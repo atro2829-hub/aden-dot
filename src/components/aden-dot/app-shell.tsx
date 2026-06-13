@@ -21,7 +21,7 @@ import { SettingsPage } from './settings-page';
 import { EarningsPage } from './earnings-page';
 import { AdminDashboard } from './admin-dashboard';
 import { SupabaseSetupScreen } from './supabase-setup';
-import { isSupabaseConfigured as checkSupabaseConfigured, getActiveSupabaseConfig } from '@/lib/supabase-config';
+import { getActiveSupabaseConfig } from '@/lib/supabase-config';
 import { resetSupabaseBrowser } from '@/lib/supabase-browser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
@@ -371,9 +371,8 @@ function TopBar() {
 function LoadingScreen() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="flex items-center gap-2">
-        <div className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
-        <span className="text-sm text-muted-foreground">...</span>
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
       </div>
     </div>
   );
@@ -434,52 +433,51 @@ export default function AdenDotApp() {
   const setShowCreatePost = useAppStore((s) => s.setShowCreatePost);
 
   const [isInitializing, setIsInitializing] = useState(true);
-  const [supabaseReady, setSupabaseReady] = useState(false);
-  const [showSetup, setShowSetup] = useState(false);
 
-  // Check and validate Supabase config on mount
+  // Set up Android lifecycle bridge so native code can notify the web layer
   useEffect(() => {
-    const checkConfig = async () => {
-      const config = getActiveSupabaseConfig();
-      if (!config) {
-        setShowSetup(true);
-        setIsInitializing(false);
-        return;
-      }
-      
-      // Validate the config by testing auth endpoint
-      try {
-        const response = await fetch(`${config.url}/auth/v1/settings`, {
-          headers: { 'apikey': config.anonKey },
-        });
-        if (response.ok) {
-          setSupabaseReady(true);
-        } else {
-          const data = await response.json();
-          if (data.message?.includes('Invalid API key')) {
-            console.warn('[AdenDotApp] Supabase API key is invalid, showing setup screen');
-            setShowSetup(true);
-          } else {
-            // Server might be temporarily down, try anyway
-            setSupabaseReady(true);
-          }
+    (window as Record<string, unknown>).__adendotLifecycle = {
+      onForeground: () => {
+        // Update user status to online
+        const authState = useAuthStore.getState();
+        if (authState.user && authState.isAuthenticated) {
+          userService.updateUserProfile(authState.user.uid, {
+            status: 'online',
+            lastSeen: Date.now(),
+          } as Record<string, unknown>).catch(() => {});
         }
-      } catch {
-        // Network error, try anyway
-        setSupabaseReady(true);
-      }
-      setIsInitializing(false);
+      },
+      onBackground: () => {
+        // Update user status to offline
+        const authState = useAuthStore.getState();
+        if (authState.user && authState.isAuthenticated) {
+          userService.updateUserProfile(authState.user.uid, {
+            status: 'offline',
+            lastSeen: Date.now(),
+          } as Record<string, unknown>).catch(() => {});
+        }
+      },
     };
-    checkConfig();
+
+    return () => {
+      delete (window as Record<string, unknown>).__adendotLifecycle;
+    };
   }, []);
 
-  // Initialize auth on mount (only when Supabase is ready)
+  // Initialize auth on mount - go directly to login, no splash or setup screen
   useEffect(() => {
-    if (!supabaseReady) return;
-    
     let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
+    let mounted = true;
 
     const init = async () => {
+      // Check if Supabase is configured
+      const config = getActiveSupabaseConfig();
+      if (!config) {
+        // No config found - show setup screen
+        if (mounted) setIsInitializing(false);
+        return;
+      }
+
       try {
         await useAuthStore.getState().initializeAuth();
 
@@ -493,6 +491,8 @@ export default function AdenDotApp() {
                 user: profile,
                 isAuthenticated: true,
               });
+              // Ensure we navigate away from auth screens
+              useAppStore.setState({ showAuth: null });
             }
           } else if (event === 'SIGNED_OUT') {
             useAuthStore.setState({
@@ -501,6 +501,8 @@ export default function AdenDotApp() {
               error: null,
             });
             usePostsStore.setState({ posts: [], currentPage: 0, hasMore: true });
+            // Navigate to login page
+            useAppStore.setState({ showAuth: 'login', activeTab: 'home' });
           } else if (event === 'TOKEN_REFRESHED' && s?.user?.id) {
             const currentState = useAuthStore.getState();
             if (!currentState.user) {
@@ -522,43 +524,46 @@ export default function AdenDotApp() {
       } catch (error) {
         console.error('[AdenDotApp] Auth initialization error:', error);
       } finally {
-        setIsInitializing(false);
+        if (mounted) setIsInitializing(false);
       }
     };
 
     init();
 
     return () => {
+      mounted = false;
       if (authSubscription) {
         authSubscription.data.subscription.unsubscribe();
       }
     };
   }, []);
 
-  // Show loading
+  // Quick loading - no splash, just a brief spinner
   if (isInitializing) {
     return <LoadingScreen />;
   }
 
-  // Show Supabase setup if not configured
-  if (showSetup) {
+  // Show Supabase setup only if no config at all
+  const config = getActiveSupabaseConfig();
+  if (!config) {
     return <SupabaseSetupScreen onConfigured={() => {
       resetSupabaseBrowser();
-      setSupabaseReady(true);
-      setShowSetup(false);
+      setIsInitializing(true);
+      // Re-run init
+      window.location.reload();
     }} />;
   }
 
-  // Show auth pages
+  // Show auth pages - handle all auth states properly
   if (!isAuthenticated || showAuth) {
     if (showAuth === 'register') return <RegisterPage />;
     if (showAuth === 'forgot-password') return <ForgotPasswordPage />;
+    if (showAuth === 'complete-profile') return <CompleteProfilePage />;
     return <LoginPage />;
   }
 
   // Profile incomplete - only show complete profile if username is truly missing
-  // (not just is_profile_complete flag, as users who signed up with username are already complete)
-  if (isAuthenticated && user && !user.isProfileComplete && !user.username) {
+  if (isAuthenticated && user && !user.username) {
     return <CompleteProfilePage />;
   }
 

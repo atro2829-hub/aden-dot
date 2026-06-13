@@ -87,6 +87,7 @@ export function SettingsPage() {
   const theme = useAppStore((s) => s.theme);
   const toggleTheme = useAppStore((s) => s.toggleTheme);
   const setActiveTab = useAppStore((s) => s.setActiveTab);
+  const setShowAuth = useAppStore((s) => s.setShowAuth);
   const logout = useAuthStore((s) => s.logout);
   const user = useAuthStore((s) => s.user);
   const updateUser = useAuthStore((s) => s.updateUser);
@@ -381,7 +382,7 @@ export function SettingsPage() {
       {/* Logout */}
       <div className="pt-2">
         <motion.button
-          onClick={async () => { await logout(); setActiveTab('home'); }}
+          onClick={async () => { await logout(); setActiveTab('home'); setShowAuth('login'); }}
           className="w-full h-12 rounded-xl text-sm font-semibold text-red-500 bg-red-500/10 border border-red-500/20 hover:bg-red-500/15"
           whileTap={{ scale: 0.97 }}
         >

@@ -721,10 +721,27 @@ export function ForgotPasswordPage() {
 
   const [email, setEmail] = useState('');
   const [isSent, setIsSent] = useState(false);
+  const [isSending, setIsSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSent(true);
+    if (!email) return;
+    setSendError(null);
+    setIsSending(true);
+    try {
+      const { getSupabaseBrowser } = await import('@/lib/supabase-browser');
+      const client = getSupabaseBrowser();
+      if (!client) throw new Error('Supabase not configured');
+      const { error } = await client.auth.resetPasswordForEmail(email);
+      if (error) throw error;
+      setIsSent(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to send reset email';
+      setSendError(msg);
+    } finally {
+      setIsSending(false);
+    }
   };
 
   return (
@@ -777,11 +794,17 @@ export function ForgotPasswordPage() {
                 </div>
                 <Button
                   type="submit"
+                  disabled={isSending || !email}
                   className="w-full h-12 rounded-xl text-base font-semibold bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/25"
                 >
-                  {t('auth.resetPassword', lang)}
+                  {isSending ? '...' : t('auth.resetPassword', lang)}
                 </Button>
               </form>
+              {sendError && (
+                <div className="mt-3 bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl">
+                  {sendError}
+                </div>
+              )}
             </motion.div>
           ) : (
             <motion.div key="success" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center">

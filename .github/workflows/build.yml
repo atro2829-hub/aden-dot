@@ -139,12 +139,10 @@ jobs:
             },
             plugins: {
               SplashScreen: {
-                launchShowDuration: 2000,
+                launchShowDuration: 0,
                 launchAutoHide: true,
                 backgroundColor: '#FFFFFF',
-                showSpinner: true,
-                spinnerColor: '#D4A853',
-                androidScaleType: 'CENTER_CROP',
+                showSpinner: false,
               },
               StatusBar: {
                 style: 'LIGHT',
@@ -171,6 +169,23 @@ jobs:
               <string name="title_activity_main">Aden Dot Admin</string>
               <string name="package_name">com.qtbmdev.adendot.admin</string>
               <string name="custom_url_scheme">com.qtbmdev.adendot.admin</string>
+              <string name="permission_rationale_title">الأذونات المطلوبة</string>
+              <string name="permission_rationale_message">يحتاج تطبيق عدن دوت إلى هذه الأذونات</string>
+              <string name="permission_settings_instruction">يمكنك تفعيل الأذونات من إعدادات التطبيق</string>
+              <string name="open_settings">فتح الإعدادات</string>
+              <string name="ok">حسناً</string>
+              <string name="skip">تخطي</string>
+              <string name="notification_channel_general">عام</string>
+              <string name="notification_channel_general_desc">الإشعارات العامة</string>
+              <string name="notification_channel_chat">المحادثات</string>
+              <string name="notification_channel_chat_desc">رسائل المحادثة</string>
+              <string name="notification_channel_live">البث المباشر</string>
+              <string name="notification_channel_live_desc">إشعارات البث</string>
+              <string name="notification_channel_gifts">الهدايا</string>
+              <string name="notification_channel_gifts_desc">إشعارات الهدايا</string>
+              <string name="biometric_prompt_title">تسجيل الدخول بالبصمة</string>
+              <string name="biometric_prompt_subtitle">استخدم بصمتك للدخول</string>
+              <string name="biometric_prompt_cancel">إلغاء</string>
           </resources>
           XMLEOF
 

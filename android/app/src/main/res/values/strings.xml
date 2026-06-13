@@ -4,4 +4,27 @@
     <string name="title_activity_main">Aden Dot</string>
     <string name="package_name">com.qtbmdev.adendot</string>
     <string name="custom_url_scheme">com.qtbmdev.adendot</string>
+
+    <!-- Permissions -->
+    <string name="permission_rationale_title">الأذونات المطلوبة</string>
+    <string name="permission_rationale_message">يحتاج تطبيق عدن دوت إلى هذه الأذونات لتوفير جميع الميزات مثل الكاميرا والصور والإشعارات</string>
+    <string name="permission_settings_instruction">تم رفض بعض الأذونات. يمكنك تفعيلها من إعدادات التطبيق</string>
+    <string name="open_settings">فتح الإعدادات</string>
+    <string name="ok">حسناً</string>
+    <string name="skip">تخطي</string>
+
+    <!-- Notification Channels -->
+    <string name="notification_channel_general">عام</string>
+    <string name="notification_channel_general_desc">الإشعارات العامة</string>
+    <string name="notification_channel_chat">المحادثات</string>
+    <string name="notification_channel_chat_desc">رسائل المحادثة الجديدة</string>
+    <string name="notification_channel_live">البث المباشر</string>
+    <string name="notification_channel_live_desc">إشعارات البث المباشر</string>
+    <string name="notification_channel_gifts">الهدايا</string>
+    <string name="notification_channel_gifts_desc">إشعارات الهدايا المستلمة</string>
+
+    <!-- Biometric -->
+    <string name="biometric_prompt_title">تسجيل الدخول بالبصمة</string>
+    <string name="biometric_prompt_subtitle">استخدم بصمتك للدخول إلى عدن دوت</string>
+    <string name="biometric_prompt_cancel">إلغاء</string>
 </resources>
