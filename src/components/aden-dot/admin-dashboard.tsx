@@ -42,8 +42,8 @@ let adminClient: SupabaseClient<Database> | null = null;
 
 function getSupabaseAdmin(): SupabaseClient<Database> | null {
   if (adminClient) return adminClient;
-  let url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://ocjcbowrewenogrkexmr.supabase.co';
-  let serviceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTcyNDM2NSwiZXhwIjoyMDY1MzAwMzY1fQ.hZOPJjSDe8FFDYOxbIf1z10HIlxbMCAHhNxZXJI5FOw';
+  let url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zjdkfzemrosdgkgtzhtg.supabase.co';
+  let serviceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM3NTg1NywiZXhwIjoyMDk2OTUxODU3fQ.gKTa_CbKLCHcgjLA_-OqGwCqHHr3dtDxZ-3Pbx-bWx4';
   if (!url || !serviceKey) {
     console.warn('[Admin] Missing Supabase configuration');
     return null;

@@ -20,8 +20,8 @@ function getEnvConfig(): SupabaseConfig | null {
 
   // Fallback: embedded default config for Capacitor/Android builds
   // This ensures the app always has valid Supabase credentials
-  const DEFAULT_URL = 'https://ocjcbowrewenogrkexmr.supabase.co';
-  const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MjQzNjUsImV4cCI6MjA2NTMwMDM2NX0.RzHqKpV8vCJGjRlUQm-KjK2zKvCZqf4HGTIvuE_XnZs';
+  const DEFAULT_URL = 'https://zjdkfzemrosdgkgtzhtg.supabase.co';
+  const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8';
   if (DEFAULT_URL && DEFAULT_ANON_KEY) return { url: DEFAULT_URL, anonKey: DEFAULT_ANON_KEY };
 
   return null;
