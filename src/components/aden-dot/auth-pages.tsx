@@ -308,7 +308,13 @@ export function RegisterPage() {
   };
 
   const handleRegister = async () => {
-    await register(email, password, username, nickname);
+    const success = await register(email, password, username, nickname);
+    if (success) {
+      // Registration succeeded - auth state change will handle navigation
+      // The app-shell component watches isAuthenticated and will show the main page
+      setShowAuth(null);
+    }
+    // If failed, the error from the store will be displayed
   };
 
   const stepTitles = [

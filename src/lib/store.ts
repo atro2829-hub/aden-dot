@@ -125,7 +125,16 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const data = await authService.signUp(email, password, username, nickname);
       if (data.user) {
-        const profile = await userService.getUserProfile(data.user.id);
+        // Try to load the profile (trigger should have created it)
+        // Retry a few times since the trigger might need a moment
+        let profile = null;
+        for (let attempt = 0; attempt < 3; attempt++) {
+          profile = await userService.getUserProfile(data.user.id);
+          if (profile) break;
+          // Wait before retrying
+          await new Promise(r => setTimeout(r, 500));
+        }
+
         if (profile) {
           set({
             user: profile,
@@ -133,7 +142,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           });
           return true;
         }
-        // If profile not yet available, create a temporary user
+
+        // If profile still not available after retries, create a temporary user
+        // This allows the user to proceed while the profile gets created
         const isAdmin = email === 'admin@adendot.app';
         const tempUser: User = {
           uid: data.user.id,
@@ -167,7 +178,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ user: tempUser, isAuthenticated: true });
         return true;
       }
-      set({ error: 'Registration failed' });
+      set({ error: 'فشل إنشاء الحساب - حاول مرة أخرى' });
       return false;
     } catch (error: unknown) {
       let message = error instanceof Error ? error.message : 'Registration failed';

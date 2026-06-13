@@ -100,34 +100,65 @@ export const authService = {
         email,
         password,
         options: {
+          data: {
+            username: username || undefined,
+            nickname: nickname || undefined,
+          },
           emailRedirectTo: undefined, // Disable email redirect
         },
       });
       if (error) throw error;
 
-      // Create user profile in users table
+      // The database trigger "on_auth_user_created" automatically creates:
+      // - user profile in public.users (with username/nickname from user_metadata)
+      // - wallet in public.wallets (with 100 coins welcome bonus)
+      // So we only need to UPDATE the profile with any extra fields the trigger might not set
       if (data.user) {
         const uid = data.user.id;
-        const isAdmin = email === 'admin@adendot.app';
-        await client.from('users').upsert({
-          uid,
-          email,
-          username: username || null,
-          nickname: nickname || '',
-          is_profile_complete: false,
-          is_email_verified: true, // No email verification required
-          role: isAdmin ? 'admin' : 'user',
-          is_verified: isAdmin, // Admin accounts are auto-verified
-          status: 'online',
-          last_seen: Date.now(),
-        });
+        try {
+          // Small delay to ensure the trigger has completed
+          await new Promise(r => setTimeout(r, 500));
 
-        // Create wallet for new user
-        await client.from('wallets').upsert({
-          uid,
-          coins_balance: 100, // Welcome bonus
-          diamonds_balance: 0,
-        });
+          // Update the profile created by trigger with the provided username/nickname
+          const updateData: Record<string, unknown> = {
+            is_profile_complete: true,
+            is_email_verified: true,
+            status: 'online',
+            last_seen: Date.now(),
+          };
+          if (username) updateData.username = username;
+          if (nickname) updateData.nickname = nickname;
+
+          await client.from('users').update(updateData).eq('uid', uid);
+        } catch (updateErr) {
+          // If update fails (e.g. trigger hasn't completed yet), try to upsert as fallback
+          console.warn('[AuthService] Profile update failed, trying upsert:', updateErr);
+          try {
+            const isAdmin = email === 'admin@adendot.app';
+            await client.from('users').upsert({
+              uid,
+              email,
+              username: username || null,
+              nickname: nickname || '',
+              is_profile_complete: true,
+              is_email_verified: true,
+              role: isAdmin ? 'admin' : 'user',
+              is_verified: isAdmin,
+              status: 'online',
+              last_seen: Date.now(),
+            });
+
+            // Create wallet if trigger didn't
+            await client.from('wallets').upsert({
+              uid,
+              coins_balance: 100,
+              diamonds_balance: 0,
+            });
+          } catch (upsertErr) {
+            // Last resort - ignore, the trigger should have handled it
+            console.warn('[AuthService] Profile upsert also failed:', upsertErr);
+          }
+        }
       }
 
       return data;
