@@ -1,0 +1,228 @@
+name: Build & Deploy Aden Dot
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  BUN_VERSION: '1.1.0'
+
+jobs:
+  # ========== Lint & Type Check ==========
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+
+  # ========== Build Web App ==========
+  build-web:
+    name: Build Web App
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - name: Create env file
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+      - run: bun run build
+      - name: Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: aden-dot-web
+          path: .next/standalone/
+          retention-days: 7
+
+  # ========== Build Android APK (User App) via TWA ==========
+  build-user-apk:
+    name: Build User APK
+    runs-on: ubuntu-latest
+    needs: build-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - run: bun install --frozen-lockfile
+
+      - name: Build web assets
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          bun run build
+
+      - name: Setup Bubblewrap TWA
+        run: |
+          npm install -g @aspect/aspect-cli @nicolo-ribaudo/chokidar-2 @nicolo-ribaudo/chokidar
+          npm install -g @nicolo-ribaudo/chokidar-2
+          npm install -g @nicolo-ribaudo/chokidar
+          npm install -g @nicolo-ribaudo/chokidar
+          npx @nicolo-ribaudo/chokidar-2 --version || true
+          npm install -g @nicolo-ribaudo/chokidar-2 2>/dev/null || true
+
+      - name: Create TWA project
+        run: |
+          mkdir -p twa-user
+          cd twa-user
+          npx @nicolo-ribaudo/chokidar-2 --version 2>/dev/null || true
+          npm init -y
+          npm install @nicolo-ribaudo/chokidar-2 2>/dev/null || true
+
+      - name: Build User APK with Capacitor
+        run: |
+          npm install -g @capacitor/cli @capacitor/core
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Aden Dot" com.qtbmdev.adendot --web-dir=out
+          npx cap add android
+          npx cap sync
+
+          # Copy app icon
+          cp public/icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+          # Build debug APK
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cd ..
+
+      - name: Upload User APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aden-dot-user-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+  # ========== Build Android APK (Admin App) via Capacitor ==========
+  build-admin-apk:
+    name: Build Admin APK
+    runs-on: ubuntu-latest
+    needs: build-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - run: bun install --frozen-lockfile
+
+      - name: Build web assets for admin
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
+          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          echo "NEXT_PUBLIC_APP_MODE=admin" >> .env.local
+          bun run build
+
+      - name: Build Admin APK with Capacitor
+        run: |
+          npm install -g @capacitor/cli @capacitor/core
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npx cap init "Aden Dot Admin" com.qtbmdev.adendot.admin --web-dir=out
+          npx cap add android
+          npx cap sync
+
+          # Copy app icon
+          cp public/icon.png android/app/src/main/res/mipmap-hdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-mdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xhdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png
+          cp public/icon.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+          # Update app name in strings.xml
+          sed -i 's/<string name="app_name">.*<\/string>/<string name="app_name">Aden Dot Admin<\/string>/g' android/app/src/main/res/values/strings.xml
+
+          # Build debug APK
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+          cd ..
+
+      - name: Upload Admin APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: aden-dot-admin-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
+
+  # ========== Release ==========
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [build-user-apk, build-admin-apk]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download User APK
+        uses: actions/download-artifact@v4
+        with:
+          name: aden-dot-user-apk
+          path: ./artifacts/
+
+      - name: Download Admin APK
+        uses: actions/download-artifact@v4
+        with:
+          name: aden-dot-admin-apk
+          path: ./artifacts/
+
+      - name: Rename APKs
+        run: |
+          mv ./artifacts/app-debug.apk ./artifacts/AdenDot-User.apk 2>/dev/null || true
+          ls -la ./artifacts/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: "Aden Dot v1.0.${{ github.run_number }}"
+          body: |
+            # Aden Dot - عدن دوت
+
+            ## Changes
+            - Latest build from main branch
+
+            ## Downloads
+            - 📱 **AdenDot-User.apk** - User application
+            - 🛡️ **AdenDot-Admin.apk** - Admin application
+
+            ---
+            Built by QTBM DEV
+          files: |
+            ./artifacts/*.apk
+          draft: false
+          prerelease: false
