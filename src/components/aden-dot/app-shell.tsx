@@ -22,10 +22,6 @@ import { AdminDashboard } from './admin-dashboard';
 import { DatabaseSetupPage } from '@/components/skyline/database-setup';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-const GOLD = '#D4A853';
-const GOLD_LIGHT = '#F5C542';
-const NAVY = '#1A1F36';
-
 // ============ Bottom Navigation ============
 function BottomNav() {
   const activeTab = useAppStore((s) => s.activeTab);
@@ -46,14 +42,8 @@ function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50"
-      style={{
-        background: 'rgba(26, 31, 54, 0.85)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(212, 168, 83, 0.1)',
-        paddingBottom: 'env(safe-area-inset-bottom)',
-      }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-border"
+      style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="max-w-lg mx-auto flex items-center justify-around py-1.5 px-2">
         {tabs.map((tab) => {
@@ -68,23 +58,22 @@ function BottomNav() {
               {isActive && (
                 <motion.div
                   layoutId="activeTab"
-                  className="absolute -top-1.5 w-6 h-0.5 rounded-full"
-                  style={{ background: `linear-gradient(90deg, ${GOLD}, ${GOLD_LIGHT})` }}
+                  className="absolute -top-1.5 w-6 h-0.5 rounded-full bg-primary"
                   transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
               )}
 
               {tab.id === 'admin' ? (
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: isActive ? `${GOLD}20` : 'rgba(255,255,255,0.05)' }}>
-                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={isActive ? GOLD : '#6B7280'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isActive ? 'bg-primary/10' : 'bg-muted'}`}>
+                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke={isActive ? 'var(--primary)' : 'var(--muted-foreground)'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                   </svg>
                 </div>
               ) : tab.id === 'profile' ? (
                 <div className="relative">
-                  <Avatar className={`w-6 h-6 transition-all ${isActive ? 'ring-2 scale-110' : ''}`} style={{ borderColor: isActive ? GOLD : 'transparent' }}>
+                  <Avatar className={`w-6 h-6 transition-all ${isActive ? 'ring-2 ring-primary scale-110' : ''}`}>
                     <AvatarImage src={user?.profileImage || '/avatar.png'} className="object-cover" />
-                    <AvatarFallback className="text-[9px]" style={{ background: `${GOLD}20`, color: GOLD }}>
+                    <AvatarFallback className="text-[9px] bg-primary/10 text-primary">
                       {user?.nickname?.charAt(0) || '?'}
                     </AvatarFallback>
                   </Avatar>
@@ -93,20 +82,19 @@ function BottomNav() {
                 <div className="relative">
                   <tab.icon
                     size={22}
-                    color={isActive ? (tab.id === 'live' ? '#EF4444' : GOLD) : '#6B7280'}
+                    color={isActive ? (tab.id === 'live' ? '#EF4444' : 'var(--primary)') : 'var(--muted-foreground)'}
                   />
                   {tab.id === 'live' && (
                     <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full animate-pulse" />
                   )}
                   {tab.id === 'chat' && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full" style={{ background: GOLD }} />
+                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-primary" />
                   )}
                 </div>
               )}
 
               <span
-                className="text-[9px] font-medium transition-colors"
-                style={{ color: isActive ? GOLD : '#6B7280' }}
+                className={`text-[9px] font-medium transition-colors ${isActive ? 'text-primary' : 'text-muted-foreground'}`}
               >
                 {tab.label}
               </span>
@@ -143,38 +131,29 @@ function TopBar() {
   };
 
   return (
-    <header
-      className="sticky top-0 z-40"
-      style={{
-        background: 'rgba(26, 31, 54, 0.9)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(212, 168, 83, 0.08)',
-      }}
-    >
+    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-xl border-b border-border">
       <div className="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
           {activeTab === 'home' && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})` }}
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary"
             >
-              <AppLogoIcon size={22} />
+              <img src="/icon.png" alt="Aden Dot" className="w-6 h-6 rounded-md" />
             </motion.div>
           )}
-          <h1 className="text-lg font-bold text-white">{getTitle()}</h1>
+          <h1 className="text-lg font-bold text-foreground">{getTitle()}</h1>
         </div>
         <div className="flex items-center gap-3">
           {activeTab === 'home' && user && (
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full" style={{ background: `${GOLD}15`, border: `1px solid ${GOLD}30` }}>
+              <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-primary/10 border border-primary/20">
                 <CoinIcon size={14} />
-                <span className="text-xs font-semibold" style={{ color: GOLD }}>{user.coinsBalance || 0}</span>
+                <span className="text-xs font-semibold text-primary">{user.coinsBalance || 0}</span>
               </div>
               <button onClick={() => setActiveTab('settings')} className="relative p-1">
-                <BellIcon size={20} color={GOLD} />
+                <BellIcon size={20} color="var(--primary)" />
                 <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full" />
               </button>
             </div>
@@ -190,10 +169,7 @@ function LoadingScreen() {
   const lang = useAppStore((s) => s.language);
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center"
-      style={{ background: `linear-gradient(135deg, ${NAVY} 0%, #242A45 50%, #0F1225 100%)` }}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-background">
       <motion.div
         className="text-center space-y-4"
         initial={{ opacity: 0, scale: 0.9 }}
@@ -201,21 +177,19 @@ function LoadingScreen() {
         transition={{ duration: 0.5 }}
       >
         <motion.div
-          className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center"
-          style={{ background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})` }}
+          className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center bg-primary"
           animate={{ rotate: [0, 5, -5, 0] }}
           transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
         >
-          <AppLogoIcon size={48} />
+          <img src="/icon.png" alt="Aden Dot" className="w-12 h-12 rounded-xl" />
         </motion.div>
         <div className="flex items-center justify-center gap-2">
           <motion.div
-            className="w-5 h-5 rounded-full"
-            style={{ border: `2px solid ${GOLD}30`, borderTopColor: GOLD }}
+            className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary"
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
           />
-          <span className="text-sm" style={{ color: GOLD }}>{t('app.loading', lang)}</span>
+          <span className="text-sm text-primary">{t('app.loading', lang)}</span>
         </div>
       </motion.div>
     </div>
@@ -241,25 +215,20 @@ function ProfileSubMenu() {
         <motion.button
           key={item.id}
           onClick={() => setActiveTab(item.id)}
-          className="w-full p-3.5 rounded-xl flex items-center gap-3 transition-all"
-          style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(212, 168, 83, 0.08)',
-          }}
+          className="w-full p-3.5 rounded-xl flex items-center gap-3 transition-all bg-card border border-border hover:bg-primary/5"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: idx * 0.05 }}
-          whileHover={{ background: 'rgba(212, 168, 83, 0.06)' }}
           whileTap={{ scale: 0.98 }}
         >
-          <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl" style={{ background: `${GOLD}10` }}>
+          <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl bg-primary/10">
             {item.emoji}
           </div>
           <div className="flex-1 text-left" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-            <p className="font-medium text-sm text-white">{item.label}</p>
-            <p className="text-xs text-gray-500">{item.desc}</p>
+            <p className="font-medium text-sm text-foreground">{item.label}</p>
+            <p className="text-xs text-muted-foreground">{item.desc}</p>
           </div>
-          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2" style={{ transform: lang === 'ar' ? 'scaleX(-1)' : 'none' }}>
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--muted-foreground)" strokeWidth="2" style={{ transform: lang === 'ar' ? 'scaleX(-1)' : 'none' }}>
             <path d="M9 18l6-6-6-6" />
           </svg>
         </motion.button>
@@ -390,8 +359,7 @@ export default function AdenDotApp() {
   // Main app
   return (
     <div
-      className="min-h-screen"
-      style={{ background: `linear-gradient(180deg, ${NAVY} 0%, #0F1225 100%)` }}
+      className="min-h-screen bg-background"
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
       {activeTab !== 'live' && <TopBar />}

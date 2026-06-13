@@ -27,8 +27,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
-const GOLD = '#D4A853';
-const NAVY = '#1A1F36';
 const RED = '#EF4444';
 const GREEN = '#22C55E';
 
@@ -47,7 +45,7 @@ async function adminFetch(path: string, options?: RequestInit) {
 }
 
 // ============ Custom Icons for Admin ============
-function DashboardIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function DashboardIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /><rect x="14" y="14" width="7" height="7" />
@@ -55,7 +53,7 @@ function DashboardIcon({ size = 20, color = GOLD }: { size?: number; color?: str
   );
 }
 
-function UsersIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function UsersIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" />
@@ -63,7 +61,7 @@ function UsersIcon({ size = 20, color = GOLD }: { size?: number; color?: string 
   );
 }
 
-function ModerationIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function ModerationIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
@@ -71,7 +69,7 @@ function ModerationIcon({ size = 20, color = GOLD }: { size?: number; color?: st
   );
 }
 
-function SubscriptionIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function SubscriptionIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <rect x="2" y="4" width="20" height="16" rx="2" /><path d="M2 10h20" /><path d="M6 16h4" />
@@ -79,7 +77,7 @@ function SubscriptionIcon({ size = 20, color = GOLD }: { size?: number; color?: 
   );
 }
 
-function WithdrawalIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function WithdrawalIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />
@@ -87,7 +85,7 @@ function WithdrawalIcon({ size = 20, color = GOLD }: { size?: number; color?: st
   );
 }
 
-function ActivityIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function ActivityIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
@@ -103,7 +101,7 @@ function StreamIcon({ size = 20, color = RED }: { size?: number; color?: string 
   );
 }
 
-function LogsIcon({ size = 20, color = GOLD }: { size?: number; color?: string }) {
+function LogsIcon({ size = 20, color = 'var(--primary)' }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" />
@@ -130,18 +128,18 @@ function AdminSidebar({ active, onChange, lang }: { active: AdminSection; onChan
     <div
       className="hidden lg:flex flex-col w-56 shrink-0 border-r"
       style={{
-        background: 'rgba(26, 31, 54, 0.95)',
-        borderColor: `${GOLD}15`,
+        background: 'var(--card)',
+        borderColor: `var(--primary)15`,
         direction: isRTL ? 'rtl' : 'ltr',
       }}
     >
-      <div className="p-4 flex items-center gap-2" style={{ borderBottom: `1px solid ${GOLD}15` }}>
-        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${GOLD}20` }}>
+      <div className="p-4 flex items-center gap-2" style={{ borderBottom: '1px solid var(--border)' }}>
+        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `var(--primary)20` }}>
           <ShieldIcon size={18} />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-white">{isRTL ? 'لوحة المشرف' : 'Admin Panel'}</h2>
-          <p className="text-[10px]" style={{ color: GOLD }}>{isRTL ? 'عدن دوت' : 'Aden Dot'}</p>
+          <h2 className="text-sm font-bold text-foreground">{isRTL ? 'لوحة المشرف' : 'Admin Panel'}</h2>
+          <p className="text-[10px]" style={{ color: 'var(--primary)' }}>{isRTL ? 'عدن دوت' : 'Aden Dot'}</p>
         </div>
       </div>
       <ScrollArea className="flex-1">
@@ -152,9 +150,9 @@ function AdminSidebar({ active, onChange, lang }: { active: AdminSection; onChan
               onClick={() => onChange(item.id)}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all"
               style={{
-                background: active === item.id ? `${GOLD}15` : 'transparent',
-                color: active === item.id ? GOLD : '#9CA3AF',
-                border: active === item.id ? `1px solid ${GOLD}25` : '1px solid transparent',
+                background: active === item.id ? `var(--primary)15` : 'transparent',
+                color: active === item.id ? 'var(--primary)' : 'var(--muted-foreground)',
+                border: active === item.id ? `1px solid var(--primary)25` : '1px solid transparent',
               }}
             >
               {item.icon}
@@ -191,9 +189,9 @@ function AdminMobileTabs({ active, onChange, lang }: { active: AdminSection; onC
       <nav
         className="lg:hidden fixed bottom-0 left-0 right-0 z-50"
         style={{
-          background: 'rgba(26, 31, 54, 0.95)',
+          background: 'var(--card)',
           backdropFilter: 'blur(20px)',
-          borderTop: `1px solid ${GOLD}15`,
+          borderTop: '1px solid var(--border)',
           paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
@@ -205,22 +203,22 @@ function AdminMobileTabs({ active, onChange, lang }: { active: AdminSection; onC
               className="flex flex-col items-center gap-0.5 py-1 px-2 relative"
             >
               {active === tab.id && (
-                <motion.div layoutId="adminTab" className="absolute -top-1.5 w-6 h-0.5 rounded-full" style={{ background: GOLD }} />
+                <motion.div layoutId="adminTab" className="absolute -top-1.5 w-6 h-0.5 rounded-full" style={{ background: 'var(--primary)' }} />
               )}
-              <div style={{ color: active === tab.id ? GOLD : '#6B7280' }}>{tab.icon}</div>
-              <span className="text-[9px] font-medium" style={{ color: active === tab.id ? GOLD : '#6B7280' }}>{tab.label}</span>
+              <div style={{ color: active === tab.id ? 'var(--primary)' : 'var(--muted-foreground)' }}>{tab.icon}</div>
+              <span className="text-[9px] font-medium" style={{ color: active === tab.id ? 'var(--primary)' : 'var(--muted-foreground)' }}>{tab.label}</span>
             </button>
           ))}
           <button
             onClick={() => setMoreOpen(!moreOpen)}
             className="flex flex-col items-center gap-0.5 py-1 px-2"
           >
-            <div style={{ color: moreOpen ? GOLD : '#6B7280' }}>
+            <div style={{ color: moreOpen ? 'var(--primary)' : 'var(--muted-foreground)' }}>
               <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <circle cx="12" cy="5" r="1.5" /><circle cx="12" cy="12" r="1.5" /><circle cx="12" cy="19" r="1.5" />
               </svg>
             </div>
-            <span className="text-[9px] font-medium" style={{ color: moreOpen ? GOLD : '#6B7280' }}>{isRTL ? 'المزيد' : 'More'}</span>
+            <span className="text-[9px] font-medium" style={{ color: moreOpen ? 'var(--primary)' : 'var(--muted-foreground)' }}>{isRTL ? 'المزيد' : 'More'}</span>
           </button>
         </div>
       </nav>
@@ -233,7 +231,7 @@ function AdminMobileTabs({ active, onChange, lang }: { active: AdminSection; onC
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             className="lg:hidden fixed bottom-16 left-2 right-2 z-50 rounded-xl p-3 space-y-1"
-            style={{ background: 'rgba(26, 31, 54, 0.98)', border: `1px solid ${GOLD}20` }}
+            style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}
           >
             {moreItems.map((item) => (
               <button
@@ -241,8 +239,8 @@ function AdminMobileTabs({ active, onChange, lang }: { active: AdminSection; onC
                 onClick={() => { onChange(item.id); setMoreOpen(false); }}
                 className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all"
                 style={{
-                  background: active === item.id ? `${GOLD}15` : 'transparent',
-                  color: active === item.id ? GOLD : '#9CA3AF',
+                  background: active === item.id ? `var(--primary)15` : 'transparent',
+                  color: active === item.id ? 'var(--primary)' : 'var(--muted-foreground)',
                 }}
               >
                 {item.icon}
@@ -257,7 +255,7 @@ function AdminMobileTabs({ active, onChange, lang }: { active: AdminSection; onC
 }
 
 // ============ Stat Card ============
-function StatCard({ icon, label, value, subValue, color = GOLD, delay = 0 }: {
+function StatCard({ icon, label, value, subValue, color = 'var(--primary)', delay = 0 }: {
   icon: React.ReactNode; label: string; value: string | number; subValue?: string; color?: string; delay?: number;
 }) {
   return (
@@ -266,16 +264,16 @@ function StatCard({ icon, label, value, subValue, color = GOLD, delay = 0 }: {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay }}
       className="p-4 rounded-xl"
-      style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}12` }}
+      style={{ background: 'var(--card)', border: `1px solid ${color}12` }}
     >
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs text-gray-500">{label}</span>
+        <span className="text-xs text-muted-foreground">{label}</span>
         <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: `${color}12` }}>
           {icon}
         </div>
       </div>
       <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-      {subValue && <p className="text-[10px] text-gray-500 mt-0.5">{subValue}</p>}
+      {subValue && <p className="text-[10px] text-muted-foreground mt-0.5">{subValue}</p>}
     </motion.div>
   );
 }
@@ -311,7 +309,7 @@ function DashboardOverview({ lang }: { lang: string }) {
       <div className="space-y-4">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />
+            <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--card)' }} />
           ))}
         </div>
       </div>
@@ -319,9 +317,9 @@ function DashboardOverview({ lang }: { lang: string }) {
   }
 
   const quickActions = [
-    { icon: <UsersIcon size={16} color={GOLD} />, label: isRTL ? 'إدارة المستخدمين' : 'Manage Users', section: 'users' as AdminSection },
-    { icon: <ModerationIcon size={16} color={GOLD} />, label: isRTL ? 'مراجعة البلاغات' : 'Review Reports', section: 'moderation' as AdminSection },
-    { icon: <WithdrawalIcon size={16} color={GOLD} />, label: isRTL ? 'طلبات السحب' : 'Withdrawals', section: 'withdrawals' as AdminSection },
+    { icon: <UsersIcon size={16} color="var(--primary)" />, label: isRTL ? 'إدارة المستخدمين' : 'Manage Users', section: 'users' as AdminSection },
+    { icon: <ModerationIcon size={16} color="var(--primary)" />, label: isRTL ? 'مراجعة البلاغات' : 'Review Reports', section: 'moderation' as AdminSection },
+    { icon: <WithdrawalIcon size={16} color="var(--primary)" />, label: isRTL ? 'طلبات السحب' : 'Withdrawals', section: 'withdrawals' as AdminSection },
     { icon: <SettingsIcon size={16} />, label: isRTL ? 'إعدادات التطبيق' : 'App Settings', section: 'settings' as AdminSection },
   ];
 
@@ -329,9 +327,9 @@ function DashboardOverview({ lang }: { lang: string }) {
     <div className="space-y-4">
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={<UsersIcon size={16} color={GOLD} />} label={isRTL ? 'إجمالي المستخدمين' : 'Total Users'} value={formatNumber(stats?.totalUsers || 0, lang)} subValue={`${formatNumber(stats?.newUsersToday || 0, lang)} ${isRTL ? 'جدد اليوم' : 'new today'}`} delay={0} />
+        <StatCard icon={<UsersIcon size={16} color="var(--primary)" />} label={isRTL ? 'إجمالي المستخدمين' : 'Total Users'} value={formatNumber(stats?.totalUsers || 0, lang)} subValue={`${formatNumber(stats?.newUsersToday || 0, lang)} ${isRTL ? 'جدد اليوم' : 'new today'}`} delay={0} />
         <StatCard icon={<OnlineIcon size={16} />} label={isRTL ? 'المستخدمون النشطون' : 'Active Users'} value={formatNumber(stats?.activeUsers || 0, lang)} color={GREEN} delay={0.05} />
-        <StatCard icon={<SubscriptionIcon size={16} color={GOLD} />} label={isRTL ? 'المشتركون المميزون' : 'Premium Subs'} value={formatNumber(stats?.premiumUsers || 0, lang)} delay={0.1} />
+        <StatCard icon={<SubscriptionIcon size={16} color="var(--primary)" />} label={isRTL ? 'المشتركون المميزون' : 'Premium Subs'} value={formatNumber(stats?.premiumUsers || 0, lang)} delay={0.1} />
         <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'إجمالي الإيرادات' : 'Total Revenue'} value={formatNumber(stats?.totalPurchaseRevenue || 0, lang)} subValue={isRTL ? 'عملات' : 'coins'} delay={0.15} />
         <StatCard icon={<GiftIcon size={16} color={GREEN} />} label={isRTL ? 'الهدايا المرسلة' : 'Gifts Sent'} value={formatNumber(stats?.totalGifts || 0, lang)} color={GREEN} delay={0.2} />
         <StatCard icon={<StreamIcon size={16} />} label={isRTL ? 'البثوث النشطة' : 'Active Streams'} value={stats?.activeStreams || 0} color={RED} delay={0.25} />
@@ -340,9 +338,9 @@ function DashboardOverview({ lang }: { lang: string }) {
       </div>
 
       {/* Revenue Chart */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">
+          <CardTitle className="text-sm font-semibold text-foreground">
             {isRTL ? 'الإيرادات الشهرية' : 'Monthly Revenue'}
           </CardTitle>
         </CardHeader>
@@ -352,15 +350,15 @@ function DashboardOverview({ lang }: { lang: string }) {
               <AreaChart data={monthlyRevenue}>
                 <defs>
                   <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={GOLD} stopOpacity={0.3} />
-                    <stop offset="95%" stopColor={GOLD} stopOpacity={0} />
+                    <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="month" tick={{ fill: '#6B7280', fontSize: 10 }} />
                 <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} />
-                <Tooltip contentStyle={{ background: NAVY, border: `1px solid ${GOLD}30`, borderRadius: 8, fontSize: 12 }} labelStyle={{ color: GOLD }} />
-                <Area type="monotone" dataKey="revenue" stroke={GOLD} fill="url(#revGrad)" strokeWidth={2} />
+                <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} labelStyle={{ color: 'var(--primary)' }} />
+                <Area type="monotone" dataKey="revenue" stroke="var(--primary)" fill="url(#revGrad)" strokeWidth={2} />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -368,9 +366,9 @@ function DashboardOverview({ lang }: { lang: string }) {
       </Card>
 
       {/* User Growth Chart */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">
+          <CardTitle className="text-sm font-semibold text-foreground">
             {isRTL ? 'نمو المستخدمين (7 أيام)' : 'User Growth (7 days)'}
           </CardTitle>
         </CardHeader>
@@ -381,8 +379,8 @@ function DashboardOverview({ lang }: { lang: string }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="date" tick={{ fill: '#6B7280', fontSize: 9 }} tickFormatter={(v: string) => v.split('-').slice(1).join('/')} />
                 <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} />
-                <Tooltip contentStyle={{ background: NAVY, border: `1px solid ${GOLD}30`, borderRadius: 8, fontSize: 12 }} />
-                <Bar dataKey="newUsers" fill={GOLD} radius={[4, 4, 0, 0]} />
+                <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} />
+                <Bar dataKey="newUsers" fill="var(--primary)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -391,18 +389,18 @@ function DashboardOverview({ lang }: { lang: string }) {
 
       {/* Quick Actions */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-2">{isRTL ? 'إجراءات سريعة' : 'Quick Actions'}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'إجراءات سريعة' : 'Quick Actions'}</h3>
         <div className="grid grid-cols-2 gap-2">
           {quickActions.map((action, i) => (
             <motion.button
               key={i}
               className="p-3 rounded-xl flex items-center gap-2 transition-all"
-              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}08` }}
-              whileHover={{ background: `${GOLD}08` }}
+              style={{ background: 'var(--card)', border: `1px solid var(--primary)08` }}
+              whileHover={{ background: `var(--primary)08` }}
               whileTap={{ scale: 0.98 }}
             >
               {action.icon}
-              <span className="text-xs text-gray-300">{action.label}</span>
+              <span className="text-xs text-foreground/70">{action.label}</span>
             </motion.button>
           ))}
         </div>
@@ -410,26 +408,26 @@ function DashboardOverview({ lang }: { lang: string }) {
 
       {/* Recent Activity */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-2">{isRTL ? 'النشاط الأخير' : 'Recent Activity'}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'النشاط الأخير' : 'Recent Activity'}</h3>
         <div className="space-y-1.5 max-h-64 overflow-y-auto">
           {recentActivity.length === 0 && (
-            <p className="text-xs text-gray-500 text-center py-4">{isRTL ? 'لا يوجد نشاط' : 'No recent activity'}</p>
+            <p className="text-xs text-muted-foreground text-center py-4">{isRTL ? 'لا يوجد نشاط' : 'No recent activity'}</p>
           )}
           {recentActivity.map((activity, i) => (
             <motion.div
               key={activity.id + i}
               className="flex items-center gap-2 p-2.5 rounded-lg"
-              style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid rgba(255,255,255,0.03)` }}
+              style={{ background: 'var(--card)', border: `1px solid rgba(255,255,255,0.03)` }}
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
             >
-              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: activity.type === 'gift' ? `${GREEN}15` : `${GOLD}15` }}>
+              <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: activity.type === 'gift' ? `${GREEN}15` : `var(--primary)15` }}>
                 {activity.type === 'gift' ? <GiftIcon size={14} color={GREEN} /> : <ActivityIcon size={14} />}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs text-gray-300 truncate">{activity.description}</p>
-                <p className="text-[10px] text-gray-600">{new Date(activity.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</p>
+                <p className="text-xs text-foreground/70 truncate">{activity.description}</p>
+                <p className="text-[10px] text-muted-foreground">{new Date(activity.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</p>
               </div>
             </motion.div>
           ))}
@@ -504,7 +502,7 @@ function UserManagement({ lang }: { lang: string }) {
   const totalPages = Math.ceil(total / 20);
 
   const roleBadge = (role: string) => {
-    const colors: Record<string, string> = { admin: GOLD, moderator: '#8B5CF6', supporter: '#3B82F6', user: '#6B7280' };
+    const colors: Record<string, string> = { admin: 'var(--primary)', moderator: '#8B5CF6', supporter: '#3B82F6', user: '#6B7280' };
     const c = colors[role] || '#6B7280';
     return <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${c}15`, color: c }}>{role}</span>;
   };
@@ -519,14 +517,14 @@ function UserManagement({ lang }: { lang: string }) {
             value={search}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             className="text-xs h-9"
-            style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+            style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
           />
         </div>
         <Select value={roleFilter} onValueChange={(v) => { setRoleFilter(v === 'all' ? '' : v); setPage(1); }}>
-          <SelectTrigger className="w-28 h-9 text-xs" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}>
+          <SelectTrigger className="w-28 h-9 text-xs" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}>
             <SelectValue placeholder={isRTL ? 'الدور' : 'Role'} />
           </SelectTrigger>
-          <SelectContent style={{ background: NAVY, borderColor: `${GOLD}20` }}>
+          <SelectContent style={{ background: 'var(--card)', borderColor: `var(--primary)20` }}>
             <SelectItem value="all">{isRTL ? 'الكل' : 'All'}</SelectItem>
             <SelectItem value="user">User</SelectItem>
             <SelectItem value="moderator">Moderator</SelectItem>
@@ -538,18 +536,18 @@ function UserManagement({ lang }: { lang: string }) {
 
       {/* Bulk Actions */}
       {selectedUids.size > 0 && (
-        <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: `${GOLD}10`, border: `1px solid ${GOLD}20` }}>
-          <span className="text-xs" style={{ color: GOLD }}>{selectedUids.size} {isRTL ? 'محدد' : 'selected'}</span>
+        <motion.div initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: `var(--primary)10`, border: `1px solid var(--primary)20` }}>
+          <span className="text-xs" style={{ color: 'var(--primary)' }}>{selectedUids.size} {isRTL ? 'محدد' : 'selected'}</span>
           <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => bulkAction('ban')}>{isRTL ? 'حظر' : 'Ban'}</Button>
           <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }} onClick={() => bulkAction('verify')}>{isRTL ? 'توثيق' : 'Verify'}</Button>
-          <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GOLD, color: GOLD }} onClick={() => bulkAction('change_role', { role: 'moderator' })}>{isRTL ? 'ترقية لمشرف' : 'Make Mod'}</Button>
-          <Button size="sm" variant="ghost" className="h-7 text-[10px] text-gray-400" onClick={() => setSelectedUids(new Set())}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
+          <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }} onClick={() => bulkAction('change_role', { role: 'moderator' })}>{isRTL ? 'ترقية لمشرف' : 'Make Mod'}</Button>
+          <Button size="sm" variant="ghost" className="h-7 text-[10px] text-muted-foreground" onClick={() => setSelectedUids(new Set())}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
         </motion.div>
       )}
 
       {/* User List */}
       {loading ? (
-        <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>
+        <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <div key={i} className="h-14 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>
       ) : (
         <div className="space-y-1.5 max-h-[60vh] overflow-y-auto">
           {users.map((u, i) => {
@@ -561,8 +559,8 @@ function UserManagement({ lang }: { lang: string }) {
                 key={uid}
                 className="flex items-center gap-2 p-2.5 rounded-lg cursor-pointer transition-all"
                 style={{
-                  background: selectedUids.has(uid) ? `${GOLD}08` : 'rgba(255,255,255,0.02)',
-                  border: `1px solid ${selectedUids.has(uid) ? `${GOLD}20` : 'rgba(255,255,255,0.03)'}`,
+                  background: selectedUids.has(uid) ? `var(--primary)08` : 'rgba(255,255,255,0.02)',
+                  border: `1px solid ${selectedUids.has(uid) ? `var(--primary)20` : 'rgba(255,255,255,0.03)'}`,
                   opacity: isBanned ? 0.6 : 1,
                 }}
                 initial={{ opacity: 0, x: -5 }}
@@ -578,23 +576,23 @@ function UserManagement({ lang }: { lang: string }) {
                   onClick={(e) => e.stopPropagation()}
                 />
                 <Avatar className="w-8 h-8">
-                  <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }} className="text-[10px]">
+                  <AvatarFallback style={{ background: `var(--primary)20`, color: 'var(--primary)' }} className="text-[10px]">
                     {(u.nickname as string)?.charAt(0) || '?'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0" dir={isRTL ? 'rtl' : 'ltr'}>
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-medium text-white truncate">{u.nickname as string}</span>
+                    <span className="text-xs font-medium text-foreground truncate">{u.nickname as string}</span>
                     {u.is_verified && <VerifiedIcon size={10} />}
                     {isBanned && <Badge variant="destructive" className="text-[8px] h-3.5 px-1">{isRTL ? 'محظور' : 'Banned'}</Badge>}
                   </div>
-                  <span className="text-[10px] text-gray-500">@{u.username as string}</span>
+                  <span className="text-[10px] text-muted-foreground">@{u.username as string}</span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   {roleBadge(u.role as string)}
                   <div className="flex items-center gap-0.5">
                     <CoinIcon size={10} />
-                    <span className="text-[9px] text-gray-500">{formatNumber((u.coins_balance as number) || 0, lang)}</span>
+                    <span className="text-[9px] text-muted-foreground">{formatNumber((u.coins_balance as number) || 0, lang)}</span>
                   </div>
                 </div>
               </motion.div>
@@ -605,69 +603,69 @@ function UserManagement({ lang }: { lang: string }) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between pt-2">
-        <span className="text-[10px] text-gray-500">{isRTL ? `${total} مستخدم` : `${total} users`}</span>
+        <span className="text-[10px] text-muted-foreground">{isRTL ? `${total} مستخدم` : `${total} users`}</span>
         <div className="flex items-center gap-1">
-          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400" disabled={page <= 1} onClick={() => setPage(page - 1)}>‹</Button>
-          <span className="text-[10px] text-gray-400">{page}/{totalPages || 1}</span>
-          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-gray-400" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>›</Button>
+          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground" disabled={page <= 1} onClick={() => setPage(page - 1)}>‹</Button>
+          <span className="text-[10px] text-muted-foreground">{page}/{totalPages || 1}</span>
+          <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-muted-foreground" disabled={page >= totalPages} onClick={() => setPage(page + 1)}>›</Button>
         </div>
       </div>
 
       {/* User Detail Dialog */}
       <Dialog open={!!selectedUser} onOpenChange={() => setSelectedUser(null)}>
-        <DialogContent className="max-w-md" style={{ background: NAVY, border: `1px solid ${GOLD}20` }}>
+        <DialogContent className="max-w-md" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           {selectedUser && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white flex items-center gap-2">
+                <DialogTitle className="text-foreground flex items-center gap-2">
                   <Avatar className="w-10 h-10">
-                    <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }}>{(selectedUser.nickname as string)?.charAt(0)}</AvatarFallback>
+                    <AvatarFallback style={{ background: `var(--primary)20`, color: 'var(--primary)' }}>{(selectedUser.nickname as string)?.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
                     <div className="flex items-center gap-1">
                       {selectedUser.nickname as string}
                       {selectedUser.is_verified && <VerifiedIcon size={12} />}
                     </div>
-                    <span className="text-xs text-gray-500 font-normal">@{selectedUser.username as string}</span>
+                    <span className="text-xs text-muted-foreground font-normal">@{selectedUser.username as string}</span>
                   </div>
                 </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-3 py-2" dir={isRTL ? 'rtl' : 'ltr'}>
                 <div className="grid grid-cols-2 gap-2">
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'البريد' : 'Email'}</span>
-                    <p className="text-xs text-white truncate">{selectedUser.email as string}</p>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'البريد' : 'Email'}</span>
+                    <p className="text-xs text-foreground truncate">{selectedUser.email as string}</p>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'الدور' : 'Role'}</span>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'الدور' : 'Role'}</span>
                     <p className="text-xs">{roleBadge(selectedUser.role as string)}</p>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'المتابعون' : 'Followers'}</span>
-                    <p className="text-xs text-white">{formatNumber((selectedUser.followers_count as number) || 0, lang)}</p>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'المتابعون' : 'Followers'}</span>
+                    <p className="text-xs text-foreground">{formatNumber((selectedUser.followers_count as number) || 0, lang)}</p>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'المستوى' : 'Level'}</span>
-                    <p className="text-xs text-white">{selectedUser.level as number}</p>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'المستوى' : 'Level'}</span>
+                    <p className="text-xs text-foreground">{selectedUser.level as number}</p>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'العملات' : 'Coins'}</span>
-                    <div className="flex items-center gap-1"><CoinIcon size={12} /><span className="text-xs text-white">{formatNumber((selectedUser.coins_balance as number) || 0, lang)}</span></div>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'العملات' : 'Coins'}</span>
+                    <div className="flex items-center gap-1"><CoinIcon size={12} /><span className="text-xs text-foreground">{formatNumber((selectedUser.coins_balance as number) || 0, lang)}</span></div>
                   </div>
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)' }}>
-                    <span className="text-[10px] text-gray-500">{isRTL ? 'الألماس' : 'Diamonds'}</span>
-                    <div className="flex items-center gap-1"><DiamondCurrencyIcon size={12} /><span className="text-xs text-white">{formatNumber((selectedUser.diamonds_balance as number) || 0, lang)}</span></div>
+                  <div className="p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                    <span className="text-[10px] text-muted-foreground">{isRTL ? 'الألماس' : 'Diamonds'}</span>
+                    <div className="flex items-center gap-1"><DiamondCurrencyIcon size={12} /><span className="text-xs text-foreground">{formatNumber((selectedUser.diamonds_balance as number) || 0, lang)}</span></div>
                   </div>
                 </div>
 
-                <Separator style={{ background: `${GOLD}15` }} />
+                <Separator style={{ background: `var(--primary)15` }} />
 
                 <div className="grid grid-cols-2 gap-1.5">
                   <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => setActionDialog({ user: selectedUser, action: selectedUser.status === 'banned' ? 'unban' : 'ban' })}>
                     {selectedUser.status === 'banned' ? (isRTL ? 'إلغاء الحظر' : 'Unban') : (isRTL ? 'حظر' : 'Ban')}
                   </Button>
-                  <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: GOLD, color: GOLD }} onClick={() => setActionDialog({ user: selectedUser, action: selectedUser.is_verified ? 'unverify' : 'verify' })}>
+                  <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }} onClick={() => setActionDialog({ user: selectedUser, action: selectedUser.is_verified ? 'unverify' : 'verify' })}>
                     {selectedUser.is_verified ? (isRTL ? 'إلغاء التوثيق' : 'Unverify') : (isRTL ? 'توثيق' : 'Verify')}
                   </Button>
                   <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: '#8B5CF6', color: '#8B5CF6' }} onClick={() => setActionDialog({ user: selectedUser, action: 'give_premium' })}>
@@ -677,7 +675,7 @@ function UserManagement({ lang }: { lang: string }) {
                     <SelectTrigger className="h-8 text-[10px]" style={{ borderColor: '#3B82F6', color: '#3B82F6', background: 'transparent' }}>
                       <SelectValue placeholder={isRTL ? 'تغيير الدور' : 'Change Role'} />
                     </SelectTrigger>
-                    <SelectContent style={{ background: NAVY }}>
+                    <SelectContent style={{ background: 'var(--card)' }}>
                       <SelectItem value="user">User</SelectItem>
                       <SelectItem value="moderator">Moderator</SelectItem>
                       <SelectItem value="admin">Admin</SelectItem>
@@ -692,17 +690,17 @@ function UserManagement({ lang }: { lang: string }) {
 
       {/* Action Confirmation Dialog */}
       <Dialog open={!!actionDialog} onOpenChange={() => { setActionDialog(null); setNoteText(''); }}>
-        <DialogContent className="max-w-sm" style={{ background: NAVY, border: `1px solid ${GOLD}20` }}>
+        <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           {actionDialog && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white text-sm">
+                <DialogTitle className="text-foreground text-sm">
                   {isRTL ? 'تأكيد الإجراء' : 'Confirm Action'}
                 </DialogTitle>
               </DialogHeader>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {isRTL ? 'هل أنت متأكد من' : 'Are you sure you want to '}
-                <span className="font-semibold text-white">{actionDialog.action}</span>
+                <span className="font-semibold text-foreground">{actionDialog.action}</span>
                 {isRTL ? ` على ${(actionDialog.user.nickname as string)}` : ` ${(actionDialog.user.nickname as string)}`}?
               </p>
               <Textarea
@@ -710,11 +708,11 @@ function UserManagement({ lang }: { lang: string }) {
                 value={noteText}
                 onChange={(e) => setNoteText(e.target.value)}
                 className="text-xs"
-                style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+                style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
               />
               <DialogFooter className="gap-2">
-                <Button size="sm" variant="ghost" className="text-gray-400" onClick={() => { setActionDialog(null); setNoteText(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
-                <Button size="sm" style={{ background: GOLD, color: NAVY }} onClick={() => performAction(actionDialog.user.uid as string, actionDialog.action)}>
+                <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => { setActionDialog(null); setNoteText(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
+                <Button size="sm" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }} onClick={() => performAction(actionDialog.user.uid as string, actionDialog.action)}>
                   {isRTL ? 'تأكيد' : 'Confirm'}
                 </Button>
               </DialogFooter>
@@ -765,14 +763,14 @@ function ContentModeration({ lang }: { lang: string }) {
   return (
     <div className="space-y-3">
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
-        <TabsList className="w-full" style={{ background: 'rgba(255,255,255,0.05)' }}>
-          <TabsTrigger value="reports" className="flex-1 text-[10px]" style={{ color: tab === 'reports' ? GOLD : '#6B7280' }}>
+        <TabsList className="w-full" style={{ background: 'var(--muted)' }}>
+          <TabsTrigger value="reports" className="flex-1 text-[10px]" style={{ color: tab === 'reports' ? 'var(--primary)' : 'var(--muted-foreground)' }}>
             {isRTL ? 'البلاغات' : 'Reports'} ({reportedPosts.filter(r => r.status === 'pending').length})
           </TabsTrigger>
-          <TabsTrigger value="flagged" className="flex-1 text-[10px]" style={{ color: tab === 'flagged' ? GOLD : '#6B7280' }}>
+          <TabsTrigger value="flagged" className="flex-1 text-[10px]" style={{ color: tab === 'flagged' ? 'var(--primary)' : 'var(--muted-foreground)' }}>
             {isRTL ? 'محتوى مُعلم' : 'Auto-Flagged'}
           </TabsTrigger>
-          <TabsTrigger value="log" className="flex-1 text-[10px]" style={{ color: tab === 'log' ? GOLD : '#6B7280' }}>
+          <TabsTrigger value="log" className="flex-1 text-[10px]" style={{ color: tab === 'log' ? 'var(--primary)' : 'var(--muted-foreground)' }}>
             {isRTL ? 'السجل' : 'Log'}
           </TabsTrigger>
         </TabsList>
@@ -783,7 +781,7 @@ function ContentModeration({ lang }: { lang: string }) {
               <motion.div
                 key={report.id}
                 className="p-3 rounded-lg"
-                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${report.status === 'pending' ? `${GOLD}15` : 'rgba(255,255,255,0.03)'}` }}
+                style={{ background: 'var(--card)', border: `1px solid ${report.status === 'pending' ? `var(--primary)15` : 'rgba(255,255,255,0.03)'}` }}
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
@@ -793,9 +791,9 @@ function ContentModeration({ lang }: { lang: string }) {
                     {reasonBadge(report.reason)}
                     {statusBadge(report.status)}
                   </div>
-                  <span className="text-[9px] text-gray-600">{new Date(report.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</span>
+                  <span className="text-[9px] text-muted-foreground">{new Date(report.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</span>
                 </div>
-                <p className="text-xs text-gray-300 mb-2">{report.description}</p>
+                <p className="text-xs text-foreground/70 mb-2">{report.description}</p>
                 {report.status === 'pending' && (
                   <div className="flex gap-1.5">
                     <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }}>{isRTL ? 'موافقة' : 'Approve'}</Button>
@@ -815,13 +813,13 @@ function ContentModeration({ lang }: { lang: string }) {
               <motion.div
                 key={item.id}
                 className="p-3 rounded-lg"
-                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${RED}12` }}
+                style={{ background: 'var(--card)', border: `1px solid ${RED}12` }}
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.05 }}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs text-gray-300">{item.reason}</span>
+                  <span className="text-xs text-foreground/70">{item.reason}</span>
                   <Badge className="text-[9px] h-4" style={{ background: `${RED}15`, color: RED, borderColor: 'transparent' }}>
                     {Math.round(item.confidence * 100)}%
                   </Badge>
@@ -838,13 +836,13 @@ function ContentModeration({ lang }: { lang: string }) {
         <TabsContent value="log">
           <div className="space-y-1.5">
             {moderationLog.map((entry) => (
-              <div key={entry.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: `${GOLD}10` }}>
+              <div key={entry.id} className="flex items-center gap-2 p-2 rounded-lg" style={{ background: 'var(--card)' }}>
+                <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: `var(--primary)10` }}>
                   <ShieldIcon size={12} />
                 </div>
                 <div className="flex-1">
-                  <p className="text-xs text-gray-300">{entry.action} — <span className="text-gray-500">{entry.target}</span></p>
-                  <p className="text-[9px] text-gray-600">{entry.admin} · {new Date(entry.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</p>
+                  <p className="text-xs text-foreground/70">{entry.action} — <span className="text-muted-foreground">{entry.target}</span></p>
+                  <p className="text-[9px] text-muted-foreground">{entry.admin} · {new Date(entry.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</p>
                 </div>
               </div>
             ))}
@@ -874,31 +872,31 @@ function SubscriptionManagement({ lang }: { lang: string }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const planColors: Record<string, string> = { free: '#6B7280', premium: GOLD, vip: '#8B5CF6' };
+  const planColors: Record<string, string> = { free: '#6B7280', premium: 'var(--primary)', vip: '#8B5CF6' };
 
   if (loading) {
-    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>;
+    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
   }
 
   return (
     <div className="space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<SubscriptionIcon size={16} color={GOLD} />} label={isRTL ? 'إجمالي المشتركين' : 'Total Subscribers'} value={data?.totalSubscribers || 0} delay={0} />
+        <StatCard icon={<SubscriptionIcon size={16} color="var(--primary)" />} label={isRTL ? 'إجمالي المشتركين' : 'Total Subscribers'} value={data?.totalSubscribers || 0} delay={0} />
         <StatCard icon={<ActivityIcon size={16} color={RED} />} label={isRTL ? 'معدل الفقد' : 'Churn Rate'} value={`${data?.churnRate || 0}%`} color={RED} delay={0.05} />
       </div>
 
       {/* Plans */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-2">{isRTL ? 'خطط الاشتراك' : 'Subscription Plans'}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'خطط الاشتراك' : 'Subscription Plans'}</h3>
         <div className="space-y-2">
           {data?.plans.map((plan, i) => {
-            const color = planColors[plan.id] || GOLD;
+            const color = planColors[plan.id] || 'var(--primary)';
             return (
               <motion.div
                 key={plan.id}
                 className="p-3.5 rounded-xl"
-                style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}15` }}
+                style={{ background: 'var(--card)', border: `1px solid ${color}15` }}
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.1 }}
@@ -909,8 +907,8 @@ function SubscriptionManagement({ lang }: { lang: string }) {
                       {plan.id === 'vip' ? <CrownIcon size={16} /> : plan.id === 'premium' ? <StarIcon size={16} /> : <UsersIcon size={16} color={color} />}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-white">{isRTL ? plan.nameAr : plan.name}</p>
-                      <p className="text-[10px] text-gray-500">${plan.price}/mo · {plan.subscribersCount} {isRTL ? 'مشترك' : 'subs'}</p>
+                      <p className="text-sm font-semibold text-foreground">{isRTL ? plan.nameAr : plan.name}</p>
+                      <p className="text-[10px] text-muted-foreground">${plan.price}/mo · {plan.subscribersCount} {isRTL ? 'مشترك' : 'subs'}</p>
                     </div>
                   </div>
                   <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: color, color }} onClick={() => setEditingPlan(plan)}>
@@ -930,9 +928,9 @@ function SubscriptionManagement({ lang }: { lang: string }) {
 
       {/* Revenue Chart */}
       {data?.monthlyRevenue && (
-        <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+        <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'إيرادات الاشتراكات' : 'Subscription Revenue'}</CardTitle>
+            <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'إيرادات الاشتراكات' : 'Subscription Revenue'}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-40">
@@ -941,8 +939,8 @@ function SubscriptionManagement({ lang }: { lang: string }) {
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                   <XAxis dataKey="month" tick={{ fill: '#6B7280', fontSize: 10 }} />
                   <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} />
-                  <Tooltip contentStyle={{ background: NAVY, border: `1px solid ${GOLD}30`, borderRadius: 8, fontSize: 12 }} />
-                  <Bar dataKey="revenue" fill={GOLD} radius={[4, 4, 0, 0]} />
+                  <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} />
+                  <Bar dataKey="revenue" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -952,24 +950,24 @@ function SubscriptionManagement({ lang }: { lang: string }) {
 
       {/* Edit Plan Dialog */}
       <Dialog open={!!editingPlan} onOpenChange={() => setEditingPlan(null)}>
-        <DialogContent className="max-w-sm" style={{ background: NAVY, border: `1px solid ${GOLD}20` }}>
+        <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           {editingPlan && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white text-sm">{isRTL ? 'تعديل الخطة' : 'Edit Plan'}</DialogTitle>
+                <DialogTitle className="text-foreground text-sm">{isRTL ? 'تعديل الخطة' : 'Edit Plan'}</DialogTitle>
               </DialogHeader>
               <div className="space-y-3">
                 <div>
-                  <Label className="text-xs text-gray-400">{isRTL ? 'الاسم' : 'Name'}</Label>
-                  <Input value={editingPlan.name} className="text-xs h-8 mt-1" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })} />
+                  <Label className="text-xs text-muted-foreground">{isRTL ? 'الاسم' : 'Name'}</Label>
+                  <Input value={editingPlan.name} className="text-xs h-8 mt-1" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })} />
                 </div>
                 <div>
-                  <Label className="text-xs text-gray-400">{isRTL ? 'السعر (USD/شهر)' : 'Price (USD/month)'}</Label>
-                  <Input type="number" value={editingPlan.price} className="text-xs h-8 mt-1" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} onChange={(e) => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) })} />
+                  <Label className="text-xs text-muted-foreground">{isRTL ? 'السعر (USD/شهر)' : 'Price (USD/month)'}</Label>
+                  <Input type="number" value={editingPlan.price} className="text-xs h-8 mt-1" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} onChange={(e) => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) })} />
                 </div>
               </div>
               <DialogFooter>
-                <Button size="sm" style={{ background: GOLD, color: NAVY }} onClick={() => setEditingPlan(null)}>{isRTL ? 'حفظ' : 'Save'}</Button>
+                <Button size="sm" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }} onClick={() => setEditingPlan(null)}>{isRTL ? 'حفظ' : 'Save'}</Button>
               </DialogFooter>
             </>
           )}
@@ -1013,30 +1011,30 @@ function WithdrawalManagement({ lang }: { lang: string }) {
   };
 
   if (loading) {
-    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>;
+    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
   }
 
   return (
     <div className="space-y-4">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<WithdrawalIcon size={16} color={GOLD} />} label={isRTL ? 'إجمالي المدفوعات' : 'Total Payouts'} value={formatNumber(data?.totalPayouts || 0, lang)} subValue={isRTL ? 'عملات' : 'coins'} />
+        <StatCard icon={<WithdrawalIcon size={16} color="var(--primary)" />} label={isRTL ? 'إجمالي المدفوعات' : 'Total Payouts'} value={formatNumber(data?.totalPayouts || 0, lang)} subValue={isRTL ? 'عملات' : 'coins'} />
         <StatCard icon={<LightningIcon size={16} />} label={isRTL ? 'معلق' : 'Pending'} value={formatNumber(data?.pendingAmount || 0, lang)} color="#F59E0B" />
         <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'تمت الموافقة' : 'Approved'} value={formatNumber(data?.approvedPayouts || 0, lang)} color={GREEN} />
       </div>
 
       {/* Withdrawal List */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-2">{isRTL ? 'طلبات السحب' : 'Withdrawal Requests'}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'طلبات السحب' : 'Withdrawal Requests'}</h3>
         <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
           {(data?.withdrawals || []).length === 0 && (
-            <p className="text-xs text-gray-500 text-center py-8">{isRTL ? 'لا توجد طلبات سحب' : 'No withdrawal requests'}</p>
+            <p className="text-xs text-muted-foreground text-center py-8">{isRTL ? 'لا توجد طلبات سحب' : 'No withdrawal requests'}</p>
           )}
           {(data?.withdrawals || []).map((w, i) => (
             <motion.div
               key={w.id as string}
               className="p-3 rounded-lg"
-              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid rgba(255,255,255,0.03)` }}
+              style={{ background: 'var(--card)', border: `1px solid rgba(255,255,255,0.03)` }}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
@@ -1045,10 +1043,10 @@ function WithdrawalManagement({ lang }: { lang: string }) {
                 <div>
                   <div className="flex items-center gap-1.5">
                     {w.currency === 'coins' ? <CoinIcon size={12} /> : <DiamondCurrencyIcon size={12} />}
-                    <span className="text-sm font-semibold text-white">{formatNumber(w.amount as number, lang)}</span>
-                    <span className="text-[10px] text-gray-500">{w.currency as string}</span>
+                    <span className="text-sm font-semibold text-foreground">{formatNumber(w.amount as number, lang)}</span>
+                    <span className="text-[10px] text-muted-foreground">{w.currency as string}</span>
                   </div>
-                  <p className="text-[10px] text-gray-500 mt-0.5">{w.user_uid as string} · {new Date(w.created_at as number).toLocaleString(isRTL ? 'ar' : 'en')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{w.user_uid as string} · {new Date(w.created_at as number).toLocaleString(isRTL ? 'ar' : 'en')}</p>
                 </div>
                 <div className="flex gap-1">
                   <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }} onClick={() => setActionDialog({ id: w.id as string, action: 'approve' })}>
@@ -1066,11 +1064,11 @@ function WithdrawalManagement({ lang }: { lang: string }) {
 
       {/* Action Dialog */}
       <Dialog open={!!actionDialog} onOpenChange={() => { setActionDialog(null); setNote(''); }}>
-        <DialogContent className="max-w-sm" style={{ background: NAVY, border: `1px solid ${GOLD}20` }}>
+        <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           {actionDialog && (
             <>
               <DialogHeader>
-                <DialogTitle className="text-white text-sm">
+                <DialogTitle className="text-foreground text-sm">
                   {actionDialog.action === 'approve' ? (isRTL ? 'موافقة على السحب' : 'Approve Withdrawal') : (isRTL ? 'رفض السحب' : 'Reject Withdrawal')}
                 </DialogTitle>
               </DialogHeader>
@@ -1079,11 +1077,11 @@ function WithdrawalManagement({ lang }: { lang: string }) {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 className="text-xs"
-                style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+                style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
               />
               <DialogFooter className="gap-2">
-                <Button size="sm" variant="ghost" className="text-gray-400" onClick={() => { setActionDialog(null); setNote(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
-                <Button size="sm" style={{ background: actionDialog.action === 'approve' ? GREEN : RED, color: 'white' }} onClick={handleAction}>
+                <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => { setActionDialog(null); setNote(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
+                <Button size="sm" style={{ background: actionDialog.action === 'approve' ? GREEN : RED, color: 'var(--foreground)' }} onClick={handleAction}>
                   {actionDialog.action === 'approve' ? (isRTL ? 'موافقة' : 'Approve') : (isRTL ? 'رفض' : 'Reject')}
                 </Button>
               </DialogFooter>
@@ -1114,7 +1112,7 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
     }).catch(() => setLoading(false));
   }, []);
 
-  const categoryColors: Record<string, string> = { basic: '#6B7280', premium: GOLD, luxury: '#8B5CF6', seasonal: GREEN, exclusive: RED };
+  const categoryColors: Record<string, string> = { basic: '#6B7280', premium: 'var(--primary)', luxury: '#8B5CF6', seasonal: GREEN, exclusive: RED };
   const categories = ['basic', 'premium', 'luxury', 'seasonal', 'exclusive'];
 
   const economySettings = [
@@ -1128,15 +1126,15 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
     <div className="space-y-4">
       {/* Economy Settings */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-2">{isRTL ? 'إعدادات الاقتصاد' : 'Economy Settings'}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'إعدادات الاقتصاد' : 'Economy Settings'}</h3>
         <div className="grid grid-cols-2 gap-2">
           {economySettings.map((setting) => (
-            <div key={setting.key} className="p-3 rounded-lg" style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}08` }}>
+            <div key={setting.key} className="p-3 rounded-lg" style={{ background: 'var(--card)', border: `1px solid var(--primary)08` }}>
               <div className="flex items-center gap-1.5 mb-1">
                 {setting.icon}
-                <span className="text-[10px] text-gray-500">{setting.label}</span>
+                <span className="text-[10px] text-muted-foreground">{setting.label}</span>
               </div>
-              <p className="text-lg font-bold" style={{ color: GOLD }}>{setting.value}</p>
+              <p className="text-lg font-bold" style={{ color: 'var(--primary)' }}>{setting.value}</p>
             </div>
           ))}
         </div>
@@ -1145,14 +1143,14 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
       {/* Gift Types */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-white">{isRTL ? 'أنواع الهدايا' : 'Gift Types'}</h3>
-          <Button size="sm" className="h-7 text-[10px]" style={{ background: GOLD, color: NAVY }} onClick={() => setShowAddGift(true)}>
+          <h3 className="text-sm font-semibold text-foreground">{isRTL ? 'أنواع الهدايا' : 'Gift Types'}</h3>
+          <Button size="sm" className="h-7 text-[10px]" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }} onClick={() => setShowAddGift(true)}>
             {isRTL ? '+ إضافة هدية' : '+ Add Gift'}
           </Button>
         </div>
 
         {loading ? (
-          <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>
+          <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>
         ) : (
           <div className="space-y-1.5 max-h-80 overflow-y-auto">
             {giftTypes.map((gift, i) => {
@@ -1162,7 +1160,7 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
                 <motion.div
                   key={gift.id as string}
                   className="flex items-center gap-3 p-2.5 rounded-lg"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${color}10` }}
+                  style={{ background: 'var(--card)', border: `1px solid ${color}10` }}
                   initial={{ opacity: 0, y: 5 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.03 }}
@@ -1170,17 +1168,17 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
                   <span className="text-xl">{gift.emoji as string}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-white">{gift.name as string}</span>
+                      <span className="text-xs font-medium text-foreground">{gift.name as string}</span>
                       <Badge className="text-[8px] h-3.5" style={{ background: `${color}12`, color, borderColor: 'transparent' }}>{category}</Badge>
                     </div>
-                    <div className="flex items-center gap-2 text-[10px] text-gray-500">
+                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                       <span className="flex items-center gap-0.5"><CoinIcon size={8} />{gift.coin_cost as number}</span>
                       <span className="flex items-center gap-0.5"><DiamondCurrencyIcon size={8} />{gift.diamond_value as number}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
                     <Switch checked={gift.is_active as boolean} className="scale-75" />
-                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-gray-400" onClick={() => setEditGift(gift)}>
+                    <Button size="sm" variant="ghost" className="h-6 w-6 p-0 text-muted-foreground" onClick={() => setEditGift(gift)}>
                       <SettingsIcon size={12} />
                     </Button>
                   </div>
@@ -1192,9 +1190,9 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
       </div>
 
       {/* Transaction Revenue Summary */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'إيرادات الهدايا' : 'Gift Revenue'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'إيرادات الهدايا' : 'Gift Revenue'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-36">
@@ -1202,13 +1200,13 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
               <PieChart>
                 <Pie data={[
                   { name: isRTL ? 'أساسية' : 'Basic', value: 40, fill: '#6B7280' },
-                  { name: isRTL ? 'مميزة' : 'Premium', value: 35, fill: GOLD },
+                  { name: isRTL ? 'مميزة' : 'Premium', value: 35, fill: 'var(--primary)' },
                   { name: isRTL ? 'فاخرة' : 'Luxury', value: 15, fill: '#8B5CF6' },
                   { name: isRTL ? 'حصرية' : 'Exclusive', value: 10, fill: RED },
                 ]} dataKey="value" innerRadius={35} outerRadius={55} paddingAngle={2}>
-                  {[ '#6B7280', GOLD, '#8B5CF6', RED ].map((c, i) => <Cell key={i} fill={c} />)}
+                  {[ '#6B7280', 'var(--primary)', '#8B5CF6', RED ].map((c, i) => <Cell key={i} fill={c} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: NAVY, border: `1px solid ${GOLD}30`, borderRadius: 8, fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -1217,43 +1215,43 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
 
       {/* Add Gift Dialog */}
       <Dialog open={showAddGift} onOpenChange={setShowAddGift}>
-        <DialogContent className="max-w-sm" style={{ background: NAVY, border: `1px solid ${GOLD}20` }}>
+        <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           <DialogHeader>
-            <DialogTitle className="text-white text-sm">{isRTL ? 'إضافة هدية جديدة' : 'Add New Gift'}</DialogTitle>
+            <DialogTitle className="text-foreground text-sm">{isRTL ? 'إضافة هدية جديدة' : 'Add New Gift'}</DialogTitle>
           </DialogHeader>
           <div className="space-y-2">
             <div>
-              <Label className="text-xs text-gray-400">{isRTL ? 'الاسم (إنجليزي)' : 'Name (English)'}</Label>
-              <Input value={newGift.name} onChange={(e) => setNewGift({ ...newGift, name: e.target.value })} className="text-xs h-8" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} />
+              <Label className="text-xs text-muted-foreground">{isRTL ? 'الاسم (إنجليزي)' : 'Name (English)'}</Label>
+              <Input value={newGift.name} onChange={(e) => setNewGift({ ...newGift, name: e.target.value })} className="text-xs h-8" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} />
             </div>
             <div>
-              <Label className="text-xs text-gray-400">{isRTL ? 'الاسم (عربي)' : 'Name (Arabic)'}</Label>
-              <Input value={newGift.nameAr} onChange={(e) => setNewGift({ ...newGift, nameAr: e.target.value })} className="text-xs h-8" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} />
+              <Label className="text-xs text-muted-foreground">{isRTL ? 'الاسم (عربي)' : 'Name (Arabic)'}</Label>
+              <Input value={newGift.nameAr} onChange={(e) => setNewGift({ ...newGift, nameAr: e.target.value })} className="text-xs h-8" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <Label className="text-xs text-gray-400">{isRTL ? 'تكلفة العملات' : 'Coin Cost'}</Label>
-                <Input type="number" value={newGift.coinCost} onChange={(e) => setNewGift({ ...newGift, coinCost: parseInt(e.target.value) })} className="text-xs h-8" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} />
+                <Label className="text-xs text-muted-foreground">{isRTL ? 'تكلفة العملات' : 'Coin Cost'}</Label>
+                <Input type="number" value={newGift.coinCost} onChange={(e) => setNewGift({ ...newGift, coinCost: parseInt(e.target.value) })} className="text-xs h-8" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} />
               </div>
               <div>
-                <Label className="text-xs text-gray-400">{isRTL ? 'قيمة الألماس' : 'Diamond Value'}</Label>
-                <Input type="number" value={newGift.diamondValue} onChange={(e) => setNewGift({ ...newGift, diamondValue: parseInt(e.target.value) })} className="text-xs h-8" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }} />
+                <Label className="text-xs text-muted-foreground">{isRTL ? 'قيمة الألماس' : 'Diamond Value'}</Label>
+                <Input type="number" value={newGift.diamondValue} onChange={(e) => setNewGift({ ...newGift, diamondValue: parseInt(e.target.value) })} className="text-xs h-8" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }} />
               </div>
             </div>
             <div>
-              <Label className="text-xs text-gray-400">{isRTL ? 'الفئة' : 'Category'}</Label>
+              <Label className="text-xs text-muted-foreground">{isRTL ? 'الفئة' : 'Category'}</Label>
               <Select value={newGift.category} onValueChange={(v) => setNewGift({ ...newGift, category: v })}>
-                <SelectTrigger className="h-8 text-xs" style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}>
+                <SelectTrigger className="h-8 text-xs" style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}>
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent style={{ background: NAVY }}>
+                <SelectContent style={{ background: 'var(--card)' }}>
                   {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
           <DialogFooter>
-            <Button size="sm" style={{ background: GOLD, color: NAVY }} onClick={() => setShowAddGift(false)}>{isRTL ? 'إضافة' : 'Add Gift'}</Button>
+            <Button size="sm" style={{ background: 'var(--primary)', color: 'var(--primary-foreground)' }} onClick={() => setShowAddGift(false)}>{isRTL ? 'إضافة' : 'Add Gift'}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -1287,24 +1285,24 @@ function LiveStreamManagement({ lang }: { lang: string }) {
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <StatCard icon={<StreamIcon size={16} />} label={isRTL ? 'البثوث النشطة' : 'Active Streams'} value={streams.length} color={RED} />
-        <StatCard icon={<UsersIcon size={16} color={GOLD} />} label={isRTL ? 'إجمالي المشاهدين' : 'Total Viewers'} value={formatNumber(streams.reduce((sum, s) => sum + ((s.viewer_count as number) || 0), 0), lang)} />
+        <StatCard icon={<UsersIcon size={16} color="var(--primary)" />} label={isRTL ? 'إجمالي المشاهدين' : 'Total Viewers'} value={formatNumber(streams.reduce((sum, s) => sum + ((s.viewer_count as number) || 0), 0), lang)} />
       </div>
 
       {loading ? (
-        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-20 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>
+        <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-20 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>
       ) : (
         <div className="space-y-2">
           {streams.length === 0 && (
             <div className="text-center py-8">
               <StreamIcon size={32} color="#6B7280" />
-              <p className="text-sm text-gray-500 mt-2">{isRTL ? 'لا توجد بثوث نشطة' : 'No active streams'}</p>
+              <p className="text-sm text-muted-foreground mt-2">{isRTL ? 'لا توجد بثوث نشطة' : 'No active streams'}</p>
             </div>
           )}
           {streams.map((stream, i) => (
             <motion.div
               key={stream.id as string}
               className="p-3 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${RED}10` }}
+              style={{ background: 'var(--card)', border: `1px solid ${RED}10` }}
               initial={{ opacity: 0, y: 5 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.05 }}
@@ -1312,15 +1310,15 @@ function LiveStreamManagement({ lang }: { lang: string }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                  <span className="text-xs font-semibold text-white">{(stream.title as string) || isRTL ? 'بث مباشر' : 'Live Stream'}</span>
+                  <span className="text-xs font-semibold text-foreground">{(stream.title as string) || isRTL ? 'بث مباشر' : 'Live Stream'}</span>
                 </div>
                 <Badge className="text-[9px] h-4" style={{ background: `${RED}15`, color: RED, borderColor: 'transparent' }}>LIVE</Badge>
               </div>
               <div className="flex items-center justify-between mt-2">
-                <div className="flex items-center gap-3 text-[10px] text-gray-500">
+                <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                   <span>{isRTL ? 'المضيف' : 'Host'}: {(stream.host_uid as string)?.substring(0, 8)}</span>
                   <span className="flex items-center gap-0.5"><EyeIcon2 size={10} /> {stream.viewer_count as number}</span>
-                  <span className="flex items-center gap-0.5"><GiftIcon size={10} color={GOLD} /> {stream.gifts_coins_total as number}</span>
+                  <span className="flex items-center gap-0.5"><GiftIcon size={10} color="var(--primary)" /> {stream.gifts_coins_total as number}</span>
                 </div>
                 <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => endStream(stream.id as string)}>
                   {isRTL ? 'إنهاء' : 'End Stream'}
@@ -1332,9 +1330,9 @@ function LiveStreamManagement({ lang }: { lang: string }) {
       )}
 
       {/* Stream Analytics */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'تحليلات البث' : 'Stream Analytics'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'تحليلات البث' : 'Stream Analytics'}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="h-36">
@@ -1351,9 +1349,9 @@ function LiveStreamManagement({ lang }: { lang: string }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                 <XAxis dataKey="day" tick={{ fill: '#6B7280', fontSize: 10 }} />
                 <YAxis tick={{ fill: '#6B7280', fontSize: 10 }} />
-                <Tooltip contentStyle={{ background: NAVY, border: `1px solid ${GOLD}30`, borderRadius: 8, fontSize: 12 }} />
+                <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} />
                 <Line type="monotone" dataKey="viewers" stroke={RED} strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="streams" stroke={GOLD} strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="streams" stroke="var(--primary)" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -1405,7 +1403,7 @@ function AppSettingsSection({ lang }: { lang: string }) {
   };
 
   if (loading) {
-    return <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>;
+    return <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-24 rounded-xl animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
   }
 
   const features = settings?.featureFlags || {};
@@ -1431,15 +1429,15 @@ function AppSettingsSection({ lang }: { lang: string }) {
   return (
     <div className="space-y-4">
       {/* General */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'عام' : 'General'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'عام' : 'General'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-white">{isRTL ? 'وضع الصيانة' : 'Maintenance Mode'}</p>
-              <p className="text-[10px] text-gray-500">{isRTL ? 'تعطيل التطبيق مؤقتاً' : 'Temporarily disable the app'}</p>
+              <p className="text-xs text-foreground">{isRTL ? 'وضع الصيانة' : 'Maintenance Mode'}</p>
+              <p className="text-[10px] text-muted-foreground">{isRTL ? 'تعطيل التطبيق مؤقتاً' : 'Temporarily disable the app'}</p>
             </div>
             <Switch
               checked={settings?.maintenanceMode || false}
@@ -1448,28 +1446,28 @@ function AppSettingsSection({ lang }: { lang: string }) {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-white">{isRTL ? 'اسم التطبيق' : 'App Name'}</p>
+              <p className="text-xs text-foreground">{isRTL ? 'اسم التطبيق' : 'App Name'}</p>
             </div>
-            <span className="text-xs" style={{ color: GOLD }}>{settings?.appName || 'Aden Dot'}</span>
+            <span className="text-xs" style={{ color: 'var(--primary)' }}>{settings?.appName || 'Aden Dot'}</span>
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs text-white">{isRTL ? 'إصدار التطبيق' : 'App Version'}</p>
+              <p className="text-xs text-foreground">{isRTL ? 'إصدار التطبيق' : 'App Version'}</p>
             </div>
-            <Badge style={{ background: `${GOLD}15`, color: GOLD, borderColor: 'transparent' }}>v{settings?.version || '2.1.0'}</Badge>
+            <Badge style={{ background: `var(--primary)15`, color: 'var(--primary)', borderColor: 'transparent' }}>v{settings?.version || '2.1.0'}</Badge>
           </div>
         </CardContent>
       </Card>
 
       {/* Feature Flags */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'ميزات التطبيق' : 'Feature Flags'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'ميزات التطبيق' : 'Feature Flags'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2.5">
           {Object.entries(features).map(([key, enabled]) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-xs text-gray-300">{isRTL ? featureLabels[key]?.ar : featureLabels[key]?.en || key}</span>
+              <span className="text-xs text-foreground/70">{isRTL ? featureLabels[key]?.ar : featureLabels[key]?.en || key}</span>
               <Switch
                 checked={enabled}
                 onCheckedChange={(v) => saveSettings({ featureFlags: { ...features, [key]: v } })}
@@ -1480,20 +1478,20 @@ function AppSettingsSection({ lang }: { lang: string }) {
       </Card>
 
       {/* Rate Limits */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'حدود المعدل' : 'Rate Limits'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'حدود المعدل' : 'Rate Limits'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
           {Object.entries(settings?.rateLimits || {}).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-xs text-gray-300">{isRTL ? rateLimitLabels[key]?.ar : rateLimitLabels[key]?.en || key}</span>
+              <span className="text-xs text-foreground/70">{isRTL ? rateLimitLabels[key]?.ar : rateLimitLabels[key]?.en || key}</span>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
                   value={value as number}
                   className="w-16 h-7 text-xs text-center"
-                  style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+                  style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
                   onChange={(e) => saveSettings({ rateLimits: { ...settings?.rateLimits, [key]: parseInt(e.target.value) } })}
                 />
               </div>
@@ -1503,14 +1501,14 @@ function AppSettingsSection({ lang }: { lang: string }) {
       </Card>
 
       {/* Content Policies */}
-      <Card style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GOLD}10` }}>
+      <Card style={{ background: 'var(--card)', border: `1px solid var(--primary)10` }}>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-semibold text-white">{isRTL ? 'سياسات المحتوى' : 'Content Policies'}</CardTitle>
+          <CardTitle className="text-sm font-semibold text-foreground">{isRTL ? 'سياسات المحتوى' : 'Content Policies'}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2.5">
           {settings?.contentPolicies && Object.entries(settings.contentPolicies).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between">
-              <span className="text-xs text-gray-300">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}</span>
+              <span className="text-xs text-foreground/70">{key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase())}</span>
               {typeof value === 'boolean' ? (
                 <Switch checked={value} onCheckedChange={(v) => saveSettings({ contentPolicies: { ...settings.contentPolicies, [key]: v } })} />
               ) : (
@@ -1518,7 +1516,7 @@ function AppSettingsSection({ lang }: { lang: string }) {
                   type="number"
                   value={value as number}
                   className="w-16 h-7 text-xs text-center"
-                  style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+                  style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
                   onChange={(e) => saveSettings({ contentPolicies: { ...settings.contentPolicies, [key]: parseInt(e.target.value) } })}
                 />
               )}
@@ -1528,8 +1526,8 @@ function AppSettingsSection({ lang }: { lang: string }) {
       </Card>
 
       {saving && (
-        <div className="flex items-center gap-2 text-xs" style={{ color: GOLD }}>
-          <motion.div className="w-3 h-3 rounded-full" style={{ border: `2px solid ${GOLD}30`, borderTopColor: GOLD }} animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} />
+        <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--primary)' }}>
+          <motion.div className="w-3 h-3 rounded-full" style={{ border: `2px solid var(--primary)30`, borderTopColor: 'var(--primary)' }} animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} />
           {isRTL ? 'جاري الحفظ...' : 'Saving...'}
         </div>
       )}
@@ -1571,35 +1569,35 @@ function AdminLogs({ lang }: { lang: string }) {
         value={filter}
         onChange={(e) => setFilter(e.target.value)}
         className="text-xs h-9"
-        style={{ background: 'rgba(255,255,255,0.05)', borderColor: `${GOLD}15`, color: 'white' }}
+        style={{ background: 'var(--muted)', borderColor: `var(--primary)15`, color: 'var(--foreground)' }}
       />
 
       {loading ? (
-        <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />)}</div>
+        <div className="space-y-2">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="h-12 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>
       ) : (
         <div className="space-y-1 max-h-[65vh] overflow-y-auto">
           {filteredLogs.map((log, i) => (
             <motion.div
               key={log.id}
               className="flex items-start gap-2 p-2.5 rounded-lg"
-              style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)' }}
+              style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.03)' }}
               initial={{ opacity: 0, x: -5 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.03 }}
             >
-              <div className="w-6 h-6 rounded-full flex items-center justify-center mt-0.5" style={{ background: `${GOLD}10` }}>
+              <div className="w-6 h-6 rounded-full flex items-center justify-center mt-0.5" style={{ background: `var(--primary)10` }}>
                 <ShieldIcon size={12} />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-white">{log.action}</span>
-                  <span className="text-[9px] text-gray-600">→ {log.target}</span>
+                  <span className="text-xs font-medium text-foreground">{log.action}</span>
+                  <span className="text-[9px] text-muted-foreground">→ {log.target}</span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <span className="text-[10px] text-gray-500">{log.admin}</span>
-                  <span className="text-[10px] text-gray-600">· {new Date(log.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</span>
+                  <span className="text-[10px] text-muted-foreground">{log.admin}</span>
+                  <span className="text-[10px] text-muted-foreground">· {new Date(log.timestamp).toLocaleString(isRTL ? 'ar' : 'en')}</span>
                 </div>
-                {log.details && <p className="text-[10px] text-gray-500 mt-0.5">{log.details}</p>}
+                {log.details && <p className="text-[10px] text-muted-foreground mt-0.5">{log.details}</p>}
               </div>
             </motion.div>
           ))}
@@ -1622,8 +1620,8 @@ export function AdminDashboard() {
       <div className="flex items-center justify-center py-16">
         <div className="text-center space-y-3">
           <ShieldIcon size={48} />
-          <p className="text-sm text-gray-400">{isRTL ? 'غير مصرح بالوصول' : 'Access Denied'}</p>
-          <p className="text-xs text-gray-600">{isRTL ? 'هذه الصفحة متاحة للمشرفين فقط' : 'This page is only accessible to admins'}</p>
+          <p className="text-sm text-muted-foreground">{isRTL ? 'غير مصرح بالوصول' : 'Access Denied'}</p>
+          <p className="text-xs text-muted-foreground">{isRTL ? 'هذه الصفحة متاحة للمشرفين فقط' : 'This page is only accessible to admins'}</p>
         </div>
       </div>
     );
@@ -1664,8 +1662,8 @@ export function AdminDashboard() {
       {/* Main Content */}
       <div className="flex-1 min-w-0">
         {/* Section Header */}
-        <div className="p-4 pb-2 flex items-center gap-2" style={{ borderBottom: `1px solid ${GOLD}08` }}>
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${GOLD}12` }}>
+        <div className="p-4 pb-2 flex items-center gap-2" style={{ borderBottom: `1px solid var(--primary)08` }}>
+          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `var(--primary)12` }}>
             {activeSection === 'overview' && <DashboardIcon size={14} />}
             {activeSection === 'users' && <UsersIcon size={14} />}
             {activeSection === 'moderation' && <ModerationIcon size={14} />}
@@ -1676,7 +1674,7 @@ export function AdminDashboard() {
             {activeSection === 'settings' && <SettingsIcon size={14} />}
             {activeSection === 'logs' && <LogsIcon size={14} />}
           </div>
-          <h2 className="text-sm font-bold text-white">{isRTL ? sectionTitles[activeSection].ar : sectionTitles[activeSection].en}</h2>
+          <h2 className="text-sm font-bold text-foreground">{isRTL ? sectionTitles[activeSection].ar : sectionTitles[activeSection].en}</h2>
         </div>
 
         {/* Section Content */}

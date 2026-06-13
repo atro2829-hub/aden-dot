@@ -12,10 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import type { Post } from '@/types/skyline';
 
-const GOLD = '#D4A853';
-const GOLD_LIGHT = '#F5C542';
-const NAVY = '#1A1F36';
-
 // ============ Story Circles ============
 function StoryCircles() {
   const lang = useAppStore((s) => s.language);
@@ -47,14 +43,14 @@ function StoryCircles() {
               className="w-[62px] h-[62px] rounded-full p-[2.5px]"
               style={{
                 background: story.isAdd
-                  ? `linear-gradient(135deg, ${GOLD}40, ${GOLD_LIGHT}40)`
-                  : `linear-gradient(135deg, ${story.color}, ${GOLD}, ${GOLD_LIGHT})`,
+                  ? 'linear-gradient(135deg, var(--primary), var(--primary))'
+                  : `linear-gradient(135deg, ${story.color}, var(--primary), var(--primary))`,
               }}
             >
-              <div className="w-full h-full rounded-full overflow-hidden" style={{ background: NAVY, padding: '2px' }}>
+              <div className="w-full h-full rounded-full overflow-hidden bg-background p-[2px]">
                 {story.isAdd ? (
-                  <div className="w-full h-full rounded-full flex items-center justify-center" style={{ background: `${GOLD}12` }}>
-                    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="2.5">
+                  <div className="w-full h-full rounded-full flex items-center justify-center bg-primary/10">
+                    <svg width={22} height={22} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="2.5">
                       <path d="M12 5v14M5 12h14" />
                     </svg>
                   </div>
@@ -68,12 +64,12 @@ function StoryCircles() {
                 )}
               </div>
             </div>
-            <span className="text-[10px] text-gray-400 truncate w-[68px] text-center">{story.name}</span>
+            <span className="text-[10px] text-muted-foreground truncate w-[68px] text-center">{story.name}</span>
           </motion.button>
         ))}
       </div>
       {/* Fade edges */}
-      <div className="absolute right-0 top-0 bottom-3 w-8 pointer-events-none" style={{ background: `linear-gradient(90deg, transparent, ${NAVY})` }} />
+      <div className="absolute right-0 top-0 bottom-3 w-8 pointer-events-none bg-gradient-to-l from-background to-transparent" />
     </div>
   );
 }
@@ -85,20 +81,20 @@ function CreatePostInput() {
 
   return (
     <motion.div
-      className="flex items-center gap-3 p-4 rounded-2xl glass-card"
+      className="flex items-center gap-3 p-4 rounded-2xl bg-card border border-border"
       whileTap={{ scale: 0.98 }}
     >
-      <Avatar className="w-11 h-11 ring-2 ring-offset-1" style={{ ringColor: `${GOLD}30`, ringOffsetColor: NAVY }}>
+      <Avatar className="w-11 h-11 ring-2 ring-primary/20 ring-offset-1 ring-offset-background">
         <AvatarImage src={user?.profileImage || '/avatar.png'} />
-        <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }}>{user?.nickname?.charAt(0) || '?'}</AvatarFallback>
+        <AvatarFallback className="bg-primary/10 text-primary">{user?.nickname?.charAt(0) || '?'}</AvatarFallback>
       </Avatar>
-      <div className="flex-1 text-gray-500 text-sm">{t('home.whatsNew', lang)}</div>
+      <div className="flex-1 text-muted-foreground text-sm">{t('home.whatsNew', lang)}</div>
       <div className="flex gap-2.5">
         <motion.div whileTap={{ scale: 0.85 }}>
-          <ImageIcon size={20} color={GOLD} />
+          <ImageIcon size={20} color="var(--primary)" />
         </motion.div>
         <motion.div whileTap={{ scale: 0.85 }}>
-          <CameraIcon size={20} color={GOLD} />
+          <CameraIcon size={20} color="var(--primary)" />
         </motion.div>
       </div>
     </motion.div>
@@ -107,17 +103,15 @@ function CreatePostInput() {
 
 // ============ Floating Action Button ============
 function CreatePostFAB() {
-  const lang = useAppStore((s) => s.language);
   const setActiveTab = useAppStore((s) => s.setActiveTab);
 
   return (
     <motion.button
-      className="fixed z-30 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl safe-bottom"
+      className="fixed z-30 w-14 h-14 rounded-full flex items-center justify-center shadow-2xl safe-bottom bg-primary text-primary-foreground"
       style={{
-        background: `linear-gradient(135deg, ${GOLD}, ${GOLD_LIGHT})`,
         bottom: 'calc(5.5rem + env(safe-area-inset-bottom, 0px))',
         right: 'max(1rem, calc((100vw - 32rem) / 2 + 1rem))',
-        boxShadow: `0 4px 20px ${GOLD}50`,
+        boxShadow: '0 4px 20px var(--primary) / 0.4',
       }}
       whileHover={{ scale: 1.08 }}
       whileTap={{ scale: 0.92 }}
@@ -126,7 +120,7 @@ function CreatePostFAB() {
       transition={{ type: 'spring', stiffness: 400, damping: 20, delay: 0.5 }}
       onClick={() => setActiveTab('create')}
     >
-      <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke={NAVY} strokeWidth="2.5" strokeLinecap="round">
+      <svg width={26} height={26} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
         <path d="M12 5v14M5 12h14" />
       </svg>
     </motion.button>
@@ -172,8 +166,8 @@ function PostCard({ post, index }: { post: Post; index: number }) {
 
   return (
     <motion.div
-      className="rounded-2xl overflow-hidden glass-card"
-      style={{ boxShadow: `0 4px 24px rgba(0,0,0,0.15)` }}
+      className="rounded-2xl overflow-hidden bg-card border border-border"
+      style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)' }}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.06, type: 'spring', stiffness: 300, damping: 30 }}
@@ -181,28 +175,28 @@ function PostCard({ post, index }: { post: Post; index: number }) {
     >
       {/* Header */}
       <div className="flex items-center gap-3 p-4 pb-2">
-        <Avatar className="w-11 h-11 ring-1" style={{ ringColor: `${GOLD}20` }}>
+        <Avatar className="w-11 h-11 ring-1 ring-primary/10">
           <AvatarImage src={post.publisherProfileImage || '/avatar.png'} />
-          <AvatarFallback className="text-xs font-bold" style={{ background: `${GOLD}20`, color: GOLD }}>
+          <AvatarFallback className="text-xs font-bold bg-primary/10 text-primary">
             {post.publisherNickname?.charAt(0) || '?'}
           </AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center gap-1.5">
-            <span className="text-sm font-semibold text-white">{post.publisherNickname || post.publisherUsername}</span>
+            <span className="text-sm font-semibold text-foreground">{post.publisherNickname || post.publisherUsername}</span>
             {post.publisherVerified && <VerifiedIcon size={14} />}
           </div>
-          <span className="text-[10px] text-gray-500">{timeAgo(post.createdAt)}</span>
+          <span className="text-[10px] text-muted-foreground">{timeAgo(post.createdAt)}</span>
         </div>
-        <button className="p-1 rounded-full hover:bg-white/5 transition-colors">
-          <MoreIcon size={18} color="#6B7280" />
+        <button className="p-1 rounded-full hover:bg-muted transition-colors">
+          <MoreIcon size={18} color="var(--muted-foreground)" />
         </button>
       </div>
 
       {/* Content */}
       {post.content && (
         <div className="px-4 pb-3">
-          <p className="text-sm text-gray-200 leading-relaxed whitespace-pre-wrap">{post.content}</p>
+          <p className="text-sm text-foreground/80 leading-relaxed whitespace-pre-wrap">{post.content}</p>
         </div>
       )}
 
@@ -256,26 +250,26 @@ function PostCard({ post, index }: { post: Post; index: number }) {
               animate={isLiked ? { scale: [1, 1.4, 1] } : {}}
               transition={{ duration: 0.3 }}
             >
-              <LikeIcon size={20} color={isLiked ? '#EF4444' : '#9CA3AF'} filled={isLiked} />
+              <LikeIcon size={20} color={isLiked ? '#EF4444' : 'var(--muted-foreground)'} filled={isLiked} />
             </motion.div>
-            <span className={`text-xs font-medium ${isLiked ? 'text-red-400' : 'text-gray-500'}`}>
+            <span className={`text-xs font-medium ${isLiked ? 'text-red-500' : 'text-muted-foreground'}`}>
               {formatNumber(likesCount, lang)}
             </span>
           </motion.button>
 
           <button className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-            <CommentIcon size={18} color="#9CA3AF" />
-            <span className="text-xs text-gray-500">{formatNumber(post.commentsCount, lang)}</span>
+            <CommentIcon size={18} color="var(--muted-foreground)" />
+            <span className="text-xs text-muted-foreground">{formatNumber(post.commentsCount, lang)}</span>
           </button>
 
           <button className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-            <ShareIcon size={18} color="#9CA3AF" />
-            <span className="text-xs text-gray-500">{formatNumber(post.sharesCount, lang)}</span>
+            <ShareIcon size={18} color="var(--muted-foreground)" />
+            <span className="text-xs text-muted-foreground">{formatNumber(post.sharesCount, lang)}</span>
           </button>
         </div>
 
         <div className="flex items-center gap-1">
-          <span className="text-[10px] text-gray-600">{formatNumber(post.viewsCount, lang)} {t('post.views', lang)}</span>
+          <span className="text-[10px] text-muted-foreground">{formatNumber(post.viewsCount, lang)} {t('post.views', lang)}</span>
         </div>
       </div>
     </motion.div>
@@ -296,12 +290,11 @@ function PullRefreshIndicator({ isRefreshing }: { isRefreshing: boolean }) {
           exit={{ opacity: 0, y: -10 }}
         >
           <motion.div
-            className="w-5 h-5 rounded-full"
-            style={{ border: `2px solid ${GOLD}30`, borderTopColor: GOLD }}
+            className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary"
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 0.8, ease: 'linear' }}
           />
-          <span className="text-xs" style={{ color: GOLD }}>{t('home.refreshFeed', lang)}</span>
+          <span className="text-xs text-primary">{t('home.refreshFeed', lang)}</span>
         </motion.div>
       )}
     </AnimatePresence>
@@ -312,8 +305,6 @@ function PullRefreshIndicator({ isRefreshing }: { isRefreshing: boolean }) {
 export function HomeFeed() {
   const lang = useAppStore((s) => s.language);
   const posts = usePostsStore((s) => s.posts);
-  const isLoading = usePostsStore((s) => s.isLoading);
-  const hasMore = usePostsStore((s) => s.hasMore);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Demo posts if no real ones
@@ -420,12 +411,12 @@ export function HomeFeed() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: `${GOLD}10` }}>
-              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5">
+            <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center bg-primary/10">
+              <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
               </svg>
             </div>
-            <p className="text-gray-500 text-sm">{t('home.noPosts', lang)}</p>
+            <p className="text-muted-foreground text-sm">{t('home.noPosts', lang)}</p>
           </motion.div>
         ) : (
           <div className="space-y-4">

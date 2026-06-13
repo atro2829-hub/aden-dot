@@ -12,9 +12,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import type { ChatRoom, ChatMessage } from '@/types/skyline';
 
-const GOLD = '#D4A853';
-const NAVY = '#1A1F36';
-
 // ============ Demo Chat Data ============
 const demoRooms: (ChatRoom & { lastSeen?: string })[] = [
   {
@@ -67,14 +64,12 @@ function ChatRoomItem({ room, onClick, lang }: { room: ChatRoom & { lastSeen?: s
   return (
     <motion.button
       onClick={onClick}
-      className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors"
-      style={{ background: 'rgba(255,255,255,0.02)' }}
-      whileHover={{ background: 'rgba(212,168,83,0.05)' }}
+      className="w-full flex items-center gap-3 p-3 rounded-xl transition-colors bg-card hover:bg-primary/5"
       whileTap={{ scale: 0.98 }}
     >
       <div className="relative">
         <Avatar className="w-12 h-12">
-          <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }}>{room.otherUser.nickname?.charAt(0) || '?'}</AvatarFallback>
+          <AvatarFallback className="bg-primary/10 text-primary">{room.otherUser.nickname?.charAt(0) || '?'}</AvatarFallback>
         </Avatar>
         <div className="absolute bottom-0 right-0">
           {room.otherUser.status === 'online' ? <OnlineIcon size={12} /> : <OfflineIcon size={12} />}
@@ -82,16 +77,16 @@ function ChatRoomItem({ room, onClick, lang }: { room: ChatRoom & { lastSeen?: s
       </div>
       <div className="flex-1 min-w-0 text-left" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
         <div className="flex items-center gap-1">
-          <span className="text-sm font-semibold text-white truncate">{room.otherUser.nickname}</span>
+          <span className="text-sm font-semibold text-foreground truncate">{room.otherUser.nickname}</span>
           {room.otherUser.isVerified && <VerifiedIcon size={12} />}
         </div>
-        <p className="text-xs text-gray-500 truncate">{room.lastMessage}</p>
+        <p className="text-xs text-muted-foreground truncate">{room.lastMessage}</p>
       </div>
       <div className="flex flex-col items-end gap-1">
-        <span className="text-[10px] text-gray-600">{timeAgo(room.lastMessageTime)}</span>
+        <span className="text-[10px] text-muted-foreground">{timeAgo(room.lastMessageTime)}</span>
         {room.unreadCount > 0 && (
-          <div className="w-5 h-5 rounded-full flex items-center justify-center" style={{ background: GOLD }}>
-            <span className="text-[10px] font-bold" style={{ color: NAVY }}>{room.unreadCount}</span>
+          <div className="w-5 h-5 rounded-full flex items-center justify-center bg-primary">
+            <span className="text-[10px] font-bold text-primary-foreground">{room.unreadCount}</span>
           </div>
         )}
       </div>
@@ -141,26 +136,23 @@ function ChatMessages({ room, onBack }: { room: ChatRoom & { lastSeen?: string }
   return (
     <div className="flex flex-col h-[calc(100vh-60px)]">
       {/* Header */}
-      <div
-        className="flex items-center gap-3 p-3"
-        style={{ borderBottom: '1px solid rgba(212,168,83,0.08)' }}
-      >
+      <div className="flex items-center gap-3 p-3 border-b border-border">
         <button onClick={onBack}>
-          <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.8">
+          <svg width={24} height={24} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.8">
             <path d="M19 12H5M12 19l-7-7 7-7" />
           </svg>
         </button>
         <Avatar className="w-10 h-10">
-          <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }}>{room.otherUser.nickname?.charAt(0)}</AvatarFallback>
+          <AvatarFallback className="bg-primary/10 text-primary">{room.otherUser.nickname?.charAt(0)}</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center gap-1">
-            <span className="text-sm font-semibold text-white">{room.otherUser.nickname}</span>
+            <span className="text-sm font-semibold text-foreground">{room.otherUser.nickname}</span>
             {room.otherUser.isVerified && <VerifiedIcon size={12} />}
           </div>
           <div className="flex items-center gap-1">
             {room.otherUser.status === 'online' ? <OnlineIcon size={8} /> : <OfflineIcon size={8} />}
-            <span className="text-[10px] text-gray-500">
+            <span className="text-[10px] text-muted-foreground">
               {room.otherUser.status === 'online' ? t('chat.online', lang) : t('chat.lastSeen', lang)}
             </span>
           </div>
@@ -180,21 +172,15 @@ function ChatMessages({ room, onBack }: { room: ChatRoom & { lastSeen?: string }
               transition={{ delay: idx * 0.02 }}
             >
               <div
-                className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl ${isMe ? 'rounded-br-md' : 'rounded-bl-md'}`}
-                style={{
-                  background: isMe
-                    ? `linear-gradient(135deg, ${GOLD}, ${GOLD}90)`
-                    : 'rgba(255,255,255,0.06)',
-                  color: isMe ? NAVY : '#E5E7EB',
-                }}
+                className={`max-w-[75%] px-3.5 py-2.5 rounded-2xl ${isMe ? 'rounded-br-md bg-primary text-primary-foreground' : 'rounded-bl-md bg-muted text-foreground'}`}
               >
                 <p className="text-sm leading-relaxed">{msg.content}</p>
                 <div className={`flex items-center gap-1 mt-1 ${isMe ? 'justify-start' : 'justify-end'}`}>
-                  <span className="text-[9px]" style={{ color: isMe ? `${NAVY}80` : '#6B7280' }}>
+                  <span className={`text-[9px] ${isMe ? 'text-primary-foreground/60' : 'text-muted-foreground'}`}>
                     {new Date(msg.createdAt).toLocaleTimeString(lang === 'ar' ? 'ar-SA' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                   </span>
                   {isMe && (
-                    <DoubleCheckIcon size={12} color={msg.isRead ? '#3B82F6' : `${NAVY}50`} />
+                    <DoubleCheckIcon size={12} color={msg.isRead ? '#3B82F6' : 'var(--muted-foreground)'} />
                   )}
                 </div>
               </div>
@@ -211,13 +197,12 @@ function ChatMessages({ room, onBack }: { room: ChatRoom & { lastSeen?: string }
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 5 }}
             >
-              <div className="px-4 py-3 rounded-2xl rounded-bl-md" style={{ background: 'rgba(255,255,255,0.06)' }}>
+              <div className="px-4 py-3 rounded-2xl rounded-bl-md bg-muted">
                 <div className="flex gap-1">
                   {[0, 1, 2].map((i) => (
                     <motion.div
                       key={i}
-                      className="w-2 h-2 rounded-full"
-                      style={{ background: GOLD }}
+                      className="w-2 h-2 rounded-full bg-primary"
                       animate={{ y: [0, -4, 0] }}
                       transition={{ repeat: Infinity, duration: 0.6, delay: i * 0.15 }}
                     />
@@ -230,29 +215,28 @@ function ChatMessages({ room, onBack }: { room: ChatRoom & { lastSeen?: string }
       </div>
 
       {/* Input */}
-      <div className="p-3 flex items-center gap-2" style={{ borderTop: '1px solid rgba(212,168,83,0.08)' }}>
+      <div className="p-3 flex items-center gap-2 border-t border-border">
         <button className="p-2">
-          <EmojiIcon size={22} color="#9CA3AF" />
+          <EmojiIcon size={22} color="var(--muted-foreground)" />
         </button>
         <Input
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
           placeholder={t('chat.typeMessage', lang)}
-          className="flex-1 h-10 rounded-full bg-white/5 border-white/10 text-white placeholder:text-gray-500 text-sm"
+          className="flex-1 h-10 rounded-full bg-muted border-border text-foreground placeholder:text-muted-foreground text-sm"
           style={{ direction: lang === 'ar' ? 'rtl' : 'ltr' }}
         />
         <button className="p-2">
-          <CameraIcon size={22} color="#9CA3AF" />
+          <CameraIcon size={22} color="var(--muted-foreground)" />
         </button>
         <motion.button
           onClick={handleSend}
-          className="p-2 rounded-full"
-          style={{ background: message.trim() ? `linear-gradient(135deg, ${GOLD}, #F5C542)` : 'transparent' }}
+          className={`p-2 rounded-full ${message.trim() ? 'bg-primary' : 'bg-transparent'}`}
           whileTap={{ scale: 0.9 }}
           disabled={!message.trim()}
         >
-          <SendIcon size={20} color={message.trim() ? NAVY : '#6B7280'} />
+          <SendIcon size={20} color={message.trim() ? 'var(--primary-foreground)' : 'var(--muted-foreground)'} />
         </motion.button>
       </div>
     </div>
@@ -272,12 +256,12 @@ export function ChatPage() {
     <div className="space-y-3">
       {demoRooms.length === 0 ? (
         <div className="text-center py-12">
-          <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center" style={{ background: `${GOLD}10` }}>
-            <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke={GOLD} strokeWidth="1.5">
+          <div className="w-16 h-16 mx-auto mb-3 rounded-full flex items-center justify-center bg-primary/10">
+            <svg width={32} height={32} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.5">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
           </div>
-          <p className="text-sm text-gray-500">{t('chat.noChats', lang)}</p>
+          <p className="text-sm text-muted-foreground">{t('chat.noChats', lang)}</p>
         </div>
       ) : (
         demoRooms.map((room, idx) => (

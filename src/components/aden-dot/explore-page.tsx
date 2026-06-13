@@ -8,9 +8,6 @@ import { ExploreIcon, VerifiedIcon, FollowIcon } from '@/components/icons/aden-d
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 
-const GOLD = '#D4A853';
-const NAVY = '#1A1F36';
-
 const categories = [
   { id: 'all', labelAr: 'الكل', labelEn: 'All' },
   { id: 'trending', labelAr: 'الرائج', labelEn: 'Trending' },
@@ -65,7 +62,7 @@ export function ExplorePage() {
           onFocus={() => setIsSearchFocused(true)}
           onBlur={() => setIsSearchFocused(false)}
           placeholder={t('explore.searchPlaceholder', lang)}
-          className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-gray-500 focus:border-amber-500/50"
+          className="h-11 rounded-xl bg-muted border-border text-foreground placeholder:text-muted-foreground focus:border-primary/50"
           style={{ direction: lang === 'ar' ? 'rtl' : 'ltr' }}
         />
       </motion.div>
@@ -76,12 +73,11 @@ export function ExplorePage() {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className="px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all"
-            style={{
-              background: activeCategory === cat.id ? `linear-gradient(135deg, ${GOLD}, #F5C542)` : 'rgba(255,255,255,0.05)',
-              color: activeCategory === cat.id ? NAVY : '#9CA3AF',
-              border: `1px solid ${activeCategory === cat.id ? GOLD : 'rgba(255,255,255,0.1)'}`,
-            }}
+            className={`px-4 py-1.5 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+              activeCategory === cat.id
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+            }`}
           >
             {lang === 'ar' ? cat.labelAr : cat.labelEn}
           </button>
@@ -90,24 +86,22 @@ export function ExplorePage() {
 
       {/* Trending Topics */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">{t('explore.trendingNow', lang)}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">{t('explore.trendingNow', lang)}</h3>
         <div className="space-y-2">
           {trendingTopics.map((topic, idx) => (
             <motion.button
               key={topic.tag}
-              className="w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors"
-              style={{ background: 'rgba(255,255,255,0.02)' }}
+              className="w-full flex items-center gap-3 p-2.5 rounded-xl transition-colors bg-card hover:bg-primary/5"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.05 }}
-              whileHover={{ background: 'rgba(212,168,83,0.05)' }}
             >
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold" style={{ background: `${GOLD}15`, color: GOLD }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold bg-primary/10 text-primary">
                 {idx + 1}
               </div>
               <div className="flex-1 text-left" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-                <p className="text-sm font-medium" style={{ color: GOLD }}>{topic.tag}</p>
-                <p className="text-[10px] text-gray-500">{formatNumber(topic.posts, lang)} {t('post.likes', lang)}</p>
+                <p className="text-sm font-medium text-primary">{topic.tag}</p>
+                <p className="text-[10px] text-muted-foreground">{formatNumber(topic.posts, lang)} {t('post.likes', lang)}</p>
               </div>
             </motion.button>
           ))}
@@ -116,7 +110,7 @@ export function ExplorePage() {
 
       {/* Masonry Grid */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">{t('explore.popular', lang)}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">{t('explore.popular', lang)}</h3>
         <div className="columns-2 gap-2 space-y-2">
           {exploreImages.map((img, idx) => (
             <motion.div
@@ -138,30 +132,28 @@ export function ExplorePage() {
 
       {/* Suggested Users */}
       <div>
-        <h3 className="text-sm font-semibold text-white mb-3">{t('explore.suggestedForYou', lang)}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-3">{t('explore.suggestedForYou', lang)}</h3>
         <div className="space-y-2">
           {suggestedUsers.map((user, idx) => (
             <motion.div
               key={user.id}
-              className="flex items-center gap-3 p-3 rounded-xl"
-              style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(212,168,83,0.08)' }}
+              className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.05 }}
             >
               <Avatar className="w-11 h-11">
-                <AvatarFallback style={{ background: `${GOLD}20`, color: GOLD }}>{user.name.charAt(0)}</AvatarFallback>
+                <AvatarFallback className="bg-primary/10 text-primary">{user.name.charAt(0)}</AvatarFallback>
               </Avatar>
               <div className="flex-1" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
                 <div className="flex items-center gap-1">
-                  <span className="text-sm font-semibold text-white">{user.name}</span>
+                  <span className="text-sm font-semibold text-foreground">{user.name}</span>
                   {user.verified && <VerifiedIcon size={14} />}
                 </div>
-                <span className="text-xs text-gray-500">{user.username} · {formatNumber(user.followers, lang)}</span>
+                <span className="text-xs text-muted-foreground">{user.username} · {formatNumber(user.followers, lang)}</span>
               </div>
               <motion.button
-                className="px-4 py-1.5 rounded-full text-xs font-semibold"
-                style={{ background: `${GOLD}15`, color: GOLD, border: `1px solid ${GOLD}30` }}
+                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
                 whileTap={{ scale: 0.95 }}
               >
                 {t('profile.follow', lang)}

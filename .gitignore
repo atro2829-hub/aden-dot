@@ -77,3 +77,11 @@ setup-supabase.js
 supabase/config.toml
 setup-db.mjs
 setup-db.py
+_api_routes_backup/
+android-sdk/
+android-admin/
+out/
+out-admin/
+capacitor.config.admin.ts
+.env.admin
+android/app/keystore/
