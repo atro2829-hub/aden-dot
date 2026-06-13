@@ -74,8 +74,6 @@ worklog.md
 
 # Files with sensitive references
 setup-supabase.js
-src/app/api/execute-sql/
 supabase/config.toml
-src/components/skyline/database-setup.tsx
 setup-db.mjs
 setup-db.py

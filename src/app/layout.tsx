@@ -20,6 +20,19 @@ export const metadata: Metadata = {
   authors: [{ name: "QTBM DEV" }],
   icons: {
     icon: "/icon.png",
+    apple: "/icon.png",
+  },
+  manifest: "/manifest.json",
+  openGraph: {
+    title: "Aden Dot | عدن دوت",
+    description: "منصة عدن دوت الاجتماعية",
+    images: ["/icon.png"],
+    type: "website",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Aden Dot",
   },
 };
 

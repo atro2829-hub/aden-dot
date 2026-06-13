@@ -1,29 +1,60 @@
-<?xml version="1.0" encoding="utf-8"?>
-<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 30 30" style="enable-background:new 0 0 30 30;" xml:space="preserve">
-<defs>
-  <style type="text/css">
-    .st194{fill:#2D2D2D;stroke:#FFFFFF;stroke-width:0.6317;stroke-miterlimit:10;}
-    .st23{fill:#FFFFFF;}
-
-    .z-breathe {
-      animation: breathe 2.5s ease-in-out infinite;
-    }
-
-    @keyframes breathe {
-      0%, 100% { opacity: 0.7; }
-      50% { opacity: 1; }
-    }
-  </style>
-</defs>
-
-<g>
-  <path class="st194" d="M24.51,28.51H5.49c-2.21,0-4-1.79-4-4V5.49c0-2.21,1.79-4,4-4h19.03c2.21,0,4,1.79,4,4v19.03
-    C28.51,26.72,26.72,28.51,24.51,28.51z"/>
-  <g class="z-breathe">
-    <path class="st23" d="M15.47,7.1l-1.3,1.85c-0.2,0.29-0.54,0.47-0.9,0.47h-7.1V7.09C6.16,7.1,15.47,7.1,15.47,7.1z"/>
-    <polygon class="st23" points="24.3,7.1 13.14,22.91 5.7,22.91 16.86,7.1"/>
-    <path class="st23" d="M14.53,22.91l1.31-1.86c0.2-0.29,0.54-0.47,0.9-0.47h7.09v2.33H14.53z"/>
-  </g>
-</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none">
+  <defs>
+    <linearGradient id="outerGrad" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4A853"/>
+      <stop offset="0.5" stop-color="#F5C542"/>
+      <stop offset="1" stop-color="#D4A853"/>
+    </linearGradient>
+    <linearGradient id="innerGrad" x1="160" y1="160" x2="352" y2="352" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4A853" stop-opacity="0.4"/>
+      <stop offset="0.5" stop-color="#F5C542" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#D4A853" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="dotGrad" x1="224" y1="224" x2="288" y2="288" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5C542"/>
+      <stop offset="1" stop-color="#D4A853"/>
+    </linearGradient>
+    <radialGradient id="glowGrad" cx="256" cy="256" r="200" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F5C542" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#D4A853" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="248" fill="#1A1F36"/>
+  
+  <!-- Subtle glow -->
+  <circle cx="256" cy="256" r="220" fill="url(#glowGrad)"/>
+  
+  <!-- Outer ring -->
+  <circle cx="256" cy="256" r="230" stroke="url(#outerGrad)" stroke-width="6" fill="none" opacity="0.6"/>
+  
+  <!-- Decorative arcs -->
+  <path d="M256 30 A226 226 0 0 1 482 256" stroke="url(#outerGrad)" stroke-width="4" fill="none" opacity="0.3" stroke-linecap="round"/>
+  <path d="M256 482 A226 226 0 0 1 30 256" stroke="url(#outerGrad)" stroke-width="4" fill="none" opacity="0.3" stroke-linecap="round"/>
+  
+  <!-- Inner circle -->
+  <circle cx="256" cy="256" r="160" fill="url(#innerGrad)" stroke="url(#outerGrad)" stroke-width="2" opacity="0.5"/>
+  
+  <!-- Middle ring with dot pattern -->
+  <circle cx="256" cy="256" r="120" stroke="#D4A853" stroke-width="1.5" fill="none" opacity="0.3" stroke-dasharray="8 12"/>
+  
+  <!-- Central dot (the "Dot" in Aden Dot) -->
+  <circle cx="256" cy="256" r="52" fill="url(#dotGrad)"/>
+  
+  <!-- Dot highlight -->
+  <circle cx="256" cy="256" r="36" fill="none" stroke="#F5C542" stroke-width="1" opacity="0.5"/>
+  <circle cx="244" cy="244" r="16" fill="white" opacity="0.15"/>
+  
+  <!-- Corner accent dots -->
+  <circle cx="128" cy="128" r="4" fill="#D4A853" opacity="0.4"/>
+  <circle cx="384" cy="128" r="4" fill="#D4A853" opacity="0.4"/>
+  <circle cx="128" cy="384" r="4" fill="#D4A853" opacity="0.4"/>
+  <circle cx="384" cy="384" r="4" fill="#D4A853" opacity="0.4"/>
+  
+  <!-- Subtle star accents -->
+  <path d="M160 96 L163 105 L172 108 L163 111 L160 120 L157 111 L148 108 L157 105 Z" fill="#F5C542" opacity="0.3"/>
+  <path d="M352 96 L355 105 L364 108 L355 111 L352 120 L349 111 L340 108 L349 105 Z" fill="#F5C542" opacity="0.3"/>
+  <path d="M160 416 L163 425 L172 428 L163 431 L160 440 L157 431 L148 428 L157 425 Z" fill="#F5C542" opacity="0.3"/>
+  <path d="M352 416 L355 425 L364 428 L355 431 L352 440 L349 431 L340 428 L349 425 Z" fill="#F5C542" opacity="0.3"/>
 </svg>
