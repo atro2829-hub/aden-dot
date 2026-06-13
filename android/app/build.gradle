@@ -4,21 +4,42 @@ apply plugin: 'com.android.application'
 // Keystore signing configuration
 // ---------------------------------------------------------------------------
 // Priority:
-//   1. Read from keystore.properties file (local development)
+//   1. Read from keystore.properties file (app/keystore/ or root keystore/)
 //   2. Fall back to environment variables (CI/CD)
 //   3. If KEYSTORE_BASE64 env var is set, decode it to a temp file
 // ---------------------------------------------------------------------------
 
-def keystorePropertiesFile = rootProject.file("app/keystore/keystore.properties")
 def keystoreProperties = new Properties()
 
-// 1. Try loading from keystore.properties file
-if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+// 1a. Try loading from app-level keystore.properties
+def appKeystorePropertiesFile = rootProject.file("app/keystore/keystore.properties")
+if (appKeystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(appKeystorePropertiesFile))
+}
+
+// 1b. Try loading from root-level keystore.properties (if app-level not found)
+if (!keystoreProperties.containsKey('keyAlias')) {
+    def rootKeystorePropertiesFile = rootProject.file("keystore/keystore.properties")
+    if (rootKeystorePropertiesFile.exists()) {
+        keystoreProperties.load(new FileInputStream(rootKeystorePropertiesFile))
+        // Fix storeFile path - root keystore.properties references keystore/ relative to root
+        // but we need it relative to the app module directory
+        if (keystoreProperties.containsKey('storeFile')) {
+            def currentStoreFile = keystoreProperties['storeFile']
+            // Check if the keystore file exists relative to app dir
+            def appDirStoreFile = file(currentStoreFile)
+            if (!appDirStoreFile.exists()) {
+                // Try relative to root project keystore/ dir
+                def rootStoreFile = rootProject.file("keystore/${new File(currentStoreFile).name}")
+                if (rootStoreFile.exists()) {
+                    keystoreProperties.put('storeFile', rootStoreFile.absolutePath)
+                }
+            }
+        }
+    }
 }
 
 // 2. Fall back to environment variables when keystore.properties is absent
-//    (common in CI where the android/ dir is freshly created by `cap add android`)
 if (!keystoreProperties.containsKey('keyAlias')) {
     def envKeyAlias       = System.getenv("KEY_ALIAS")
     def envKeyPassword    = System.getenv("KEY_PASSWORD")
@@ -28,8 +49,13 @@ if (!keystoreProperties.containsKey('keyAlias')) {
         keystoreProperties.put('keyAlias',      envKeyAlias)
         keystoreProperties.put('keyPassword',   envKeyPassword != null ? envKeyPassword : envStorePassword)
         keystoreProperties.put('storePassword', envStorePassword)
-        // Default storeFile path relative to the app module directory
-        keystoreProperties.put('storeFile', 'keystore/adendot-release.keystore')
+        // Try root-level keystore dir first, then app-level
+        def rootKeystore = rootProject.file("keystore/adendot-release.keystore")
+        if (rootKeystore.exists()) {
+            keystoreProperties.put('storeFile', rootKeystore.absolutePath)
+        } else {
+            keystoreProperties.put('storeFile', 'keystore/adendot-release.keystore')
+        }
     }
 }
 
@@ -56,7 +82,7 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0.0"
+        versionName "1.2.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
