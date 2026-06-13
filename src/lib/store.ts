@@ -95,7 +95,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ error: 'Login failed: could not load profile' });
       return false;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Login failed';
+      let message = error instanceof Error ? error.message : 'Login failed';
+      // Translate common Supabase errors
+      if (message.includes('Invalid API key')) {
+        message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
+      } else if (message.includes('Invalid login credentials')) {
+        message = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+      } else if (message.includes('Email not confirmed')) {
+        message = 'البريد الإلكتروني غير مؤكد - تحقق من بريدك';
+      } else if (message.includes('User already registered')) {
+        message = 'هذا البريد مسجل مسبقاً';
+      } else if (message.includes('Password should be')) {
+        message = 'كلمة المرور قصيرة جداً - يجب أن تكون 6 أحرف على الأقل';
+      } else if (message.includes('Supabase client not configured')) {
+        message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
+      } else if (message.includes('network') || message.includes('Failed to fetch')) {
+        message = 'خطأ في الاتصال - تحقق من الإنترنت';
+      }
       set({ error: message });
       return false;
     } finally {
@@ -154,7 +170,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       set({ error: 'Registration failed' });
       return false;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'Registration failed';
+      let message = error instanceof Error ? error.message : 'Registration failed';
+      // Translate common Supabase errors
+      if (message.includes('Invalid API key')) {
+        message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
+      } else if (message.includes('User already registered')) {
+        message = 'هذا البريد مسجل مسبقاً';
+      } else if (message.includes('Password should be')) {
+        message = 'كلمة المرور قصيرة جداً - يجب أن تكون 6 أحرف على الأقل';
+      } else if (message.includes('Email not confirmed')) {
+        message = 'البريد الإلكتروني غير مؤكد';
+      } else if (message.includes('Supabase client not configured')) {
+        message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
+      } else if (message.includes('network') || message.includes('Failed to fetch')) {
+        message = 'خطأ في الاتصال - تحقق من الإنترنت';
+      }
       set({ error: message });
       return false;
     } finally {

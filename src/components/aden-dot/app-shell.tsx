@@ -20,6 +20,9 @@ import { WalletPage, AchievementsPage } from './gifts-wallet';
 import { SettingsPage } from './settings-page';
 import { EarningsPage } from './earnings-page';
 import { AdminDashboard } from './admin-dashboard';
+import { SupabaseSetupScreen } from './supabase-setup';
+import { isSupabaseConfigured as checkSupabaseConfigured, getActiveSupabaseConfig } from '@/lib/supabase-config';
+import { resetSupabaseBrowser } from '@/lib/supabase-browser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 // ============ Notifications Panel ============
@@ -451,9 +454,49 @@ export default function AdenDotApp() {
   const setShowCreatePost = useAppStore((s) => s.setShowCreatePost);
 
   const [isInitializing, setIsInitializing] = useState(true);
+  const [supabaseReady, setSupabaseReady] = useState(false);
+  const [showSetup, setShowSetup] = useState(false);
 
-  // Initialize auth on mount
+  // Check and validate Supabase config on mount
   useEffect(() => {
+    const checkConfig = async () => {
+      const config = getActiveSupabaseConfig();
+      if (!config) {
+        setShowSetup(true);
+        setIsInitializing(false);
+        return;
+      }
+      
+      // Validate the config by testing auth endpoint
+      try {
+        const response = await fetch(`${config.url}/auth/v1/settings`, {
+          headers: { 'apikey': config.anonKey },
+        });
+        if (response.ok) {
+          setSupabaseReady(true);
+        } else {
+          const data = await response.json();
+          if (data.message?.includes('Invalid API key')) {
+            console.warn('[AdenDotApp] Supabase API key is invalid, showing setup screen');
+            setShowSetup(true);
+          } else {
+            // Server might be temporarily down, try anyway
+            setSupabaseReady(true);
+          }
+        }
+      } catch {
+        // Network error, try anyway
+        setSupabaseReady(true);
+      }
+      setIsInitializing(false);
+    };
+    checkConfig();
+  }, []);
+
+  // Initialize auth on mount (only when Supabase is ready)
+  useEffect(() => {
+    if (!supabaseReady) return;
+    
     let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
 
     const init = async () => {
@@ -515,6 +558,15 @@ export default function AdenDotApp() {
   // Show loading
   if (isInitializing) {
     return <LoadingScreen />;
+  }
+
+  // Show Supabase setup if not configured
+  if (showSetup) {
+    return <SupabaseSetupScreen onConfigured={() => {
+      resetSupabaseBrowser();
+      setSupabaseReady(true);
+      setShowSetup(false);
+    }} />;
   }
 
   // Show auth pages

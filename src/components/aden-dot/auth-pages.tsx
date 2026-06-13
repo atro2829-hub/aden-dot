@@ -10,6 +10,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { clearSupabaseConfig } from '@/lib/supabase-config';
+import { resetSupabaseBrowser } from '@/lib/supabase-browser';
 
 // ============ Shared Styles ============
 const pageVariants = {
@@ -165,9 +167,25 @@ export function LoginPage() {
                 initial={{ opacity: 0, y: -5, height: 0 }}
                 animate={{ opacity: 1, y: 0, height: 'auto' }}
                 exit={{ opacity: 0, y: -5, height: 0 }}
-                className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl"
+                className="space-y-2"
               >
-                {error}
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl">
+                  {error}
+                </div>
+                {error.includes('API') && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-amber-600 border-amber-300 hover:bg-amber-50"
+                    onClick={() => {
+                      clearSupabaseConfig();
+                      resetSupabaseBrowser();
+                      window.location.reload();
+                    }}
+                  >
+                    إعداد قاعدة البيانات
+                  </Button>
+                )}
               </motion.div>
             )}
           </AnimatePresence>
@@ -476,9 +494,25 @@ export function RegisterPage() {
               initial={{ opacity: 0, y: -5, height: 0 }}
               animate={{ opacity: 1, y: 0, height: 'auto' }}
               exit={{ opacity: 0, y: -5, height: 0 }}
-              className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl mt-4"
+              className="space-y-2 mt-4"
             >
-              {localError || error}
+              <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl">
+                {localError || error}
+              </div>
+              {(localError || error).includes('API') && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full text-amber-600 border-amber-300 hover:bg-amber-50"
+                  onClick={() => {
+                    clearSupabaseConfig();
+                    resetSupabaseBrowser();
+                    window.location.reload();
+                  }}
+                >
+                  إعداد قاعدة البيانات
+                </Button>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

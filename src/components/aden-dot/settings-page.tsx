@@ -8,6 +8,7 @@ import {
   userService,
 } from '@/lib/supabase-service';
 import { getSupabaseBrowser } from '@/lib/supabase-browser';
+import { getActiveSupabaseConfig, clearSupabaseConfig } from '@/lib/supabase-config';
 import {
   ArrowBackIcon, SettingsIcon, BellIcon, LockIcon, GlobeIcon,
   FingerPrintIcon, ShieldIcon, PremiumIcon,
@@ -360,6 +361,20 @@ export function SettingsPage() {
           onClick={() => window.open('mailto:support@adendot.app', '_blank')}
         >
           <ChevronIcon />
+        </SettingsRow>
+      </SettingsSection>
+
+      {/* Database Setup */}
+      <SettingsSection title={lang === 'ar' ? 'قاعدة البيانات' : 'Database'}>
+        <SettingsRow
+          icon={<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="var(--primary)" strokeWidth="1.8"><ellipse cx="12" cy="5" rx="9" ry="3" /><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" /><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" /></svg>}
+          label={lang === 'ar' ? 'إعداد Supabase' : 'Supabase Setup'}
+          onClick={() => {
+            clearSupabaseConfig();
+            window.location.reload();
+          }}
+        >
+          <span className="text-xs text-amber-500">{getActiveSupabaseConfig() ? (lang === 'ar' ? 'متصل' : 'Connected') : (lang === 'ar' ? 'غير متصل' : 'Not connected')}</span>
         </SettingsRow>
       </SettingsSection>
 
