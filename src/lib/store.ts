@@ -25,13 +25,11 @@ export { fileToBase64, base64ToFile, formatTimeAgo, formatCount };
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  isEmailVerified: boolean;
   isLoading: boolean;
   error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, username?: string, nickname?: string) => Promise<boolean>;
   logout: () => Promise<void>;
-  verifyEmail: () => void;
   updateUser: (data: Partial<User>) => Promise<void>;
   completeProfile: (data: { username: string; nickname: string; bio: string; gender: string; profileImage: string }) => Promise<void>;
   initializeAuth: () => Promise<void>;
@@ -41,7 +39,6 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   isAuthenticated: false,
-  isEmailVerified: false,
   isLoading: false,
   error: null,
 
@@ -56,7 +53,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile,
             isAuthenticated: true,
-            isEmailVerified: session.user.email_confirmed_at != null,
           });
         }
       }
@@ -92,7 +88,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile,
             isAuthenticated: true,
-            isEmailVerified: true, // Always true - no email verification required
           });
           return true;
         }
@@ -119,11 +114,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile,
             isAuthenticated: true,
-            isEmailVerified: true, // Always true - no email verification required
           });
           return true;
         }
         // If profile not yet available, create a temporary user
+        const isAdmin = email === 'admin@adendot.app';
         const tempUser: User = {
           uid: data.user.id,
           email,
@@ -134,8 +129,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           profileImage: '',
           coverImage: '',
           status: 'online',
-          role: 'user',
-          isVerified: false,
+          role: isAdmin ? 'admin' : 'user',
+          isVerified: isAdmin,
           isPremium: false,
           region: '',
           followersCount: 0,
@@ -149,11 +144,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           coinsBalance: 100,
           diamondsBalance: 0,
           isProfileComplete: false,
-          isEmailVerified: false,
+          isEmailVerified: true,
           joinDate: new Date().toISOString().split('T')[0],
           lastSeen: Date.now(),
         };
-        set({ user: tempUser, isAuthenticated: true, isEmailVerified: true });
+        set({ user: tempUser, isAuthenticated: true });
         return true;
       }
       set({ error: 'Registration failed' });
@@ -174,11 +169,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       console.error('[AuthStore] logout error:', error);
     }
-    set({ user: null, isAuthenticated: false, isEmailVerified: false, error: null });
+    set({ user: null, isAuthenticated: false, error: null });
   },
-
-  /** Mark email as verified locally */
-  verifyEmail: () => set({ isEmailVerified: true }),
 
   /** Update user profile data */
   updateUser: async (data: Partial<User>) => {
@@ -1327,11 +1319,15 @@ interface AppState {
   activeTab: 'home' | 'explore' | 'create' | 'chat' | 'profile' | 'live' | 'wallet' | 'achievements' | 'settings' | 'earnings' | 'admin';
   currentProfileUID: string | null;
   showAuth: 'login' | 'register' | 'complete-profile' | 'verify-email' | 'forgot-password' | null;
+  showCreatePost: boolean;
+  showNotifications: boolean;
   theme: 'light' | 'dark';
   language: 'ar' | 'en';
   setActiveTab: (tab: AppState['activeTab']) => void;
   setCurrentProfileUID: (uid: string | null) => void;
   setShowAuth: (show: AppState['showAuth']) => void;
+  setShowCreatePost: (show: boolean) => void;
+  setShowNotifications: (show: boolean) => void;
   toggleTheme: () => void;
   setLanguage: (lang: 'ar' | 'en') => void;
 }
@@ -1340,11 +1336,15 @@ export const useAppStore = create<AppState>((set) => ({
   activeTab: 'home',
   currentProfileUID: null,
   showAuth: null,
+  showCreatePost: false,
+  showNotifications: false,
   theme: 'dark',
   language: 'ar',
-  setActiveTab: (activeTab) => set({ activeTab }),
+  setActiveTab: (activeTab) => set({ activeTab, showNotifications: false }),
   setCurrentProfileUID: (currentProfileUID) => set({ currentProfileUID }),
   setShowAuth: (showAuth) => set({ showAuth }),
+  setShowCreatePost: (showCreatePost) => set({ showCreatePost }),
+  setShowNotifications: (showNotifications) => set({ showNotifications }),
   toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
   setLanguage: (language) => set({ language }),
 }));

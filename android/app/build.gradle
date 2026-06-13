@@ -1,18 +1,56 @@
 apply plugin: 'com.android.application'
 
+// ---------------------------------------------------------------------------
+// Keystore signing configuration
+// ---------------------------------------------------------------------------
+// Priority:
+//   1. Read from keystore.properties file (local development)
+//   2. Fall back to environment variables (CI/CD)
+//   3. If KEYSTORE_BASE64 env var is set, decode it to a temp file
+// ---------------------------------------------------------------------------
+
 def keystorePropertiesFile = rootProject.file("app/keystore/keystore.properties")
 def keystoreProperties = new Properties()
+
+// 1. Try loading from keystore.properties file
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+// 2. Fall back to environment variables when keystore.properties is absent
+//    (common in CI where the android/ dir is freshly created by `cap add android`)
+if (!keystoreProperties.containsKey('keyAlias')) {
+    def envKeyAlias       = System.getenv("KEY_ALIAS")
+    def envKeyPassword    = System.getenv("KEY_PASSWORD")
+    def envStorePassword  = System.getenv("KEYSTORE_PASSWORD")
+
+    if (envKeyAlias != null) {
+        keystoreProperties.put('keyAlias',      envKeyAlias)
+        keystoreProperties.put('keyPassword',   envKeyPassword != null ? envKeyPassword : envStorePassword)
+        keystoreProperties.put('storePassword', envStorePassword)
+        // Default storeFile path relative to the app module directory
+        keystoreProperties.put('storeFile', 'keystore/adendot-release.keystore')
+    }
+}
+
+// 3. If KEYSTORE_BASE64 is provided, decode it to a file and override storeFile
+def keystoreBase64 = System.getenv("KEYSTORE_BASE64")
+if (keystoreBase64 != null && !keystoreBase64.isEmpty()) {
+    def decodedFile = new File(project.buildDir, "ci-keystore/adendot-release.keystore")
+    decodedFile.parentFile.mkdirs()
+    decodedFile.bytes = java.util.Base64.getDecoder().decode(keystoreBase64)
+    keystoreProperties.put('storeFile', decodedFile.absolutePath)
 }
 
 android {
     namespace = "com.qtbmdev.adendot"
     compileSdk = rootProject.ext.compileSdkVersion
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_21
         targetCompatibility JavaVersion.VERSION_21
     }
+
     defaultConfig {
         applicationId "com.qtbmdev.adendot"
         minSdkVersion rootProject.ext.minSdkVersion
@@ -24,16 +62,20 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+
     signingConfigs {
         release {
-            if (keystorePropertiesFile.exists()) {
-                keyAlias keystoreProperties['keyAlias']
-                keyPassword keystoreProperties['keyPassword']
-                storeFile file(keystoreProperties['storeFile'])
+            if (keystoreProperties.containsKey('keyAlias')) {
+                keyAlias      keystoreProperties['keyAlias']
+                keyPassword   keystoreProperties['keyPassword']
                 storePassword keystoreProperties['storePassword']
+                if (keystoreProperties['storeFile'] != null) {
+                    storeFile file(keystoreProperties['storeFile'])
+                }
             }
         }
     }
+
     buildTypes {
         debug {
             debuggable true
@@ -42,8 +84,8 @@ android {
             versionNameSuffix "-debug"
         }
         release {
-            signingConfig signingConfigs.release
-            minifyEnabled true
+            signingConfig  signingConfigs.release
+            minifyEnabled  true
             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
@@ -51,7 +93,7 @@ android {
 }
 
 repositories {
-    flatDir{
+    flatDir {
         dirs '../capacitor-cordova-android-plugins/src/main/libs', 'libs'
     }
 }

@@ -95,19 +95,29 @@ export const authService = {
   async signUp(email: string, password: string, username?: string, nickname?: string) {
     try {
       const client = getClient();
-      const { data, error } = await client.auth.signUp({ email, password });
+      // Email confirmation is not required - users are signed in immediately
+      const { data, error } = await client.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: undefined, // Disable email redirect
+        },
+      });
       if (error) throw error;
 
       // Create user profile in users table
       if (data.user) {
         const uid = data.user.id;
+        const isAdmin = email === 'admin@adendot.app';
         await client.from('users').upsert({
           uid,
           email,
           username: username || null,
           nickname: nickname || '',
           is_profile_complete: false,
-          is_email_verified: false,
+          is_email_verified: true, // No email verification required
+          role: isAdmin ? 'admin' : 'user',
+          is_verified: isAdmin, // Admin accounts are auto-verified
           status: 'online',
           last_seen: Date.now(),
         });

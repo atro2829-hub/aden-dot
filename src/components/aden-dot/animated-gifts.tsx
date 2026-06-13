@@ -291,6 +291,259 @@ const loveGifts: AnimatedGift[] = [
       </svg>
     ),
   },
+  {
+    id: "heart-crown",
+    nameAr: "قلب متوج",
+    nameEn: "Heart Crown",
+    price: 150,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .hc{animation:ag-float 2.2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="hc-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fb7185"/><stop offset="100%" stopColor="#be123c"/></linearGradient>
+          <linearGradient id="hc-crown" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#d97706"/></linearGradient>
+        </defs>
+        <g className="hc">
+          <path d="M24 42C18 36 8 28 8 18C8 10 14 6 20 8C22 9 24 12 24 12C24 12 26 9 28 8C34 6 40 10 40 18C40 28 30 36 24 42Z" fill="url(#hc-g)"/>
+          <path d="M14 14L18 10L22 14L24 8L26 14L30 10L34 14L32 18L16 18Z" fill="url(#hc-crown)"/>
+          <circle cx="18" cy="11" r="1.5" fill="#e11d48"/>
+          <circle cx="24" cy="9" r="1.5" fill="#3b82f6"/>
+          <circle cx="30" cy="11" r="1.5" fill="#22c55e"/>
+          <ellipse cx="20" cy="24" rx="5" ry="4" fill="#fda4af" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "diamond-heart",
+    nameAr: "قلب ألماس",
+    nameEn: "Diamond Heart",
+    price: 500,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .dh{animation:ag-sparkle 1.8s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="dh-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#e0f2fe"/><stop offset="50%" stopColor="#7dd3fc"/><stop offset="100%" stopColor="#bae6fd"/></linearGradient>
+        </defs>
+        <g className="dh">
+          <path d="M24 42C18 36 8 28 8 18C8 10 14 6 20 8C22 9 24 12 24 12C24 12 26 9 28 8C34 6 40 10 40 18C40 28 30 36 24 42Z" fill="url(#dh-g)" opacity=".8"/>
+          <line x1="24" y1="12" x2="16" y2="24" stroke="#93c5fd" strokeWidth=".6" opacity=".5"/>
+          <line x1="24" y1="12" x2="32" y2="24" stroke="#93c5fd" strokeWidth=".6" opacity=".5"/>
+          <line x1="16" y1="24" x2="24" y2="42" stroke="#93c5fd" strokeWidth=".6" opacity=".5"/>
+          <line x1="32" y1="24" x2="24" y2="42" stroke="#93c5fd" strokeWidth=".6" opacity=".5"/>
+          <line x1="8" y1="18" x2="40" y2="18" stroke="#bfdbfe" strokeWidth=".4" opacity=".4"/>
+          <line x1="12" y1="28" x2="36" y2="28" stroke="#bfdbfe" strokeWidth=".4" opacity=".3"/>
+          <circle cx="18" cy="16" r="1" fill="#fff" opacity=".8"/>
+          <circle cx="28" cy="14" r=".8" fill="#fff" opacity=".7"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "rose-bouquet",
+    nameAr: "باقة ورد",
+    nameEn: "Rose Bouquet",
+    price: 200,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .rbq{animation:ag-pulse 2.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <radialGradient id="rbq-r1" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#fb7185"/><stop offset="100%" stopColor="#e11d48"/></radialGradient>
+          <radialGradient id="rbq-r2" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#fda4af"/><stop offset="100%" stopColor="#f43f5e"/></radialGradient>
+          <radialGradient id="rbq-r3" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#fecdd3"/><stop offset="100%" stopColor="#fb7185"/></radialGradient>
+        </defs>
+        <g className="rbq">
+          <path d="M20 28L18 44" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M28 28L30 44" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M24 30L24 44" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M22 36C22 36 16 34 14 31C16 33 20 35 22 36Z" fill="#22c55e"/>
+          <path d="M26 38C26 38 32 36 34 33C32 35 28 37 26 38Z" fill="#16a34a"/>
+          <ellipse cx="18" cy="16" rx="6" ry="7" fill="url(#rbq-r1)"/>
+          <ellipse cx="30" cy="16" rx="6" ry="7" fill="url(#rbq-r2)"/>
+          <ellipse cx="24" cy="12" rx="7" ry="8" fill="url(#rbq-r3)"/>
+          <ellipse cx="16" cy="15" rx="2.5" ry="3" fill="#fda4af" opacity=".5"/>
+          <ellipse cx="32" cy="15" rx="2.5" ry="3" fill="#fda4af" opacity=".5"/>
+          <ellipse cx="24" cy="10" rx="3" ry="4" fill="#fff" opacity=".3"/>
+          <path d="M16 26L32 26" stroke="#22c55e" strokeWidth="2" strokeLinecap="round"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "love-lock",
+    nameAr: "قفل الحب",
+    nameEn: "Love Lock",
+    price: 60,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .lk{animation:ag-shake 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="lk-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fda4af"/><stop offset="100%" stopColor="#e11d48"/></linearGradient>
+        </defs>
+        <g className="lk">
+          <path d="M16 22V16C16 10 20 6 24 6C28 6 32 10 32 16V22" stroke="#9ca3af" strokeWidth="3" fill="none" strokeLinecap="round"/>
+          <rect x="12" y="22" width="24" height="18" rx="3" fill="url(#lk-g)"/>
+          <circle cx="24" cy="30" r="3" fill="#9f1239"/>
+          <rect x="23" y="32" width="2" height="5" rx="1" fill="#9f1239"/>
+          <path d="M20 26C22 24 26 24 28 26" stroke="#fda4af" strokeWidth=".8" fill="none" opacity=".5"/>
+          <circle cx="18" cy="26" r="1" fill="#fff" opacity=".4"/>
+          <circle cx="30" cy="26" r="1" fill="#fff" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "heart-wings",
+    nameAr: "قلب مجنح",
+    nameEn: "Heart Wings",
+    price: 300,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .hw{animation:ag-float 1.8s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="hw-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fb7185"/><stop offset="100%" stopColor="#e11d48"/></linearGradient>
+          <linearGradient id="hw-w1" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#f8fafc"/><stop offset="100%" stopColor="#cbd5e1"/></linearGradient>
+          <linearGradient id="hw-w2" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f8fafc"/><stop offset="100%" stopColor="#cbd5e1"/></linearGradient>
+        </defs>
+        <g className="hw">
+          <path d="M4 18C4 12 8 8 14 10C16 11 18 14 18 18C18 24 4 26 4 18Z" fill="url(#hw-w1)" opacity=".8"/>
+          <path d="M2 22C2 18 6 14 10 16C10 16 8 20 4 22Z" fill="#e2e8f0" opacity=".6"/>
+          <path d="M44 18C44 12 40 8 34 10C32 11 30 14 30 18C30 24 44 26 44 18Z" fill="url(#hw-w2)" opacity=".8"/>
+          <path d="M46 22C46 18 42 14 38 16C38 16 40 20 44 22Z" fill="#e2e8f0" opacity=".6"/>
+          <path d="M24 38C20 34 14 28 14 20C14 14 18 10 22 12C23 13 24 14 24 14C24 14 25 13 26 12C30 10 34 14 34 20C34 28 28 34 24 38Z" fill="url(#hw-g)"/>
+          <ellipse cx="21" cy="20" rx="3" ry="4" fill="#fda4af" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "love-candle",
+    nameAr: "شمعة حب",
+    nameEn: "Love Candle",
+    price: 70,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .lc{animation:ag-glow 2s ease-in-out infinite;transform-origin:center;color:#f59e0b}`}</style>
+        <defs>
+          <linearGradient id="lc-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fda4af"/><stop offset="100%" stopColor="#e11d48"/></linearGradient>
+          <radialGradient id="lc-flame" cx=".5" cy=".3" r=".5"><stop offset="0%" stopColor="#fef9c3"/><stop offset="50%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#f97316"/></radialGradient>
+        </defs>
+        <g className="lc">
+          <rect x="18" y="20" width="12" height="22" rx="3" fill="url(#lc-g)"/>
+          <rect x="20" y="22" width="8" height="18" rx="2" fill="#fda4af" opacity=".4"/>
+          <rect x="22" y="8" width="4" height="12" rx="1" fill="#f1f5f9"/>
+          <ellipse cx="24" cy="8" rx="4" ry="6" fill="url(#lc-flame)"/>
+          <ellipse cx="24" cy="7" rx="2" ry="3.5" fill="#fef9c3"/>
+          <ellipse cx="24" cy="6" rx="1" ry="2" fill="#fff" opacity=".8"/>
+          <path d="M22 28C23 27 25 27 26 28" stroke="#be123c" strokeWidth=".6" fill="none" opacity=".5"/>
+          <path d="M22 32C23 31 25 31 26 32" stroke="#be123c" strokeWidth=".6" fill="none" opacity=".5"/>
+          <path d="M21 20C22 19 26 19 27 20" stroke="#9f1239" strokeWidth=".8" fill="none"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "eternal-flame",
+    nameAr: "لهيب أبدي",
+    nameEn: "Eternal Flame",
+    price: 800,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .ef{animation:ag-rise 1.5s ease-in-out infinite alternate;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="ef-g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stopColor="#e11d48"/><stop offset="40%" stopColor="#f97316"/><stop offset="100%" stopColor="#fbbf24"/></linearGradient>
+          <radialGradient id="ef-core" cx=".5" cy=".6" r=".4"><stop offset="0%" stopColor="#fef9c3"/><stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/></radialGradient>
+        </defs>
+        <g className="ef">
+          <path d="M24 4C24 4 36 14 36 28C36 36 30 42 24 42C18 42 12 36 12 28C12 14 24 4 24 4Z" fill="url(#ef-g)"/>
+          <path d="M24 12C24 12 32 20 32 30C32 36 28 40 24 40C20 40 16 36 16 30C16 20 24 12 24 12Z" fill="#f97316" opacity=".6"/>
+          <ellipse cx="24" cy="32" rx="6" ry="8" fill="url(#ef-core)"/>
+          <path d="M20 36C20 36 22 34 24 36C26 34 28 36 28 36" stroke="#e11d48" strokeWidth="1" fill="none" opacity=".4"/>
+          <ellipse cx="24" cy="28" rx="3" ry="5" fill="#fef9c3" opacity=".4"/>
+          <circle cx="20" cy="18" r="1" fill="#fde68a" opacity=".6"/>
+          <circle cx="28" cy="22" r="1" fill="#fde68a" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "blushing-heart",
+    nameAr: "قلب خجول",
+    nameEn: "Blushing Heart",
+    price: 40,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .bh{animation:ag-heartbeat 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="bh-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fda4af"/><stop offset="100%" stopColor="#e11d48"/></linearGradient>
+        </defs>
+        <g className="bh">
+          <path d="M24 42C18 36 8 28 8 18C8 10 14 6 20 8C22 9 24 12 24 12C24 12 26 9 28 8C34 6 40 10 40 18C40 28 30 36 24 42Z" fill="url(#bh-g)"/>
+          <ellipse cx="16" cy="22" rx="4" ry="2.5" fill="#f43f5e" opacity=".3"/>
+          <ellipse cx="32" cy="22" rx="4" ry="2.5" fill="#f43f5e" opacity=".3"/>
+          <circle cx="19" cy="18" r="2" fill="#1e1e1e"/>
+          <circle cx="29" cy="18" r="2" fill="#1e1e1e"/>
+          <circle cx="19.5" cy="17.5" r=".7" fill="#fff"/>
+          <circle cx="29.5" cy="17.5" r=".7" fill="#fff"/>
+          <path d="M21 26C22 28 26 28 27 26" stroke="#9f1239" strokeWidth="1.2" fill="none" strokeLinecap="round"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "sweet-candy",
+    nameAr: "حلوى لذيذة",
+    nameEn: "Sweet Candy",
+    price: 45,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .sc2{animation:ag-wiggle 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="sc2-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#f472b6"/><stop offset="50%" stopColor="#e11d48"/><stop offset="100%" stopColor="#f472b6"/></linearGradient>
+        </defs>
+        <g className="sc2">
+          <ellipse cx="24" cy="24" rx="10" ry="7" fill="url(#sc2-g)"/>
+          <path d="M14 24L6 20L6 28Z" fill="#fda4af"/>
+          <path d="M34 24L42 20L42 28Z" fill="#fda4af"/>
+          <path d="M14 24L8 22L8 26Z" fill="#f43f5e" opacity=".5"/>
+          <path d="M34 24L40 22L40 26Z" fill="#f43f5e" opacity=".5"/>
+          <line x1="17" y1="24" x2="31" y2="24" stroke="#fff" strokeWidth="1.5" opacity=".3"/>
+          <ellipse cx="22" cy="22" rx="2" ry="1.5" fill="#fff" opacity=".2"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "promise-ring",
+    nameAr: "خاتم وعد",
+    nameEn: "Promise Ring",
+    price: 350,
+    category: "love",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pr{animation:ag-glow 2s ease-in-out infinite;transform-origin:center;color:#e11d48}`}</style>
+        <defs>
+          <linearGradient id="pr-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#b45309"/></linearGradient>
+        </defs>
+        <g className="pr">
+          <ellipse cx="24" cy="28" rx="12" ry="10" stroke="url(#pr-g)" strokeWidth="3.5" fill="none"/>
+          <ellipse cx="24" cy="28" rx="10" ry="8" stroke="#fef3c7" strokeWidth="1" fill="none" opacity=".3"/>
+          <path d="M20 18C20 18 22 14 24 16C26 14 28 18 28 18C28 20 26 22 24 20C22 22 20 20 20 18Z" fill="#e11d48"/>
+          <circle cx="20" cy="12" r="1" fill="#fbbf24" opacity=".6"/>
+          <circle cx="28" cy="12" r="1" fill="#fbbf24" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -576,6 +829,282 @@ const celebrationGifts: AnimatedGift[] = [
       </svg>
     ),
   },
+  {
+    id: "confetti-bomb",
+    nameAr: "قنبلة كونفيتي",
+    nameEn: "Confetti Bomb",
+    price: 150,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .cbm{animation:ag-shake 0.8s ease-in-out infinite;transform-origin:center}.cbm-sp{animation:ag-sparkle 1s ease-in-out infinite .2s}`}</style>
+        <defs>
+          <radialGradient id="cbm-g" cx=".5" cy=".5" r=".5"><stop offset="0%" stopColor="#1e1e1e"/><stop offset="100%" stopColor="#374151"/></radialGradient>
+        </defs>
+        <g className="cbm">
+          <ellipse cx="24" cy="28" rx="10" ry="12" fill="url(#cbm-g)"/>
+          <ellipse cx="24" cy="28" rx="10" ry="12" stroke="#4b5563" strokeWidth="1.5" fill="none"/>
+          <rect x="20" y="16" width="8" height="4" rx="1" fill="#6b7280"/>
+          <line x1="24" y1="16" x2="24" y2="10" stroke="#f59e0b" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="24" cy="8" r="2" fill="#fbbf24"/>
+        </g>
+        <g className="cbm-sp">
+          <rect x="6" y="6" width="4" height="2" rx=".5" fill="#e11d48" transform="rotate(30 8 7)"/>
+          <rect x="38" y="4" width="4" height="2" rx=".5" fill="#3b82f6" transform="rotate(-20 40 5)"/>
+          <rect x="4" y="38" width="4" height="2" rx=".5" fill="#22c55e" transform="rotate(45 6 39)"/>
+          <rect x="36" y="36" width="4" height="2" rx=".5" fill="#f59e0b" transform="rotate(-35 38 37)"/>
+          <circle cx="10" cy="14" r="2" fill="#a855f7" opacity=".7"/>
+          <circle cx="38" cy="18" r="1.5" fill="#f472b6" opacity=".7"/>
+          <circle cx="14" cy="40" r="1.5" fill="#06b6d4" opacity=".6"/>
+          <circle cx="34" cy="10" r="1.5" fill="#fbbf24" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "firework-rocket",
+    nameAr: "صاروخ ألعاب نارية",
+    nameEn: "Firework Rocket",
+    price: 400,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .fwr{animation:ag-rise 1.5s ease-in-out infinite alternate;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="fwr-g" x1="0" y1="1" x2="0" y2="0"><stop offset="0%" stopColor="#dc2626"/><stop offset="100%" stopColor="#fbbf24"/></linearGradient>
+          <radialGradient id="fwr-spark" cx=".5" cy=".5" r=".5"><stop offset="0%" stopColor="#fef9c3"/><stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/></radialGradient>
+        </defs>
+        <g className="fwr">
+          <path d="M24 46L24 16" stroke="#6b7280" strokeWidth="2.5" strokeLinecap="round"/>
+          <path d="M22 20L24 16L26 20" fill="url(#fwr-g)"/>
+          <circle cx="24" cy="14" r="3" fill="url(#fwr-spark)"/>
+          <circle cx="24" cy="14" r="1.5" fill="#fef9c3"/>
+          <line x1="24" y1="14" x2="16" y2="6" stroke="#e11d48" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="24" y1="14" x2="32" y2="6" stroke="#3b82f6" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="24" y1="14" x2="14" y2="12" stroke="#22c55e" strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="24" y1="14" x2="34" y2="12" stroke="#a855f7" strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="24" y1="14" x2="24" y2="4" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="16" cy="5" r="1.5" fill="#e11d48" opacity=".7"/>
+          <circle cx="32" cy="5" r="1.5" fill="#3b82f6" opacity=".7"/>
+          <circle cx="24" cy="3" r="1.5" fill="#fbbf24" opacity=".7"/>
+          <path d="M20 42L24 46L28 42" stroke="#f97316" strokeWidth="1.5" fill="none" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "party-horn",
+    nameAr: "بوق الحفلة",
+    nameEn: "Party Horn",
+    price: 80,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pth{animation:ag-wiggle 1.2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="pth-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fbbf24"/><stop offset="50%" stopColor="#f97316"/><stop offset="100%" stopColor="#e11d48"/></linearGradient>
+        </defs>
+        <g className="pth">
+          <path d="M10 38L30 10L36 16L16 44Z" fill="url(#pth-g)"/>
+          <ellipse cx="13" cy="41" rx="5" ry="4" fill="#f97316" transform="rotate(-45 13 41)"/>
+          <ellipse cx="13" cy="41" rx="3" ry="2" fill="#fbbf24" transform="rotate(-45 13 41)"/>
+          <path d="M30 10L34 6L38 10L36 16Z" fill="#e11d48"/>
+          <circle cx="34" cy="8" r="1.5" fill="#fbbf24"/>
+          <line x1="18" y1="28" x2="24" y2="22" stroke="#fef3c7" strokeWidth=".5" opacity=".4"/>
+          <line x1="22" y1="32" x2="28" y2="26" stroke="#fef3c7" strokeWidth=".5" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "award-ribbon",
+    nameAr: "شريط جائزة",
+    nameEn: "Award Ribbon",
+    price: 250,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .ar{animation:ag-bounce 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="ar-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#d97706"/></linearGradient>
+          <radialGradient id="ar-center" cx=".5" cy=".5" r=".5"><stop offset="0%" stopColor="#fef3c7"/><stop offset="100%" stopColor="#fbbf24"/></radialGradient>
+        </defs>
+        <g className="ar">
+          <circle cx="24" cy="20" r="12" fill="url(#ar-g)"/>
+          <circle cx="24" cy="20" r="9" fill="url(#ar-center)"/>
+          <circle cx="24" cy="20" r="6" fill="#fbbf24"/>
+          <path d="M16 30L12 44L20 38L24 44L28 38L36 44L32 30" fill="#dc2626"/>
+          <path d="M16 30L12 44L20 38" fill="#e11d48"/>
+          <path d="M32 30L36 44L28 38" fill="#e11d48"/>
+          <path d="M22 18L24 14L26 18" stroke="#92400e" strokeWidth="1.2" fill="none"/>
+          <circle cx="24" cy="20" r="2" fill="#92400e"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "victory-trophy",
+    nameAr: "كأس النصر",
+    nameEn: "Victory Trophy",
+    price: 500,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .vt{animation:ag-glow 2s ease-in-out infinite;transform-origin:center;color:#f59e0b`}</style>
+        <defs>
+          <linearGradient id="vt-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#b45309"/></linearGradient>
+        </defs>
+        <g className="vt">
+          <path d="M14 6H34V16C34 24 28 28 24 28C20 28 14 24 14 16V6Z" fill="url(#vt-g)"/>
+          <path d="M14 10C14 10 6 10 6 16C6 20 10 22 14 22" stroke="#d97706" strokeWidth="2.5" fill="#fde68a"/>
+          <path d="M34 10C34 10 42 10 42 16C42 20 38 22 34 22" stroke="#d97706" strokeWidth="2.5" fill="#fde68a"/>
+          <rect x="20" y="28" width="8" height="6" fill="#d97706"/>
+          <rect x="14" y="34" width="20" height="4" rx="1" fill="#b45309"/>
+          <rect x="16" y="38" width="16" height="3" rx="1" fill="#92400e"/>
+          <path d="M20 14L24 10L28 14" stroke="#92400e" strokeWidth="1.5" fill="none"/>
+          <path d="M20 14L24 18L28 14" stroke="#92400e" strokeWidth="1.5" fill="none"/>
+          <ellipse cx="24" cy="14" rx="2" ry="4" fill="#fef3c7" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "new-year-bell",
+    nameAr: "جرس العام الجديد",
+    nameEn: "New Year Bell",
+    price: 1000,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .nyb{animation:ag-shake 1.5s ease-in-out infinite;transform-origin:center top}`}</style>
+        <defs>
+          <linearGradient id="nyb-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#b45309"/></linearGradient>
+        </defs>
+        <g className="nyb">
+          <circle cx="24" cy="6" r="3" fill="#d97706"/>
+          <rect x="22" y="6" width="4" height="4" fill="#d97706"/>
+          <path d="M12 34C12 34 12 18 24 14C36 18 36 34 36 34Z" fill="url(#nyb-g)"/>
+          <path d="M10 34H38V38H10Z" fill="#d97706"/>
+          <circle cx="24" cy="40" r="3" fill="#92400e"/>
+          <path d="M16 28C18 24 22 22 24 22" stroke="#fef3c7" strokeWidth=".6" fill="none" opacity=".4"/>
+          <ellipse cx="24" cy="20" rx="4" ry="3" fill="#fef3c7" opacity=".2"/>
+          <line x1="24" y1="14" x2="24" y2="32" stroke="#fef3c7" strokeWidth=".4" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "sparkler",
+    nameAr: "شعلة احتفال",
+    nameEn: "Sparkler",
+    price: 120,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .spk{animation:ag-sparkle 0.8s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <radialGradient id="spk-g" cx=".5" cy=".3" r=".5"><stop offset="0%" stopColor="#fef9c3"/><stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/></radialGradient>
+        </defs>
+        <g className="spk">
+          <rect x="22" y="20" width="4" height="26" rx="1" fill="#78350f"/>
+          <rect x="23" y="20" width="2" height="26" fill="#92400e"/>
+          <circle cx="24" cy="16" r="8" fill="url(#spk-g)"/>
+          <line x1="24" y1="16" x2="24" y2="4" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="14" y2="6" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="34" y2="6" stroke="#f97316" strokeWidth="1.2" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="12" y2="12" stroke="#e11d48" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="36" y2="12" stroke="#e11d48" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="16" y2="18" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="24" y1="16" x2="32" y2="18" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round"/>
+          <circle cx="24" cy="16" r="3" fill="#fef9c3"/>
+          <circle cx="14" cy="5" r="1" fill="#fbbf24" opacity=".7"/>
+          <circle cx="34" cy="5" r="1" fill="#fbbf24" opacity=".7"/>
+          <circle cx="24" cy="3" r="1" fill="#fef9c3" opacity=".8"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "party-blower",
+    nameAr: "نفاخة الحفلة",
+    nameEn: "Party Blower",
+    price: 60,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pb{animation:ag-wiggle 1s ease-in-out infinite;transform-origin:left center}`}</style>
+        <defs>
+          <linearGradient id="pb-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#e11d48"/><stop offset="50%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#3b82f6"/></linearGradient>
+        </defs>
+        <g className="pb">
+          <circle cx="10" cy="24" r="4" fill="#e11d48"/>
+          <path d="M14 22C14 22 20 8 36 10C40 10 42 14 38 16C34 18 28 14 24 18C20 22 18 28 14 26Z" fill="url(#pb-g)"/>
+          <path d="M14 24L28 18" stroke="#fda4af" strokeWidth=".5" opacity=".5"/>
+          <path d="M14 24L32 16" stroke="#fde68a" strokeWidth=".5" opacity=".4"/>
+          <circle cx="38" cy="12" r="2" fill="#3b82f6" opacity=".6"/>
+          <circle cx="34" cy="10" r="1.5" fill="#fbbf24" opacity=".5"/>
+          <circle cx="40" cy="14" r="1" fill="#e11d48" opacity=".5"/>
+          <rect x="8" y="22" width="4" height="4" rx="1" fill="#9f1239"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "countdown-clock",
+    nameAr: "ساعة العد التنازلي",
+    nameEn: "Countdown Clock",
+    price: 750,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .cd{animation:ag-pulse 1s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="cd-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e1e1e"/><stop offset="100%" stopColor="#374151"/></linearGradient>
+        </defs>
+        <g className="cd">
+          <circle cx="24" cy="26" r="18" fill="url(#cd-g)" stroke="#6b7280" strokeWidth="2"/>
+          <circle cx="24" cy="26" r="15" fill="#0f172a"/>
+          <rect x="20" y="6" width="8" height="4" rx="2" fill="#6b7280"/>
+          <line x1="24" y1="26" x2="24" y2="14" stroke="#fbbf24" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="24" y1="26" x2="34" y2="26" stroke="#f8fafc" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="24" cy="26" r="2" fill="#e11d48"/>
+          <text x="24" y="32" textAnchor="middle" fontSize="6" fontWeight="bold" fill="#fbbf24">00</text>
+          <circle cx="24" cy="12" r="1" fill="#f8fafc" opacity=".6"/>
+          <circle cx="24" cy="40" r="1" fill="#f8fafc" opacity=".6"/>
+          <circle cx="12" cy="26" r="1" fill="#f8fafc" opacity=".6"/>
+          <circle cx="36" cy="26" r="1" fill="#f8fafc" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "celebration-crown",
+    nameAr: "تاج الاحتفال",
+    nameEn: "Celebration Crown",
+    price: 600,
+    category: "celebration",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .cc{animation:ag-sparkle 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="cc-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#d97706"/></linearGradient>
+        </defs>
+        <g className="cc">
+          <path d="M6 34L12 14L18 26L24 8L30 26L36 14L42 34Z" fill="url(#cc-g)"/>
+          <rect x="6" y="34" width="36" height="6" rx="1" fill="#d97706"/>
+          <circle cx="12" cy="14" r="3" fill="#e11d48"/>
+          <circle cx="24" cy="8" r="3.5" fill="#3b82f6"/>
+          <circle cx="36" cy="14" r="3" fill="#22c55e"/>
+          <circle cx="18" cy="36" r="1.5" fill="#fbbf24" opacity=".7"/>
+          <circle cx="24" cy="36" r="1.5" fill="#fbbf24" opacity=".7"/>
+          <circle cx="30" cy="36" r="1.5" fill="#fbbf24" opacity=".7"/>
+          <path d="M12 14L16 26" stroke="#fef3c7" strokeWidth=".5" opacity=".4"/>
+          <path d="M36 14L32 26" stroke="#fef3c7" strokeWidth=".5" opacity=".4"/>
+          <path d="M24 8L24 26" stroke="#fef3c7" strokeWidth=".5" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -857,6 +1386,284 @@ const luxuryGifts: AnimatedGift[] = [
       </svg>
     ),
   },
+  {
+    id: "royal-scepter",
+    nameAr: "صولجان ملكي",
+    nameEn: "Royal Scepter",
+    price: 1500,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .rs2{animation:ag-glow 2s ease-in-out infinite;transform-origin:center;color:#f59e0b`}</style>
+        <defs>
+          <linearGradient id="rs2-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#92400e"/></linearGradient>
+          <radialGradient id="rs2-orb" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#60a5fa"/><stop offset="100%" stopColor="#1d4ed8"/></radialGradient>
+        </defs>
+        <g className="rs2">
+          <rect x="22" y="16" width="4" height="28" rx="1" fill="url(#rs2-g)"/>
+          <rect x="21" y="18" width="6" height="2" fill="#d97706"/>
+          <rect x="21" y="24" width="6" height="2" fill="#d97706"/>
+          <rect x="21" y="30" width="6" height="2" fill="#d97706"/>
+          <path d="M16 16L24 4L32 16L28 14L24 18L20 14Z" fill="#fde68a" stroke="#d97706" strokeWidth=".8"/>
+          <circle cx="24" cy="8" r="4" fill="url(#rs2-orb)"/>
+          <circle cx="23" cy="7" r="1.5" fill="#93c5fd" opacity=".6"/>
+          <path d="M18 16L20 12" stroke="#fbbf24" strokeWidth=".8" opacity=".5"/>
+          <path d="M30 16L28 12" stroke="#fbbf24" strokeWidth=".8" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "crown-jewel",
+    nameAr: "جوهرة التاج",
+    nameEn: "Crown Jewel",
+    price: 5000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .cj{animation:ag-sparkle 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="cj-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#d97706"/></linearGradient>
+          <linearGradient id="cj-dia" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#c084fc"/><stop offset="50%" stopColor="#7c3aed"/><stop offset="100%" stopColor="#a78bfa"/></linearGradient>
+        </defs>
+        <g className="cj">
+          <path d="M6 34L12 14L18 26L24 8L30 26L36 14L42 34Z" fill="url(#cj-g)"/>
+          <rect x="6" y="34" width="36" height="6" rx="1" fill="#d97706"/>
+          <path d="M18 20L24 10L30 20L24 26Z" fill="url(#cj-dia)" stroke="#a78bfa" strokeWidth="1"/>
+          <line x1="24" y1="10" x2="24" y2="26" stroke="#c4b5fd" strokeWidth=".6" opacity=".5"/>
+          <line x1="18" y1="20" x2="30" y2="20" stroke="#c4b5fd" strokeWidth=".6" opacity=".5"/>
+          <circle cx="22" cy="14" r="1" fill="#fff" opacity=".7"/>
+          <circle cx="12" cy="14" r="2" fill="#e11d48"/>
+          <circle cx="36" cy="14" r="2" fill="#22c55e"/>
+          <circle cx="24" cy="8" r="2.5" fill="#3b82f6"/>
+          <circle cx="18" cy="36" r="1.5" fill="#fbbf24" opacity=".6"/>
+          <circle cx="30" cy="36" r="1.5" fill="#fbbf24" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "pearl-necklace",
+    nameAr: "عقد لؤلؤ",
+    nameEn: "Pearl Necklace",
+    price: 2500,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pn{animation:ag-glow 2.5s ease-in-out infinite;transform-origin:center;color:#f8fafc`}</style>
+        <defs>
+          <radialGradient id="pn-pearl" cx=".35" cy=".3" r=".5"><stop offset="0%" stopColor="#fff"/><stop offset="100%" stopColor="#d1d5db"/></radialGradient>
+        </defs>
+        <g className="pn">
+          <path d="M10 10C10 10 12 32 24 36C36 32 38 10 38 10" stroke="#d1d5db" strokeWidth="1.5" fill="none"/>
+          <circle cx="12" cy="14" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="10" cy="20" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="10" cy="26" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="12" cy="32" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="36" cy="14" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="38" cy="20" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="38" cy="26" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="36" cy="32" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="18" cy="34" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="30" cy="34" r="3" fill="url(#pn-pearl)"/>
+          <circle cx="24" cy="36" r="4" fill="#fde68a" stroke="#d97706" strokeWidth="1"/>
+          <circle cx="23" cy="35" r="1" fill="#fef3c7" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "platinum-card",
+    nameAr: "بطاقة بلاتينية",
+    nameEn: "Platinum Card",
+    price: 4000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pc2{animation:ag-sparkle 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="pc2-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#e2e8f0"/><stop offset="50%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#cbd5e1"/></linearGradient>
+        </defs>
+        <g className="pc2">
+          <rect x="4" y="10" width="40" height="28" rx="4" fill="url(#pc2-g)"/>
+          <rect x="4" y="10" width="40" height="8" rx="4" fill="#64748b"/>
+          <rect x="4" y="14" width="40" height="4" fill="#475569"/>
+          <rect x="8" y="28" width="14" height="3" rx="1" fill="#94a3b8" opacity=".6"/>
+          <rect x="8" y="33" width="10" height="2" rx="1" fill="#94a3b8" opacity=".4"/>
+          <circle cx="36" cy="30" r="4" fill="#fde68a" opacity=".4"/>
+          <circle cx="36" cy="30" r="2.5" fill="#fbbf24" opacity=".3"/>
+          <path d="M36 28L38 30L36 32L34 30Z" fill="#fef3c7" opacity=".5"/>
+          <text x="24" y="22" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#475569" opacity=".6">PLATINUM</text>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "luxury-car",
+    nameAr: "سيارة فاخرة",
+    nameEn: "Luxury Car",
+    price: 8000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .lc2{animation:ag-float 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="lc2-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#f1f5f9"/><stop offset="100%" stopColor="#94a3b8"/></linearGradient>
+        </defs>
+        <g className="lc2">
+          <path d="M4 28L8 22L16 18L34 18L42 22L46 28Z" fill="url(#lc2-g)"/>
+          <rect x="4" y="28" width="42" height="8" rx="2" fill="#cbd5e1"/>
+          <path d="M16 18L20 12L34 12L38 18Z" fill="#60a5fa" opacity=".5"/>
+          <line x1="26" y1="12" x2="26" y2="18" stroke="#94a3b8" strokeWidth=".5"/>
+          <circle cx="14" cy="36" r="4" fill="#1e1e1e"/>
+          <circle cx="14" cy="36" r="2.5" fill="#6b7280"/>
+          <circle cx="14" cy="36" r="1" fill="#9ca3af"/>
+          <circle cx="36" cy="36" r="4" fill="#1e1e1e"/>
+          <circle cx="36" cy="36" r="2.5" fill="#6b7280"/>
+          <circle cx="36" cy="36" r="1" fill="#9ca3af"/>
+          <rect x="6" y="30" width="6" height="2" rx="1" fill="#fde68a"/>
+          <rect x="38" y="30" width="6" height="2" rx="1" fill="#fca5a5"/>
+          <path d="M8 22L12 20" stroke="#fbbf24" strokeWidth=".8" opacity=".5"/>
+          <path d="M40 22L36 20" stroke="#fbbf24" strokeWidth=".8" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "golden-key",
+    nameAr: "مفتاح ذهبي",
+    nameEn: "Golden Key",
+    price: 1000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .gk{animation:ag-shake 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="gk-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#b45309"/></linearGradient>
+        </defs>
+        <g className="gk">
+          <circle cx="16" cy="16" r="10" fill="url(#gk-g)" stroke="#92400e" strokeWidth="1"/>
+          <circle cx="16" cy="16" r="6" fill="#fbbf24"/>
+          <circle cx="16" cy="16" r="3" fill="#d97706"/>
+          <rect x="24" y="14" width="20" height="4" rx="1" fill="url(#gk-g)"/>
+          <rect x="38" y="18" width="3" height="5" rx=".5" fill="#d97706"/>
+          <rect x="34" y="18" width="3" height="4" rx=".5" fill="#d97706"/>
+          <rect x="30" y="18" width="3" height="3" rx=".5" fill="#d97706"/>
+          <circle cx="14" cy="14" r="1" fill="#fef3c7" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "ruby-gem",
+    nameAr: "ياقوت أحمر",
+    nameEn: "Ruby Gem",
+    price: 3500,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .rg{animation:ag-sparkle 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="rg-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fca5a5"/><stop offset="50%" stopColor="#dc2626"/><stop offset="100%" stopColor="#991b1b"/></linearGradient>
+        </defs>
+        <g className="rg">
+          <path d="M14 10L24 4L34 10L38 22L24 42L10 22Z" fill="url(#rg-g)" stroke="#991b1b" strokeWidth=".8"/>
+          <line x1="24" y1="4" x2="24" y2="42" stroke="#fca5a5" strokeWidth=".5" opacity=".4"/>
+          <line x1="10" y1="22" x2="38" y2="22" stroke="#fca5a5" strokeWidth=".5" opacity=".4"/>
+          <line x1="14" y1="10" x2="38" y2="22" stroke="#fca5a5" strokeWidth=".3" opacity=".3"/>
+          <line x1="34" y1="10" x2="10" y2="22" stroke="#fca5a5" strokeWidth=".3" opacity=".3"/>
+          <path d="M14 10L24 22L34 10" stroke="#fecaca" strokeWidth=".4" opacity=".3" fill="none"/>
+          <circle cx="18" cy="14" r="1.5" fill="#fff" opacity=".6"/>
+          <circle cx="28" cy="12" r="1" fill="#fff" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "emperor-throne",
+    nameAr: "عرش الإمبراطور",
+    nameEn: "Emperor Throne",
+    price: 10000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .et{animation:ag-glow 2.5s ease-in-out infinite;transform-origin:center;color:#f59e0b`}</style>
+        <defs>
+          <linearGradient id="et-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#92400e"/></linearGradient>
+        </defs>
+        <g className="et">
+          <rect x="10" y="4" width="4" height="38" rx="1" fill="url(#et-g)"/>
+          <rect x="34" y="4" width="4" height="38" rx="1" fill="url(#et-g)"/>
+          <path d="M10 4L14 2L34 2L38 4Z" fill="#fde68a"/>
+          <rect x="14" y="14" width="20" height="4" rx="1" fill="url(#et-g)"/>
+          <rect x="14" y="26" width="20" height="4" rx="1" fill="url(#et-g)"/>
+          <rect x="10" y="32" width="28" height="4" rx="1" fill="#d97706"/>
+          <rect x="8" y="36" width="32" height="4" rx="1" fill="#b45309"/>
+          <rect x="6" y="40" width="36" height="4" rx="1" fill="#92400e"/>
+          <circle cx="12" cy="8" r="2" fill="#e11d48"/>
+          <circle cx="36" cy="8" r="2" fill="#e11d48"/>
+          <path d="M14 20L34 20" stroke="#fbbf24" strokeWidth=".5" opacity=".5"/>
+          <circle cx="24" cy="18" r="2" fill="#3b82f6"/>
+          <circle cx="20" cy="16" r="1" fill="#22c55e"/>
+          <circle cx="28" cy="16" r="1" fill="#7c3aed"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "crystal-ball",
+    nameAr: "كرة بلورية",
+    nameEn: "Crystal Ball",
+    price: 6000,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .clb{animation:ag-glow 2s ease-in-out infinite;transform-origin:center;color:#a855f7}`}</style>
+        <defs>
+          <radialGradient id="clb-g" cx=".45" cy=".4" r=".5"><stop offset="0%" stopColor="#e9d5ff"/><stop offset="50%" stopColor="#a78bfa"/><stop offset="100%" stopColor="#7c3aed"/></radialGradient>
+          <radialGradient id="clb-shine" cx=".3" cy=".25" r=".3"><stop offset="0%" stopColor="#fff" stopOpacity=".6"/><stop offset="100%" stopColor="#fff" stopOpacity="0"/></radialGradient>
+        </defs>
+        <g className="clb">
+          <ellipse cx="24" cy="40" rx="12" ry="3" fill="#6b21a8" opacity=".4"/>
+          <path d="M14 40H34L32 44H16Z" fill="#92400e"/>
+          <rect x="16" y="44" width="16" height="2" rx="1" fill="#78350f"/>
+          <circle cx="24" cy="24" r="16" fill="url(#clb-g)"/>
+          <circle cx="24" cy="24" r="16" fill="url(#clb-shine)"/>
+          <circle cx="18" cy="18" r="3" fill="#fff" opacity=".15"/>
+          <path d="M20 28C22 26 26 26 28 28" stroke="#c4b5fd" strokeWidth=".8" fill="none" opacity=".5"/>
+          <circle cx="22" cy="22" r="1" fill="#fde68a" opacity=".4"/>
+          <circle cx="26" cy="26" r=".8" fill="#fde68a" opacity=".3"/>
+          <path d="M16 22L18 20L20 24Z" fill="#c4b5fd" opacity=".2"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "silver-chalice",
+    nameAr: "كأس فضية",
+    nameEn: "Silver Chalice",
+    price: 4500,
+    category: "luxury",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .sch{animation:ag-sparkle 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="sch-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#e2e8f0"/><stop offset="100%" stopColor="#94a3b8"/></linearGradient>
+        </defs>
+        <g className="sch">
+          <path d="M14 8H34C34 8 36 22 24 26C12 22 14 8 14 8Z" fill="url(#sch-g)"/>
+          <path d="M14 8H34C34 8 32 20 24 24C16 20 14 8 14 8Z" fill="#f1f5f9" opacity=".4"/>
+          <rect x="22" y="26" width="4" height="10" fill="#94a3b8"/>
+          <ellipse cx="24" cy="36" rx="10" ry="4" fill="url(#sch-g)"/>
+          <ellipse cx="24" cy="36" rx="8" ry="3" fill="#cbd5e1"/>
+          <ellipse cx="24" cy="8" rx="10" ry="2" fill="#cbd5e1" opacity=".3"/>
+          <circle cx="24" cy="16" r="3" fill="#e11d48" opacity=".3"/>
+          <circle cx="24" cy="16" r="1.5" fill="#dc2626" opacity=".4"/>
+          <circle cx="20" cy="12" r=".8" fill="#fff" opacity=".6"/>
+        </g>
+      </svg>
+    ),
+  },
 ];
 
 /* ══════════════════════════════════════════════════════════
@@ -1122,6 +1929,269 @@ const natureGifts: AnimatedGift[] = [
           <circle cx="32.5" cy="22" r=".8" fill="#1e1e1e"/>
           <path d="M36 26C38 26 40 25 42 26" stroke="#93c5fd" strokeWidth=".8" fill="none"/>
           <path d="M12 30L10 28L14 28" fill="#bfdbfe" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "falling-leaf",
+    nameAr: "ورقة ساقطة",
+    nameEn: "Falling Leaf",
+    price: 50,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .fl{animation:ag-float 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="fl-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#ea580c"/></linearGradient>
+        </defs>
+        <g className="fl">
+          <path d="M24 6C24 6 38 14 38 28C38 38 24 44 24 44C24 44 10 38 10 28C10 14 24 6 24 6Z" fill="url(#fl-g)"/>
+          <line x1="24" y1="10" x2="24" y2="40" stroke="#92400e" strokeWidth="1.5"/>
+          <line x1="24" y1="18" x2="16" y2="14" stroke="#92400e" strokeWidth=".8"/>
+          <line x1="24" y1="24" x2="32" y2="20" stroke="#92400e" strokeWidth=".8"/>
+          <line x1="24" y1="30" x2="16" y2="26" stroke="#92400e" strokeWidth=".8"/>
+          <line x1="24" y1="36" x2="32" y2="32" stroke="#92400e" strokeWidth=".8"/>
+          <path d="M24 6L26 4" stroke="#78350f" strokeWidth="1.5" strokeLinecap="round"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "moon-stars",
+    nameAr: "قمر ونجوم",
+    nameEn: "Moon & Stars",
+    price: 120,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .ms{animation:ag-glow 2.5s ease-in-out infinite;transform-origin:center;color:#fbbf24`}</style>
+        <defs>
+          <linearGradient id="ms-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#f59e0b"/></linearGradient>
+        </defs>
+        <g className="ms">
+          <path d="M20 6C20 6 10 12 10 24C10 36 20 42 20 42C10 40 4 32 4 24C4 16 10 8 20 6Z" fill="url(#ms-g)"/>
+          <circle cx="34" cy="10" r="1.5" fill="#fbbf24"/>
+          <path d="M34 7L35 9L37 10L35 11L34 13L33 11L31 10L33 9Z" fill="#fde68a"/>
+          <circle cx="40" cy="22" r="1" fill="#fbbf24" opacity=".7"/>
+          <path d="M40 20L40.8 21.2L42 22L40.8 22.8L40 24L39.2 22.8L38 22L39.2 21.2Z" fill="#fde68a" opacity=".7"/>
+          <circle cx="28" cy="40" r="1" fill="#fbbf24" opacity=".6"/>
+          <path d="M28 38L28.6 39L30 40L28.6 41L28 42L27.4 41L26 40L27.4 39Z" fill="#fde68a" opacity=".6"/>
+          <circle cx="42" cy="36" r=".8" fill="#fbbf24" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "aurora",
+    nameAr: "شفق قطبي",
+    nameEn: "Aurora",
+    price: 300,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .au{animation:ag-float 3s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="au-g1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e" stopOpacity=".8"/><stop offset="100%" stopColor="#22c55e" stopOpacity="0"/></linearGradient>
+          <linearGradient id="au-g2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#06b6d4" stopOpacity=".6"/><stop offset="100%" stopColor="#06b6d4" stopOpacity="0"/></linearGradient>
+          <linearGradient id="au-g3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a78bfa" stopOpacity=".5"/><stop offset="100%" stopColor="#a78bfa" stopOpacity="0"/></linearGradient>
+        </defs>
+        <g className="au">
+          <rect x="0" y="40" width="48" height="8" fill="#1e293b"/>
+          <path d="M4 40L8 28C12 18 18 14 24 16C30 18 36 12 40 18L44 40Z" fill="url(#au-g1)"/>
+          <path d="M8 40L12 30C16 22 22 18 28 20C34 22 38 16 42 22L46 40Z" fill="url(#au-g2)"/>
+          <path d="M12 40L16 32C20 26 26 22 32 24C36 26 40 20 44 26L46 40Z" fill="url(#au-g3)"/>
+          <circle cx="8" cy="8" r="1" fill="#fff" opacity=".6"/>
+          <circle cx="20" cy="4" r=".8" fill="#fff" opacity=".5"/>
+          <circle cx="36" cy="6" r="1" fill="#fff" opacity=".7"/>
+          <circle cx="42" cy="12" r=".6" fill="#fff" opacity=".4"/>
+          <circle cx="14" cy="12" r=".8" fill="#fff" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "cactus",
+    nameAr: "صبار",
+    nameEn: "Cactus",
+    price: 90,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .ct{animation:ag-wiggle 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="ct-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e"/><stop offset="100%" stopColor="#15803d"/></linearGradient>
+        </defs>
+        <g className="ct">
+          <rect x="20" y="10" width="8" height="28" rx="4" fill="url(#ct-g)"/>
+          <path d="M20 22H14C12 22 10 20 10 18V16C10 14 12 14 14 16V22" fill="url(#ct-g)"/>
+          <path d="M28 18H34C36 18 38 16 38 14V12C38 10 36 10 34 12V18" fill="url(#ct-g)"/>
+          <rect x="16" y="38" width="16" height="6" rx="2" fill="#92400e"/>
+          <circle cx="22" cy="16" r="1" fill="#86efac" opacity=".5"/>
+          <circle cx="26" cy="24" r="1" fill="#86efac" opacity=".5"/>
+          <circle cx="22" cy="30" r="1" fill="#86efac" opacity=".5"/>
+          <circle cx="24" cy="8" r="2" fill="#e11d48"/>
+          <circle cx="24" cy="8" r="1" fill="#fda4af"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "palm-tree",
+    nameAr: "نخلة",
+    nameEn: "Palm Tree",
+    price: 180,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .plt{animation:ag-float 2.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="plt-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#16a34a"/><stop offset="100%" stopColor="#15803d"/></linearGradient>
+          <linearGradient id="plt-trunk" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a16207"/><stop offset="100%" stopColor="#78350f"/></linearGradient>
+        </defs>
+        <g className="plt">
+          <rect x="22" y="18" width="4" height="26" rx="1" fill="url(#plt-trunk)"/>
+          <path d="M24 18C24 18 14 14 8 18C12 12 20 12 24 14Z" fill="url(#plt-g)"/>
+          <path d="M24 18C24 18 34 14 40 18C36 12 28 12 24 14Z" fill="url(#plt-g)"/>
+          <path d="M24 16C24 16 18 8 12 8C18 6 24 10 24 12Z" fill="#22c55e"/>
+          <path d="M24 16C24 16 30 8 36 8C30 6 24 10 24 12Z" fill="#22c55e"/>
+          <path d="M24 14C24 14 22 6 24 2C26 6 24 14 24 14Z" fill="#16a34a"/>
+          <path d="M22 24L22 26" stroke="#78350f" strokeWidth="1" opacity=".3"/>
+          <path d="M26 28L26 30" stroke="#78350f" strokeWidth="1" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "volcano",
+    nameAr: "بركان",
+    nameEn: "Volcano",
+    price: 250,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .vlc{animation:ag-pulse 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="vlc-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#78350f"/><stop offset="100%" stopColor="#451a03"/></linearGradient>
+          <radialGradient id="vlc-lava" cx=".5" cy=".5" r=".5"><stop offset="0%" stopColor="#fbbf24"/><stop offset="100%" stopColor="#dc2626"/></radialGradient>
+        </defs>
+        <g className="vlc">
+          <path d="M10 44L20 16L28 16L38 44Z" fill="url(#vlc-g)"/>
+          <path d="M20 16L22 20L26 20L28 16Z" fill="#dc2626"/>
+          <ellipse cx="24" cy="16" rx="4" ry="2" fill="url(#vlc-lava)"/>
+          <path d="M22 14C22 10 20 6 18 4" stroke="#f97316" strokeWidth="1.5" fill="none" opacity=".7"/>
+          <path d="M26 14C26 10 28 6 30 4" stroke="#f97316" strokeWidth="1.5" fill="none" opacity=".7"/>
+          <path d="M24 14L24 4" stroke="#fbbf24" strokeWidth="1.5" fill="none" opacity=".6"/>
+          <circle cx="18" cy="4" r="2" fill="#fbbf24" opacity=".6"/>
+          <circle cx="30" cy="4" r="2" fill="#f97316" opacity=".6"/>
+          <circle cx="24" cy="3" r="1.5" fill="#fef9c3" opacity=".7"/>
+          <path d="M6 44H42" stroke="#451a03" strokeWidth="2"/>
+          <path d="M16 26L18 24" stroke="#92400e" strokeWidth=".5" opacity=".4"/>
+          <path d="M30 28L32 26" stroke="#92400e" strokeWidth=".5" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "waterfall",
+    nameAr: "شلال",
+    nameEn: "Waterfall",
+    price: 220,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .wf{animation:ag-float 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="wf-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#475569"/></linearGradient>
+          <linearGradient id="wf-water" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#60a5fa"/><stop offset="100%" stopColor="#2563eb"/></linearGradient>
+        </defs>
+        <g className="wf">
+          <rect x="4" y="4" width="16" height="36" rx="2" fill="url(#wf-g)"/>
+          <rect x="28" y="4" width="16" height="36" rx="2" fill="url(#wf-g)"/>
+          <rect x="18" y="8" width="12" height="32" rx="1" fill="url(#wf-water)" opacity=".7"/>
+          <rect x="20" y="8" width="8" height="32" rx="1" fill="#93c5fd" opacity=".4"/>
+          <path d="M4 40H44V44H4Z" fill="#2563eb" opacity=".5"/>
+          <path d="M4 42C8 40 16 42 24 40C32 42 40 40 44 42" stroke="#60a5fa" strokeWidth="1" fill="none" opacity=".5"/>
+          <circle cx="18" cy="44" r="3" fill="#93c5fd" opacity=".3"/>
+          <circle cx="30" cy="44" r="3" fill="#93c5fd" opacity=".3"/>
+          <circle cx="24" cy="10" r="1" fill="#fff" opacity=".4"/>
+          <circle cx="22" cy="18" r="1" fill="#fff" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "comet",
+    nameAr: "مذنب",
+    nameEn: "Comet",
+    price: 160,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .cmt{animation:ag-bounce 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="cmt-tail" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stopColor="#60a5fa" stopOpacity="0"/><stop offset="100%" stopColor="#60a5fa"/></linearGradient>
+          <radialGradient id="cmt-head" cx=".5" cy=".5" r=".5"><stop offset="0%" stopColor="#fef9c3"/><stop offset="100%" stopColor="#fbbf24"/></radialGradient>
+        </defs>
+        <g className="cmt">
+          <path d="M4 4L34 28" stroke="url(#cmt-tail)" strokeWidth="4" strokeLinecap="round"/>
+          <path d="M8 6L32 26" stroke="#93c5fd" strokeWidth="2" strokeLinecap="round" opacity=".4"/>
+          <path d="M12 2L34 24" stroke="#bfdbfe" strokeWidth="1" strokeLinecap="round" opacity=".2"/>
+          <circle cx="34" cy="28" r="6" fill="url(#cmt-head)"/>
+          <circle cx="34" cy="28" r="3" fill="#fef9c3"/>
+          <circle cx="33" cy="27" r="1" fill="#fff" opacity=".8"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "eagle",
+    nameAr: "نسر",
+    nameEn: "Eagle",
+    price: 350,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .egl{animation:ag-float 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="egl-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#78350f"/><stop offset="100%" stopColor="#451a03"/></linearGradient>
+        </defs>
+        <g className="egl">
+          <path d="M4 22C4 22 14 14 24 18C34 14 44 22 44 22C40 18 34 20 30 22C26 24 22 24 18 22C14 20 8 18 4 22Z" fill="url(#egl-g)"/>
+          <ellipse cx="24" cy="22" rx="6" ry="4" fill="#92400e"/>
+          <circle cx="24" cy="18" r="4" fill="#f1f5f9"/>
+          <circle cx="22" cy="17" r="1" fill="#1e1e1e"/>
+          <path d="M20 16L18 14" stroke="#fbbf24" strokeWidth="1.5" strokeLinecap="round"/>
+          <path d="M24 20L24 26" stroke="#92400e" strokeWidth="1.5"/>
+          <path d="M22 26L20 34L24 30L28 34L26 26" fill="#fbbf24"/>
+          <circle cx="20" cy="34" r="1" fill="#92400e"/>
+          <circle cx="28" cy="34" r="1" fill="#92400e"/>
+          <path d="M10 20L6 18" stroke="#451a03" strokeWidth=".5" opacity=".5"/>
+          <path d="M38 20L42 18" stroke="#451a03" strokeWidth=".5" opacity=".5"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "desert-dune",
+    nameAr: "كثبان صحراوية",
+    nameEn: "Desert Dune",
+    price: 130,
+    category: "nature",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .dd{animation:ag-pulse 3s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="dd-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#fde68a"/><stop offset="100%" stopColor="#d97706"/></linearGradient>
+        </defs>
+        <g className="dd">
+          <circle cx="38" cy="10" r="6" fill="#fbbf24"/>
+          <circle cx="38" cy="10" r="4" fill="#fde68a"/>
+          <path d="M0 36C8 28 16 32 24 28C32 24 40 30 48 36V48H0Z" fill="url(#dd-g)"/>
+          <path d="M0 40C10 34 20 38 30 34C38 30 44 36 48 40V48H0Z" fill="#d97706"/>
+          <path d="M0 44C12 40 24 42 36 40C42 38 46 42 48 44V48H0Z" fill="#b45309"/>
+          <circle cx="12" cy="12" r="1" fill="#92400e" opacity=".3"/>
+          <circle cx="18" cy="16" r=".8" fill="#92400e" opacity=".2"/>
         </g>
       </svg>
     ),
@@ -1399,6 +2469,275 @@ const funGifts: AnimatedGift[] = [
           <circle cx="22" cy="38" r="1.5" fill="#fef3c7" opacity=".4"/>
           <path d="M6 18L4 16M8 12L6 10" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round" opacity=".3"/>
           <path d="M40 30L42 28M38 36L40 34" stroke="#fbbf24" strokeWidth="1" strokeLinecap="round" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "ufo",
+    nameAr: "طبق طائر",
+    nameEn: "UFO",
+    price: 300,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .ufo{animation:ag-float 1.5s ease-in-out infinite;transform-origin:center}.ufo-beam{animation:ag-pulse 2s ease-in-out infinite .5s}`}</style>
+        <defs>
+          <linearGradient id="ufo-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#94a3b8"/><stop offset="100%" stopColor="#475569"/></linearGradient>
+          <radialGradient id="ufo-dome" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#bfdbfe"/><stop offset="100%" stopColor="#3b82f6"/></radialGradient>
+        </defs>
+        <g className="ufo">
+          <ellipse cx="24" cy="20" rx="18" ry="6" fill="url(#ufo-g)"/>
+          <ellipse cx="24" cy="19" rx="18" ry="6" fill="#64748b" opacity=".3"/>
+          <ellipse cx="24" cy="16" rx="8" ry="8" fill="url(#ufo-dome)"/>
+          <ellipse cx="22" cy="14" rx="3" ry="2" fill="#fff" opacity=".3"/>
+          <circle cx="12" cy="20" r="2" fill="#fbbf24" opacity=".8"/>
+          <circle cx="20" cy="21" r="1.5" fill="#22c55e" opacity=".8"/>
+          <circle cx="28" cy="21" r="1.5" fill="#e11d48" opacity=".8"/>
+          <circle cx="36" cy="20" r="2" fill="#fbbf24" opacity=".8"/>
+        </g>
+        <g className="ufo-beam">
+          <path d="M16 26L10 44L38 44L32 26Z" fill="#fef08a" opacity=".15"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "pirate-flag",
+    nameAr: "علم قراصنة",
+    nameEn: "Pirate Flag",
+    price: 120,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .pf{animation:ag-shake 2s ease-in-out infinite;transform-origin:top center}`}</style>
+        <defs>
+          <linearGradient id="pf-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#1e1e1e"/><stop offset="100%" stopColor="#374151"/></linearGradient>
+        </defs>
+        <g className="pf">
+          <rect x="8" y="4" width="3" height="40" rx="1" fill="#78350f"/>
+          <circle cx="9.5" cy="4" r="2" fill="#92400e"/>
+          <path d="M11 8L38 8L38 28L11 28Z" fill="url(#pf-g)"/>
+          <circle cx="24" cy="16" r="5" fill="#f1f5f9"/>
+          <path d="M21 13L27 19M27 13L21 19" stroke="#1e1e1e" strokeWidth="2"/>
+          <ellipse cx="24" cy="22" rx="2" ry="1" fill="#f1f5f9"/>
+          <path d="M11 28C14 26 18 28 22 26C26 28 30 26 34 28C36 28 38 26 38 28" stroke="#1e1e1e" strokeWidth=".5" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "superhero-cape",
+    nameAr: "عباءة بطل خارق",
+    nameEn: "Superhero Cape",
+    price: 250,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .shc{animation:ag-float 1.8s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="shc-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#dc2626"/><stop offset="100%" stopColor="#991b1b"/></linearGradient>
+        </defs>
+        <g className="shc">
+          <path d="M18 6L30 6L32 10L36 44L24 40L12 44L16 10Z" fill="url(#shc-g)"/>
+          <path d="M20 6L28 6L30 8L18 8Z" fill="#fbbf24"/>
+          <circle cx="24" cy="12" r="3" fill="#fbbf24"/>
+          <path d="M22 12L24 9L26 12L24 15Z" fill="#dc2626"/>
+          <path d="M18 10C18 10 14 12 14 16" stroke="#991b1b" strokeWidth=".5" fill="none" opacity=".4"/>
+          <path d="M30 10C30 10 34 12 34 16" stroke="#991b1b" strokeWidth=".5" fill="none" opacity=".4"/>
+          <path d="M16 20L20 22M32 20L28 22" stroke="#fbbf24" strokeWidth=".5" opacity=".4"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "dinosaur",
+    nameAr: "ديناصور",
+    nameEn: "Dinosaur",
+    price: 180,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .dino{animation:ag-bounce 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="dino-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#22c55e"/><stop offset="100%" stopColor="#15803d"/></linearGradient>
+        </defs>
+        <g className="dino">
+          <ellipse cx="30" cy="28" rx="10" ry="8" fill="url(#dino-g)"/>
+          <ellipse cx="20" cy="18" rx="6" ry="8" fill="url(#dino-g)"/>
+          <path d="M14 14L10 12L14 10" fill="#22c55e"/>
+          <circle cx="18" cy="14" r="2" fill="#fff"/>
+          <circle cx="17" cy="14" r="1" fill="#1e1e1e"/>
+          <path d="M14 20L8 24L8 28" stroke="#15803d" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M34 34L34 40" stroke="#15803d" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M28 34L28 40" stroke="#15803d" strokeWidth="3" strokeLinecap="round"/>
+          <path d="M38 26L42 30L42 34" stroke="#15803d" strokeWidth="2" strokeLinecap="round"/>
+          <path d="M24 10L22 6M26 10L26 6M28 10L30 7" stroke="#16a34a" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="22" cy="5.5" r="1" fill="#86efac"/>
+          <circle cx="26" cy="5.5" r="1" fill="#86efac"/>
+          <circle cx="30" cy="6.5" r="1" fill="#86efac"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "time-machine",
+    nameAr: "آلة الزمن",
+    nameEn: "Time Machine",
+    price: 500,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .tm{animation:ag-spin 3s linear infinite;transform-origin:24px 24px}.tm-needle{animation:ag-spin 1s linear infinite;transform-origin:24px 24px}`}</style>
+        <defs>
+          <linearGradient id="tm-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#c084fc"/><stop offset="100%" stopColor="#7c3aed"/></linearGradient>
+        </defs>
+        <g className="tm">
+          <circle cx="24" cy="24" r="18" fill="url(#tm-g)" opacity=".3"/>
+          <circle cx="24" cy="24" r="14" fill="#1e1e1e"/>
+          <circle cx="24" cy="24" r="12" fill="#0f172a"/>
+          <circle cx="24" cy="24" r="10" stroke="#a78bfa" strokeWidth=".5" fill="none" strokeDasharray="2 2"/>
+          <g className="tm-needle">
+            <line x1="24" y1="24" x2="24" y2="14" stroke="#c084fc" strokeWidth="2" strokeLinecap="round"/>
+          </g>
+          <line x1="24" y1="24" x2="32" y2="20" stroke="#f8fafc" strokeWidth="1.5" strokeLinecap="round"/>
+          <circle cx="24" cy="24" r="2" fill="#a78bfa"/>
+          <text x="24" y="16" textAnchor="middle" fontSize="4" fill="#a78bfa" opacity=".6">IV</text>
+          <text x="24" y="35" textAnchor="middle" fontSize="4" fill="#a78bfa" opacity=".6">XII</text>
+          <text x="33" y="25" textAnchor="middle" fontSize="4" fill="#a78bfa" opacity=".6">III</text>
+          <text x="15" y="25" textAnchor="middle" fontSize="4" fill="#a78bfa" opacity=".6">IX</text>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "wizard-hat",
+    nameAr: "قبعة ساحر",
+    nameEn: "Wizard Hat",
+    price: 140,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .wz{animation:ag-wiggle 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="wz-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#7c3aed"/><stop offset="100%" stopColor="#3b0764"/></linearGradient>
+        </defs>
+        <g className="wz">
+          <path d="M24 4L14 34H34Z" fill="url(#wz-g)"/>
+          <ellipse cx="24" cy="34" rx="16" ry="5" fill="#6d28d9"/>
+          <ellipse cx="24" cy="34" rx="14" ry="3" fill="#5b21b6" opacity=".5"/>
+          <path d="M18 24L20 20L22 24L24 18L26 22L28 18L30 24" stroke="#fbbf24" strokeWidth="1.5" fill="none"/>
+          <circle cx="24" cy="4" r="2" fill="#fbbf24"/>
+          <circle cx="20" cy="30" r="1" fill="#fbbf24" opacity=".5"/>
+          <circle cx="28" cy="30" r="1" fill="#fbbf24" opacity=".5"/>
+          <path d="M16 32L12 30" stroke="#7c3aed" strokeWidth="1.5" opacity=".3"/>
+          <path d="M32 32L36 30" stroke="#7c3aed" strokeWidth="1.5" opacity=".3"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "ghost",
+    nameAr: "شبح",
+    nameEn: "Ghost",
+    price: 160,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .gh{animation:ag-float 2s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <radialGradient id="gh-g" cx=".5" cy=".3" r=".6"><stop offset="0%" stopColor="#f8fafc"/><stop offset="100%" stopColor="#cbd5e1"/></radialGradient>
+        </defs>
+        <g className="gh">
+          <path d="M12 20C12 10 16 4 24 4C32 4 36 10 36 20V38L32 34L28 38L24 34L20 38L16 34L12 38Z" fill="url(#gh-g)"/>
+          <circle cx="19" cy="18" r="3" fill="#1e1e1e"/>
+          <circle cx="29" cy="18" r="3" fill="#1e1e1e"/>
+          <circle cx="20" cy="17" r="1" fill="#fff" opacity=".7"/>
+          <circle cx="30" cy="17" r="1" fill="#fff" opacity=".7"/>
+          <ellipse cx="24" cy="26" rx="3" ry="2" fill="#94a3b8" opacity=".5"/>
+          <path d="M22 26L26 26" stroke="#64748b" strokeWidth=".8" strokeLinecap="round"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "treasure-chest",
+    nameAr: "صندوق كنز",
+    nameEn: "Treasure Chest",
+    price: 220,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .tc2{animation:ag-bounce 1.8s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <linearGradient id="tc2-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#a16207"/><stop offset="100%" stopColor="#78350f"/></linearGradient>
+        </defs>
+        <g className="tc2">
+          <rect x="6" y="22" width="36" height="18" rx="2" fill="url(#tc2-g)"/>
+          <path d="M6 22C6 22 6 18 24 18C42 18 42 22 42 22Z" fill="#92400e"/>
+          <rect x="6" y="22" width="36" height="3" fill="#d97706"/>
+          <rect x="6" y="20" width="36" height="4" fill="#b45309"/>
+          <rect x="20" y="20" width="8" height="6" rx="1" fill="#fbbf24"/>
+          <circle cx="24" cy="23" r="2" fill="#92400e"/>
+          <line x1="12" y1="28" x2="12" y2="36" stroke="#6b7280" strokeWidth=".8" opacity=".5"/>
+          <line x1="36" y1="28" x2="36" y2="36" stroke="#6b7280" strokeWidth=".8" opacity=".5"/>
+          <circle cx="16" cy="14" r="1.5" fill="#fde68a" opacity=".6"/>
+          <circle cx="30" cy="12" r="1" fill="#fbbf24" opacity=".5"/>
+          <circle cx="22" cy="10" r="1.5" fill="#fef9c3" opacity=".7"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "voodoo-doll",
+    nameAr: "دمية فوودو",
+    nameEn: "Voodoo Doll",
+    price: 170,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .vd{animation:ag-shake 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <radialGradient id="vd-g" cx=".5" cy=".4" r=".6"><stop offset="0%" stopColor="#d4a574"/><stop offset="100%" stopColor="#8b5e3c"/></radialGradient>
+        </defs>
+        <g className="vd">
+          <line x1="24" y1="4" x2="24" y2="8" stroke="#92400e" strokeWidth="1.5"/>
+          <ellipse cx="24" cy="16" rx="8" ry="10" fill="url(#vd-g)"/>
+          <circle cx="21" cy="14" r="2" fill="#1e1e1e"/>
+          <circle cx="27" cy="14" r="2" fill="#1e1e1e"/>
+          <path d="M21 14L23 12" stroke="#e11d48" strokeWidth=".8"/>
+          <path d="M27 14L25 12" stroke="#e11d48" strokeWidth=".8"/>
+          <path d="M22 20L26 20" stroke="#92400e" strokeWidth="1" strokeLinecap="round"/>
+          <line x1="16" y1="16" x2="8" y2="12" stroke="#8b5e3c" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="32" y1="16" x2="40" y2="12" stroke="#8b5e3c" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="20" y1="24" x2="16" y2="34" stroke="#8b5e3c" strokeWidth="2" strokeLinecap="round"/>
+          <line x1="28" y1="24" x2="32" y2="34" stroke="#8b5e3c" strokeWidth="2" strokeLinecap="round"/>
+          <circle cx="24" cy="12" r=".8" fill="#e11d48"/>
+        </g>
+      </svg>
+    ),
+  },
+  {
+    id: "bubble-gum",
+    nameAr: "علكة فقاعة",
+    nameEn: "Bubble Gum",
+    price: 35,
+    category: "fun",
+    svgRenderer: (s = 48) => (
+      <svg width={s} height={s} viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <style>{`${KEYFRAMES} .bg2{animation:ag-pulse 1.5s ease-in-out infinite;transform-origin:center}`}</style>
+        <defs>
+          <radialGradient id="bg2-g" cx=".4" cy=".3" r=".5"><stop offset="0%" stopColor="#f9a8d4"/><stop offset="100%" stopColor="#ec4899"/></radialGradient>
+          <radialGradient id="bg2-bubble" cx=".35" cy=".3" r=".5"><stop offset="0%" stopColor="#fda4af"/><stop offset="100%" stopColor="#f472b6"/></radialGradient>
+        </defs>
+        <g className="bg2">
+          <rect x="16" y="28" width="16" height="8" rx="4" fill="url(#bg2-g)"/>
+          <circle cx="24" cy="18" r="12" fill="url(#bg2-bubble)" opacity=".7"/>
+          <circle cx="24" cy="18" r="10" fill="#fda4af" opacity=".3"/>
+          <ellipse cx="20" cy="14" rx="3" ry="4" fill="#fff" opacity=".2"/>
+          <circle cx="30" cy="16" r="1.5" fill="#fff" opacity=".15"/>
+          <ellipse cx="24" cy="8" rx="2" ry="1" fill="#fce7f3" opacity=".4"/>
+          <path d="M24 26L24 28" stroke="#ec4899" strokeWidth="2" strokeLinecap="round"/>
         </g>
       </svg>
     ),

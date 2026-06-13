@@ -317,99 +317,18 @@ export function CompleteProfilePage() {
 }
 
 export function VerifyEmailPage() {
-  const [sent, setSent] = useState(false);
-  const [isSending, setIsSending] = useState(false);
-  const [isChecking, setIsChecking] = useState(false);
-  const [resendError, setResendError] = useState<string | null>(null);
-  const verifyEmail = useAuthStore((s) => s.verifyEmail);
-  const user = useAuthStore((s) => s.user);
-  const refreshProfile = useAuthStore((s) => s.refreshProfile);
-  const initializeAuth = useAuthStore((s) => s.initializeAuth);
+  // Email verification is no longer required - redirect to main app
   const setShowAuth = useAppStore((s) => s.setShowAuth);
 
-  const handleResendEmail = useCallback(async () => {
-    if (!user?.email) return;
-    setIsSending(true);
-    setResendError(null);
-    try {
-      await authService.resendVerificationEmail(user.email);
-      setSent(true);
-    } catch (error) {
-      setResendError(error instanceof Error ? getArabicErrorMessage(error.message) : 'فشل في إرسال بريد التحقق');
-    } finally {
-      setIsSending(false);
-    }
-  }, [user?.email]);
-
-  const handleCheckVerification = useCallback(async () => {
-    setIsChecking(true);
-    setResendError(null);
-    try {
-      // Re-initialize auth to check if email has been verified
-      await initializeAuth();
-      const currentState = useAuthStore.getState();
-      if (currentState.isEmailVerified) {
-        // Email is verified, redirect to main app
-        setShowAuth(null);
-      } else {
-        setResendError('لم يتم التحقق من البريد الإلكتروني بعد. يرجى التحقق من بريدك الإلكتروني والمحاولة مرة أخرى.');
-      }
-    } catch (error) {
-      setResendError('فشل في التحقق من حالة البريد الإلكتروني');
-    } finally {
-      setIsChecking(false);
-    }
-  }, [initializeAuth, setShowAuth]);
-
-  const handleSkip = useCallback(() => {
-    verifyEmail();
+  React.useEffect(() => {
     setShowAuth(null);
-  }, [verifyEmail, setShowAuth]);
+  }, [setShowAuth]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 via-white to-rose-50 p-4">
       <Card className="w-full max-w-md shadow-xl border-0">
-        <CardHeader className="text-center pb-2">
-          <div className="mx-auto mb-4 w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-rose-500 flex items-center justify-center">
-            <Mail className="w-8 h-8 text-white" />
-          </div>
-          <CardTitle className="text-2xl font-bold">Email Verification</CardTitle>
-          <CardDescription>Verify the email account linked to your account now. If you continue without verifying, you will only be able to preview content.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {resendError && (
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-              <span>{resendError}</span>
-            </div>
-          )}
-          {user?.email && (
-            <div className="text-center text-sm text-muted-foreground bg-muted/50 rounded-lg p-3">
-              <Mail className="w-4 h-4 inline-block mr-1" />
-              {user.email}
-            </div>
-          )}
-          {sent ? (
-            <div className="text-center space-y-4">
-              <div className="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center mx-auto">
-                <Send className="w-6 h-6" />
-              </div>
-              <p className="text-sm text-muted-foreground">Verification link has been sent to your email! Check your inbox and spam folder, then click refresh.</p>
-              <Button variant="outline" onClick={handleCheckVerification} className="w-full" disabled={isChecking}>
-                {isChecking ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Checking...</> : <><RefreshCw className="mr-2 h-4 w-4" /> Check Verification</>}
-              </Button>
-              <Button variant="ghost" onClick={handleResendEmail} className="w-full text-violet-600" disabled={isSending}>
-                Resend Verification Email
-              </Button>
-            </div>
-          ) : (
-            <Button className="w-full bg-gradient-to-r from-violet-500 to-rose-500" onClick={handleResendEmail} disabled={isSending}>
-              {isSending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...</> : <><Send className="mr-2 h-4 w-4" /> Send Verification Email</>}
-            </Button>
-          )}
-          <Button variant="ghost" className="w-full text-muted-foreground" onClick={handleSkip}>
-            Skip for now
-          </Button>
+        <CardContent className="py-8 text-center">
+          <p className="text-muted-foreground">Redirecting...</p>
         </CardContent>
       </Card>
     </div>

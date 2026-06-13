@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { useAuthStore, useAppStore } from '@/lib/store';
 import { t, formatNumber } from '@/lib/i18n';
@@ -182,62 +182,4 @@ export function AchievementsPage() {
   );
 }
 
-// ============ Daily Reward Card ============
-export function DailyRewardCard() {
-  const lang = useAppStore((s) => s.language);
-  const [claimed, setClaimed] = useState(false);
 
-  const days = [
-    { day: 1, coins: 50, claimed: true },
-    { day: 2, coins: 100, claimed: true },
-    { day: 3, coins: 150, claimed: true },
-    { day: 4, coins: 200, claimed: false, current: true },
-    { day: 5, coins: 300, claimed: false },
-    { day: 6, coins: 400, claimed: false },
-    { day: 7, coins: 500, claimed: false },
-  ];
-
-  return (
-    <motion.div
-      className="rounded-2xl p-4 bg-card border border-primary/10"
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-semibold text-foreground">{t('achievements.dailyReward', lang)}</h3>
-        <CoinIcon size={20} />
-      </div>
-      <div className="flex gap-1.5">
-        {days.map((d) => (
-          <div
-            key={d.day}
-            className={`flex-1 text-center py-2 rounded-lg ${
-              d.claimed ? 'bg-primary/15 border border-primary/30'
-              : d.current ? 'bg-primary/20 border border-primary/40'
-              : 'bg-muted border border-transparent'
-            }`}
-          >
-            <p className="text-[9px] text-muted-foreground">{t('achievements.dayN', lang)} {d.day}</p>
-            <div className="flex justify-center my-1">
-              {d.claimed ? (
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
-              ) : (
-                <CoinIcon size={14} />
-              )}
-            </div>
-            <p className={`text-[9px] font-medium ${d.claimed || d.current ? 'text-primary' : 'text-muted-foreground'}`}>{d.coins}</p>
-          </div>
-        ))}
-      </div>
-      {!claimed && (
-        <motion.button
-          onClick={() => setClaimed(true)}
-          className="w-full mt-3 h-9 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
-          whileTap={{ scale: 0.97 }}
-        >
-          {t('achievements.claimReward', lang)}
-        </motion.button>
-      )}
-    </motion.div>
-  );
-}

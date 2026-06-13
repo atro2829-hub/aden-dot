@@ -1,378 +1,299 @@
-name: Build Aden Dot APKs
+name: Build AdenDot Android APKs
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version tag (e.g. v1.2.0)'
+        required: false
+        default: 'v1.2.0'
 
+permissions:
+  contents: write
+
+# ---------------------------------------------------------------------------
+# Environment variables – embedded for first-run convenience.
+# Move these to GitHub Secrets (Settings > Secrets > Actions) for security.
+# ---------------------------------------------------------------------------
 env:
-  KEYSTORE_PASSWORD: AdenDot2026
-  KEY_ALIAS: adendot
-  KEY_PASSWORD: AdenDot2026
+  # Supabase
+  NEXT_PUBLIC_SUPABASE_URL: "https://ocjcbowrewenogrkexmr.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MjQzNjUsImV4cCI6MjA2NTMwMDM2NX0.RzHqKpV8vCJGjRlUQm-KjK2zKvCZqf4HGTIvuE_XnZs"
+  NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTcyNDM2NSwiZXhwIjoyMDY1MzAwMzY1fQ.hZOPJjSDe8FFDYOxbIf1z10HIlxbMCAHhNxZXJI5FOw"
+  SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTcyNDM2NSwiZXhwIjoyMDY1MzAwMzY1fQ.hZOPJjSDe8FFDYOxbIf1z10HIlxbMCAHhNxZXJI5FOw"
+  # Keystore credentials (for CI env-var fallback in build.gradle)
+  KEYSTORE_PASSWORD: "AdenDot2026"
+  KEY_ALIAS: "adendot"
+  KEY_PASSWORD: "AdenDot2026"
 
+# ---------------------------------------------------------------------------
+# Jobs
+# ---------------------------------------------------------------------------
 jobs:
-  # ========== Lint ==========
+  # ─────────────────────────────────────────────────────────────────────────
+  # 1. LINT
+  # ─────────────────────────────────────────────────────────────────────────
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: oven-sh/setup-bun@v2
-      - run: bun install
-      - run: bun run lint
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-  # ========== Build User APK ==========
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run ESLint
+        run: bun run lint
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 2. BUILD USER APK
+  # ─────────────────────────────────────────────────────────────────────────
   build-user-apk:
     name: Build User APK
-    runs-on: ubuntu-latest
     needs: lint
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Create .env.local
+        run: |
+          cat > .env.local << 'ENVEOF'
+          NEXT_PUBLIC_SUPABASE_URL=${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL=file:./dev.db
+          ENVEOF
+
+      - name: Build Next.js static export (User mode)
+        env:
+          NEXT_EXPORT: "1"
+          NEXT_PUBLIC_APP_MODE: user
+        run: bun run build
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - uses: oven-sh/setup-bun@v2
+          distribution: temurin
+          java-version: 17
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - run: bun install
-
-      - name: Create env file
+      - name: Decode keystore from KEYSTORE_BASE64 secret (if available)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
-          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding keystore from KEYSTORE_BASE64 secret..."
+            mkdir -p android/app/keystore
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore/adendot-release.keystore
+          else
+            echo "Using keystore from repository (android/app/keystore/)"
+          fi
 
-      - name: Build static export for Capacitor
-        run: NEXT_EXPORT=1 bun run build
-
-      - name: Sync Capacitor Android
+      - name: Build release APK with Gradle
+        working-directory: android
         run: |
-          # android directory already exists in repo, just sync
-          npx cap sync android
-
-      - name: Add Android permissions
-        run: |
-          cd android
-          cat > app/src/main/AndroidManifest.xml << 'MANIFEST'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-              <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-              <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-              <uses-permission android:name="android.permission.VIBRATE" />
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-feature android:name="android.hardware.camera" android:required="false" />
-              <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
-              <application
-                  android:allowBackup="true"
-                  android:icon="@mipmap/ic_launcher"
-                  android:label="Aden Dot"
-                  android:roundIcon="@mipmap/ic_launcher_round"
-                  android:supportsRtl="true"
-                  android:theme="@style/AppTheme.NoActionBar"
-                  android:usesCleartextTraffic="true">
-                  <activity
-                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-                      android:name=".MainActivity"
-                      android:label="Aden Dot"
-                      android:theme="@style/AppTheme.NoActionBarLaunch"
-                      android:launchMode="singleTask"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          MANIFEST
-
-      - name: Generate signing key
-        run: |
-          cd android
-          mkdir -p app/keystore
-          keytool -genkeypair -v \
-            -keystore app/keystore/adendot-release.keystore \
-            -alias adendot \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass AdenDot2026 \
-            -keypass AdenDot2026 \
-            -dname "CN=QTBM DEV, OU=Development, O=QTBM DEV, L=Aden, ST=Aden, C=YE"
-
-          echo "storeFile=keystore/adendot-release.keystore" > app/keystore/keystore.properties
-          echo "storePassword=AdenDot2026" >> app/keystore/keystore.properties
-          echo "keyAlias=adendot" >> app/keystore/keystore.properties
-          echo "keyPassword=AdenDot2026" >> app/keystore/keystore.properties
-
-      - name: Update build.gradle for signing
-        run: |
-          cd android
-          sed -i '/buildTypes {/i\
-          signingConfigs {\
-              release {\
-                  keyAlias '\''adendot'\''\
-                  keyPassword '\''AdenDot2026'\''\
-                  storeFile file('\''keystore/adendot-release.keystore'\'')\
-                  storePassword '\''AdenDot2026'\''\
-              }\
-          }' app/build.gradle
-
-          sed -i 's/minifyEnabled false/minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.release/' app/build.gradle
-
-      - name: Generate app icons
-        run: |
-          cd android
-          pip3 install Pillow 2>/dev/null || true
-          python3 -c "
-          from PIL import Image
-          import os
-          icon = Image.open('../public/icon.png')
-          sizes = {'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192}
-          for folder, size in sizes.items():
-              d = f'app/src/main/res/{folder}'
-              os.makedirs(d, exist_ok=True)
-              icon.resize((size, size), Image.LANCZOS).save(f'{d}/ic_launcher.png')
-              icon.resize((size, size), Image.LANCZOS).save(f'{d}/ic_launcher_round.png')
-          "
-
-      - name: Build Release APK
-        run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease
 
-      - name: Print SHA1 and SHA256
+      - name: Rename APK
         run: |
-          cd android
-          keytool -list -v -keystore app/keystore/adendot-release.keystore -alias adendot -storepass AdenDot2026 -keypass AdenDot2026 | grep -E "SHA1:|SHA256:"
+          mv android/app/build/outputs/apk/release/app-release.apk \
+             AdenDot-User-signed.apk
 
-      - name: Upload User APK
+      - name: Upload User APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AdenDot-User-APK
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: AdenDot-User-signed
+          path: AdenDot-User-signed.apk
           retention-days: 30
 
-  # ========== Build Admin APK ==========
+  # ─────────────────────────────────────────────────────────────────────────
+  # 3. BUILD ADMIN APK
+  # ─────────────────────────────────────────────────────────────────────────
   build-admin-apk:
     name: Build Admin APK
-    runs-on: ubuntu-latest
     needs: lint
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      - uses: oven-sh/setup-bun@v2
+      - name: Install dependencies
+        run: bun install
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
-      - run: bun install
-
-      - name: Create env file (admin mode)
+      # ── Backup critical Android files before removing android/ ──
+      - name: Backup keystore and Android config
         run: |
-          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env.local
-          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
-          echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
-          echo "NEXT_PUBLIC_APP_MODE=admin" >> .env.local
+          mkdir -p /tmp/aden-backup/keystore /tmp/aden-backup/res-xml
+          # Keystore files
+          cp android/app/keystore/adendot-release.keystore /tmp/aden-backup/keystore/ 2>/dev/null || true
+          cp android/app/keystore/keystore.properties       /tmp/aden-backup/keystore/ 2>/dev/null || true
+          cp android/keystore/adendot-release.keystore      /tmp/aden-backup/keystore/adendot-release-root.keystore 2>/dev/null || true
+          cp android/keystore/keystore.properties           /tmp/aden-backup/keystore/keystore-root.properties 2>/dev/null || true
+          # Build config
+          cp android/app/build.gradle                        /tmp/aden-backup/build.gradle 2>/dev/null || true
+          cp android/app/src/main/AndroidManifest.xml        /tmp/aden-backup/AndroidManifest.xml 2>/dev/null || true
+          # Custom XML resources
+          cp -r android/app/src/main/res/xml/*               /tmp/aden-backup/res-xml/ 2>/dev/null || true
+          echo "Backup complete."
 
-      - name: Build static export for Capacitor
-        run: NEXT_EXPORT=1 bun run build
-
-      - name: Modify Capacitor config for Admin
+      - name: Create .env.local
         run: |
-          # Update capacitor config for admin build
-          sed -i "s/com.qtbmdev.adendot'/com.qtbmdev.adendot.admin'/" capacitor.config.ts
-          sed -i 's/Aden Dot/Aden Dot Admin/' capacitor.config.ts
+          cat > .env.local << 'ENVEOF'
+          NEXT_PUBLIC_SUPABASE_URL=${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY=${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+          DATABASE_URL=file:./dev.db
+          ENVEOF
 
-      - name: Remove existing android dir and re-init for Admin
+      - name: Build Next.js static export (Admin mode)
+        env:
+          NEXT_EXPORT: "1"
+          NEXT_PUBLIC_APP_MODE: admin
+        run: bun run build
+
+      # ── Remove the existing android/ and let Capacitor recreate it ──
+      - name: Remove and re-create Android project
         run: |
           rm -rf android
           npx cap add android
-          npx cap sync android
 
-      - name: Update Android package for Admin
+      # ── Restore backed-up files into the fresh Android project ──
+      - name: Restore keystore and Android config
         run: |
-          cd android
-          # Update package name in all relevant files
-          find . -name "*.xml" -o -name "*.java" -o -name "*.gradle" | xargs sed -i 's/com\.qtbmdev\.adendot/com.qtbmdev.adendot.admin/g' 2>/dev/null || true
-          # Update kotlin files too
-          find . -name "*.kt" | xargs sed -i 's/com\.qtbmdev\.adendot/com.qtbmdev.adendot.admin/g' 2>/dev/null || true
-          # Move Java package directory
-          mkdir -p app/src/main/java/com/qtbmdev/adendot/admin
-          if [ -f app/src/main/java/com/qtbmdev/adendot/MainActivity.java ]; then
-            mv app/src/main/java/com/qtbmdev/adendot/MainActivity.java app/src/main/java/com/qtbmdev/adendot/admin/
-            rm -rf app/src/main/java/com/qtbmdev/adendot/MainActivity.java
+          # Restore keystore into app module
+          mkdir -p android/app/keystore
+          cp /tmp/aden-backup/keystore/adendot-release.keystore android/app/keystore/
+          cp /tmp/aden-backup/keystore/keystore.properties       android/app/keystore/
+          # Restore root-level keystore (referenced by root build.gradle)
+          mkdir -p android/keystore
+          cp /tmp/aden-backup/keystore/adendot-release-root.keystore android/keystore/adendot-release.keystore 2>/dev/null || true
+          cp /tmp/aden-backup/keystore/keystore-root.properties     android/keystore/keystore.properties 2>/dev/null || true
+          # Restore custom build.gradle (includes signing config)
+          cp /tmp/aden-backup/build.gradle android/app/build.gradle
+          # Restore AndroidManifest.xml
+          cp /tmp/aden-backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml 2>/dev/null || true
+          # Restore custom XML resources
+          mkdir -p android/app/src/main/res/xml
+          cp -r /tmp/aden-backup/res-xml/* android/app/src/main/res/xml/ 2>/dev/null || true
+          echo "Restore complete."
+
+      - name: Sync Capacitor (update web assets in restored project)
+        run: npx cap sync android
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode keystore from KEYSTORE_BASE64 secret (if available)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "Decoding keystore from KEYSTORE_BASE64 secret..."
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore/adendot-release.keystore
+          else
+            echo "Using keystore from backup (android/app/keystore/)"
           fi
-          # Update app name
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Aden Dot Admin</string><string name="title_activity_main">Aden Dot Admin</string><string name="package_name">com.qtbmdev.adendot.admin</string></resources>' > app/src/main/res/values/strings.xml
 
-      - name: Add Android permissions (Admin)
+      - name: Build release APK with Gradle
+        working-directory: android
         run: |
-          cd android
-          cat > app/src/main/AndroidManifest.xml << 'MANIFEST'
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-              <uses-permission android:name="android.permission.CAMERA" />
-              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-              <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-              <uses-permission android:name="android.permission.USE_FINGERPRINT" />
-              <uses-permission android:name="android.permission.VIBRATE" />
-              <uses-permission android:name="android.permission.RECORD_AUDIO" />
-              <uses-feature android:name="android.hardware.camera" android:required="false" />
-              <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
-              <application
-                  android:allowBackup="true"
-                  android:icon="@mipmap/ic_launcher"
-                  android:label="Aden Dot Admin"
-                  android:roundIcon="@mipmap/ic_launcher_round"
-                  android:supportsRtl="true"
-                  android:theme="@style/AppTheme.NoActionBar"
-                  android:usesCleartextTraffic="true">
-                  <activity
-                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
-                      android:name=".MainActivity"
-                      android:label="Aden Dot Admin"
-                      android:theme="@style/AppTheme.NoActionBarLaunch"
-                      android:launchMode="singleTask"
-                      android:exported="true">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          MANIFEST
-
-      - name: Generate signing key (Admin)
-        run: |
-          cd android
-          mkdir -p app/keystore
-          keytool -genkeypair -v \
-            -keystore app/keystore/adendot-release.keystore \
-            -alias adendot \
-            -keyalg RSA \
-            -keysize 2048 \
-            -validity 10000 \
-            -storepass AdenDot2026 \
-            -keypass AdenDot2026 \
-            -dname "CN=QTBM DEV, OU=Development, O=QTBM DEV, L=Aden, ST=Aden, C=YE"
-          echo "storeFile=keystore/adendot-release.keystore" > app/keystore/keystore.properties
-          echo "storePassword=AdenDot2026" >> app/keystore/keystore.properties
-          echo "keyAlias=adendot" >> app/keystore/keystore.properties
-          echo "keyPassword=AdenDot2026" >> app/keystore/keystore.properties
-
-      - name: Update build.gradle for signing (Admin)
-        run: |
-          cd android
-          sed -i '/buildTypes {/i\
-          signingConfigs {\
-              release {\
-                  keyAlias '\''adendot'\''\
-                  keyPassword '\''AdenDot2026'\''\
-                  storeFile file('\''keystore/adendot-release.keystore'\'')\
-                  storePassword '\''AdenDot2026'\''\
-              }\
-          }' app/build.gradle
-          sed -i 's/minifyEnabled false/minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.release/' app/build.gradle
-
-      - name: Generate app icons (Admin)
-        run: |
-          cd android
-          pip3 install Pillow 2>/dev/null || true
-          python3 -c "
-          from PIL import Image
-          import os
-          icon = Image.open('../public/icon.png')
-          sizes = {'mipmap-mdpi': 48, 'mipmap-hdpi': 72, 'mipmap-xhdpi': 96, 'mipmap-xxhdpi': 144, 'mipmap-xxxhdpi': 192}
-          for folder, size in sizes.items():
-              d = f'app/src/main/res/{folder}'
-              os.makedirs(d, exist_ok=True)
-              icon.resize((size, size), Image.LANCZOS).save(f'{d}/ic_launcher.png')
-              icon.resize((size, size), Image.LANCZOS).save(f'{d}/ic_launcher_round.png')
-          "
-
-      - name: Build Release APK (Admin)
-        run: |
-          cd android
           chmod +x gradlew
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease
 
-      - name: Upload Admin APK
+      - name: Rename APK
+        run: |
+          mv android/app/build/outputs/apk/release/app-release.apk \
+             AdenDot-Admin-signed.apk
+
+      - name: Upload Admin APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AdenDot-Admin-APK
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: AdenDot-Admin-signed
+          path: AdenDot-Admin-signed.apk
           retention-days: 30
 
-  # ========== Release ==========
+  # ─────────────────────────────────────────────────────────────────────────
+  # 4. RELEASE – Create GitHub Release with both APKs
+  # ─────────────────────────────────────────────────────────────────────────
   release:
-    name: Create Release
-    runs-on: ubuntu-latest
+    name: Create GitHub Release
     needs: [build-user-apk, build-admin-apk]
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    permissions:
-      contents: write
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Download APKs
+      - name: Download User APK
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts/
+          name: AdenDot-User-signed
+          path: ./artifacts
 
-      - name: Rename APKs
-        run: |
-          mkdir -p release
-          cp ./artifacts/AdenDot-User-APK/app-release.apk release/AdenDot-User.apk || true
-          cp ./artifacts/AdenDot-Admin-APK/app-release.apk release/AdenDot-Admin.apk || true
-          ls -la release/
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
+      - name: Download Admin APK
+        uses: actions/download-artifact@v4
         with:
-          tag_name: v1.0.${{ github.run_number }}
-          name: "Aden Dot v1.0.${{ github.run_number }}"
-          body: |
-            # Aden Dot - عدن دوت
+          name: AdenDot-Admin-signed
+          path: ./artifacts
 
-            ## APK Downloads
-            - 📱 **AdenDot-User.apk** - تطبيق المستخدم
-            - 🛡️ **AdenDot-Admin.apk** - تطبيق الأدمن
+      - name: List artifacts
+        run: ls -lh ./artifacts/
 
-            ## Signing Info
-            - **Package (User)**: com.qtbmdev.adendot
-            - **Package (Admin)**: com.qtbmdev.adendot.admin
-            - **Keystore**: adendot-release.keystore (RSA 2048)
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.inputs.version || 'v1.2.0' }}"
+          echo "Creating release $VERSION ..."
 
-            ---
-            Built by QTBM DEV
-          files: |
-            release/*.apk
+          gh release create "$VERSION" \
+            ./artifacts/AdenDot-User-signed.apk \
+            ./artifacts/AdenDot-Admin-signed.apk \
+            --title "AdenDot $VERSION" \
+            --notes "## AdenDot $VERSION
+
+          Built from commit \`${{ github.sha }}\`
+
+          ### Downloads
+          | File | Description |
+          |------|-------------|
+          | \`AdenDot-User-signed.apk\` | User version of the app |
+          | \`AdenDot-Admin-signed.apk\` | Admin version of the app |
+
+          ### How to install
+          1. Download the APK that matches your role (User or Admin)
+          2. Enable **Install from unknown sources** on your Android device
+          3. Open the downloaded APK and follow the installation prompts
+
+          ---
+          *Auto-generated by GitHub Actions*"

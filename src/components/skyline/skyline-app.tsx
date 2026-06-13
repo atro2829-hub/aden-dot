@@ -3,14 +3,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuthStore, useAppStore, usePostsStore } from '@/lib/store';
 import { authService, userService } from '@/lib/supabase-service';
-import { LoginPage, RegisterPage, CompleteProfilePage, VerifyEmailPage } from './auth-pages';
+import { LoginPage, RegisterPage, CompleteProfilePage } from './auth-pages';
 import { HomeFeed } from './home-feed';
 import { ExplorePage } from './explore-page';
 import { ProfilePage } from './profile-page';
 import { ChatPage } from './chat-page';
 import { LiveStreamsPage } from './live-stream';
 import { WalletPage, AchievementsPage, DailyRewardCard } from './gifts-wallet';
-import { DatabaseSetupPage } from './database-setup';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
@@ -168,7 +167,6 @@ function LoadingScreen() {
 // ============ Main App ============
 export default function SkylineApp() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const isEmailVerified = useAuthStore((s) => s.isEmailVerified);
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const showAuth = useAppStore((s) => s.showAuth);
@@ -178,19 +176,6 @@ export default function SkylineApp() {
 
   // Auth initialization state
   const [isInitializing, setIsInitializing] = useState(true);
-  const [needsSetup, setNeedsSetup] = useState(false);
-
-  // Check database setup status
-  useEffect(() => {
-    fetch('/api/setup')
-      .then(r => r.json())
-      .then(data => {
-        if (data.database && !data.database.isSetup) {
-          setNeedsSetup(true);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   // Initialize auth on mount + subscribe to auth state changes
   useEffect(() => {
@@ -203,7 +188,7 @@ export default function SkylineApp() {
 
         // Subscribe to auth state changes (login, logout, token refresh, etc.)
         authSubscription = authService.onAuthStateChange(async (event, session) => {
-          const s = session as { user?: { id?: string; email_confirmed_at?: string } } | null;
+          const s = session as { user?: { id?: string } } | null;
 
           if (event === 'SIGNED_IN' && s?.user?.id) {
             // User signed in — fetch their profile and update store
@@ -212,7 +197,6 @@ export default function SkylineApp() {
               useAuthStore.setState({
                 user: profile,
                 isAuthenticated: true,
-                isEmailVerified: s.user.email_confirmed_at != null,
               });
             }
           } else if (event === 'SIGNED_OUT') {
@@ -220,7 +204,6 @@ export default function SkylineApp() {
             useAuthStore.setState({
               user: null,
               isAuthenticated: false,
-              isEmailVerified: false,
               error: null,
             });
             usePostsStore.setState({ posts: [], currentPage: 0, hasMore: true });
@@ -233,7 +216,6 @@ export default function SkylineApp() {
                 useAuthStore.setState({
                   user: profile,
                   isAuthenticated: true,
-                  isEmailVerified: s.user.email_confirmed_at != null,
                 });
               }
             }
@@ -267,27 +249,16 @@ export default function SkylineApp() {
     return <LoadingScreen />;
   }
 
-  // Show database setup page if tables don't exist yet
-  if (needsSetup) {
-    return <DatabaseSetupPage />;
-  }
-
   // Show auth pages
   if (!isAuthenticated || showAuth) {
     if (showAuth === 'register') return <RegisterPage />;
     if (showAuth === 'complete-profile') return <CompleteProfilePage />;
-    if (showAuth === 'verify-email') return <VerifyEmailPage />;
     return <LoginPage />;
   }
 
   // Check if profile is incomplete
   if (isAuthenticated && !user?.username) {
     return <CompleteProfilePage />;
-  }
-
-  // Check email verification
-  if (!isEmailVerified) {
-    return <VerifyEmailPage />;
   }
 
   // Main app

@@ -3,6 +3,9 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================
+   THEME TOKENS
+   ============================================================ */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -41,12 +44,28 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
   --color-brand: #D4A853;
   --color-brand-light: #F5C542;
   --color-brand-dark: #B8902E;
+  /* Responsive breakpoint tokens (for reference) */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  /* Safe-area tokens */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  /* Touch target minimum */
+  --touch-min: 44px;
 }
 
-/* ============ LIGHT THEME (Default) ============ */
+/* ============================================================
+   LIGHT THEME (Default)
+   ============================================================ */
 :root {
   --radius: 0.75rem;
   --background: #FFFFFF;
@@ -80,9 +99,18 @@
   --sidebar-accent-foreground: #111111;
   --sidebar-border: #E5E7EB;
   --sidebar-ring: #D4A853;
+  /* Glass surface tokens */
+  --glass-bg: rgba(255, 255, 255, 0.75);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  /* Skeleton tokens */
+  --skeleton-base: #E5E7EB;
+  --skeleton-shine: #F3F4F6;
 }
 
-/* ============ DARK THEME ============ */
+/* ============================================================
+   DARK THEME
+   ============================================================ */
 .dark {
   --background: #0F0F0F;
   --foreground: #F5F5F5;
@@ -115,8 +143,18 @@
   --sidebar-accent-foreground: #F5F5F5;
   --sidebar-border: #2A2A2A;
   --sidebar-ring: #D4A853;
+  /* Glass surface tokens */
+  --glass-bg: rgba(15, 15, 15, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  /* Skeleton tokens */
+  --skeleton-base: #262626;
+  --skeleton-shine: #333333;
 }
 
+/* ============================================================
+   BASE LAYER
+   ============================================================ */
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -126,15 +164,38 @@
   }
 }
 
-/* ============ Smooth Scrolling ============ */
+/* ============================================================
+   RESPONSIVE TYPOGRAPHY (clamp-based, mobile-first)
+   ============================================================ */
 html {
+  /* Base font size scales from 14px (mobile) → 16px (desktop) */
+  font-size: clamp(14px, 1vw + 12px, 16px);
   scroll-behavior: smooth;
   -webkit-tap-highlight-color: transparent;
   -webkit-overflow-scrolling: touch;
   overflow-scrolling: touch;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior: none;
+  /* RTL logical properties support */
+  text-align: start;
 }
 
-/* ============ Custom Scrollbar ============ */
+/* Responsive type scale using clamp */
+:root {
+  --text-xs: clamp(0.6875rem, 0.65rem + 0.1vw, 0.75rem);
+  --text-sm: clamp(0.8125rem, 0.78rem + 0.15vw, 0.875rem);
+  --text-base: clamp(0.9375rem, 0.9rem + 0.2vw, 1rem);
+  --text-lg: clamp(1.0625rem, 1rem + 0.3vw, 1.125rem);
+  --text-xl: clamp(1.1875rem, 1.1rem + 0.4vw, 1.25rem);
+  --text-2xl: clamp(1.375rem, 1.25rem + 0.6vw, 1.5rem);
+  --text-3xl: clamp(1.625rem, 1.4rem + 1vw, 1.875rem);
+  --text-4xl: clamp(1.875rem, 1.5rem + 1.5vw, 2.25rem);
+  --text-5xl: clamp(2.25rem, 1.75rem + 2.25vw, 3rem);
+}
+
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -171,67 +232,134 @@ html {
   scrollbar-color: rgba(212, 168, 83, 0.3) transparent;
 }
 
-/* Hide scrollbar utility */
-.scrollbar-hide {
+/* ============================================================
+   SCROLLBAR HIDE UTILITY
+   ============================================================ */
+.scrollbar-hide,
+.no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-.scrollbar-hide::-webkit-scrollbar {
+.scrollbar-hide::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 
-/* ============ iPhone-like Momentum Scrolling ============ */
+/* ============================================================
+   MOMENTUM SCROLLING
+   ============================================================ */
 .scroll-momentum {
   -webkit-overflow-scrolling: touch;
   overflow-scrolling: touch;
 }
 
-/* ============ Safe Area Support ============ */
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom, 0px);
-}
-
+/* ============================================================
+   SAFE AREA SUPPORT
+   ============================================================ */
 .safe-top {
   padding-top: env(safe-area-inset-top, 0px);
 }
-
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
 .safe-left {
   padding-left: env(safe-area-inset-left, 0px);
 }
-
 .safe-right {
   padding-right: env(safe-area-inset-right, 0px);
 }
 
-/* ============ Smooth Global Transitions ============ */
+/* Safe-area with @supports for progressive enhancement */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .safe-left {
+    padding-left: env(safe-area-inset-left);
+  }
+  .safe-right {
+    padding-right: env(safe-area-inset-right);
+  }
+  .nav-safe-bottom {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
+  }
+  .nav-safe-top {
+    padding-top: calc(0.5rem + env(safe-area-inset-top));
+  }
+}
+
+/* Combined safe insets */
+.safe-all {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+
+/* Safe area for fixed/absolute positioned elements */
+.safe-x {
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.safe-y {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Margin-based safe area alternatives */
+.safe-mt {
+  margin-top: env(safe-area-inset-top, 0px);
+}
+.safe-mb {
+  margin-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ============================================================
+   TOUCH-FRIENDLY SIZING (44px minimum)
+   ============================================================ */
+.touch-target {
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.touch-target-expand {
+  position: relative;
+}
+.touch-target-expand::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+/* ============================================================
+   SMOOTH GLOBAL TRANSITIONS
+   ============================================================ */
 a, button, input, select, textarea,
 [role="button"], [tabindex] {
   transition: all 0.2s ease;
 }
 
-/* ============ Glassmorphism (Light) ============ */
+/* ============================================================
+   GLASSMORPHISM
+   ============================================================ */
 .glass {
-  background: rgba(255, 255, 255, 0.75);
+  background: var(--glass-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.dark .glass {
-  background: rgba(15, 15, 15, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.6);
+  background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.dark .glass-card {
-  background: rgba(26, 26, 26, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-gold {
@@ -241,35 +369,480 @@ a, button, input, select, textarea,
   border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
+.dark .glass-gold {
+  background: rgba(212, 168, 83, 0.03);
+  border: 1px solid rgba(212, 168, 83, 0.08);
+}
+
 .glass-strong {
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--glass-bg);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
 }
 
-.dark .glass-strong {
-  background: rgba(15, 15, 15, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Enhanced glassmorphism with layered depth */
+.glass-card-enhanced {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
-/* ============ Selection Color ============ */
+.dark .glass-card-enhanced {
+  background: rgba(26, 26, 26, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Ultra-frosted glass for overlays & modals */
+.glass-frosted {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.dark .glass-frosted {
+  background: rgba(15, 15, 15, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* ============================================================
+   SELECTION COLOR
+   ============================================================ */
 ::selection {
   background: rgba(212, 168, 83, 0.3);
   color: #111111;
 }
 
 .dark ::selection {
+  background: rgba(212, 168, 83, 0.4);
   color: #F5F5F5;
 }
 
-/* ============ Focus Ring ============ */
+/* ============================================================
+   FOCUS RING STYLES (Accessibility)
+   ============================================================ */
 *:focus-visible {
   outline: 2px solid rgba(212, 168, 83, 0.5);
   outline-offset: 2px;
 }
 
-/* ============ Heart Burst Animation ============ */
+/* Enhanced focus ring for interactive elements */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Focus ring with no offset (for tight layouts) */
+.focus-ring-tight:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 0px;
+}
+
+/* Focus ring inset (for inputs) */
+.focus-ring-inset:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px var(--ring);
+}
+
+/* Skip-to-content link for a11y */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  transition: top 0.2s;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* ============================================================
+   RESPONSIVE CONTAINER
+   ============================================================ */
+.responsive-container {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2vw, 2rem);
+  padding-block: clamp(0.5rem, 1.5vw, 1.5rem);
+}
+
+.responsive-container-narrow {
+  width: 100%;
+  max-width: 640px;
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2vw, 2rem);
+}
+
+.responsive-container-wide {
+  width: 100%;
+  max-width: 1536px;
+  margin-inline: auto;
+  padding-inline: clamp(0.75rem, 2vw, 2rem);
+}
+
+/* ============================================================
+   TEXT BALANCE UTILITY
+   ============================================================ */
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* ============================================================
+   LOADING SKELETON ANIMATION
+   ============================================================ */
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.skeleton {
+  background-color: var(--skeleton-base);
+  border-radius: var(--radius-md);
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Skeleton variants */
+.skeleton-circle {
+  background-color: var(--skeleton-base);
+  border-radius: 50%;
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-text {
+  height: 1em;
+  background-color: var(--skeleton-base);
+  border-radius: calc(var(--radius-sm) / 2);
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-heading {
+  height: 1.5em;
+  width: 60%;
+  background-color: var(--skeleton-base);
+  border-radius: var(--radius-sm);
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-avatar {
+  width: 44px;
+  height: 44px;
+  background-color: var(--skeleton-base);
+  border-radius: 50%;
+  animation: skeletonPulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ============================================================
+   SHIMMER LOADING EFFECT
+   ============================================================ */
+@keyframes shimmerSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--skeleton-base);
+  border-radius: var(--radius-md);
+}
+
+.shimmer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--skeleton-shine) 40%,
+    var(--skeleton-shine) 60%,
+    transparent 100%
+  );
+  animation: shimmerSlide 1.8s ease-in-out infinite;
+}
+
+/* Gold-tinted shimmer */
+.shimmer-gold {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--skeleton-base);
+  border-radius: var(--radius-md);
+}
+
+.shimmer-gold::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(212, 168, 83, 0.08) 40%,
+    rgba(212, 168, 83, 0.15) 50%,
+    rgba(212, 168, 83, 0.08) 60%,
+    transparent 100%
+  );
+  animation: shimmerSlide 2s ease-in-out infinite;
+}
+
+/* ============================================================
+   CARD HOVER EFFECT
+   ============================================================ */
+.card-hover {
+  transition:
+    transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.08),
+    0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.dark .card-hover:hover {
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-hover:active {
+  transform: translateY(0);
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.06),
+    0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* Card hover with gold glow */
+.card-hover-gold:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 40px rgba(212, 168, 83, 0.12),
+    0 4px 12px rgba(212, 168, 83, 0.08);
+}
+
+.dark .card-hover-gold:hover {
+  box-shadow:
+    0 12px 40px rgba(212, 168, 83, 0.2),
+    0 4px 12px rgba(212, 168, 83, 0.12);
+}
+
+/* ============================================================
+   BUTTON PRESS ANIMATION
+   ============================================================ */
+.btn-press {
+  transition:
+    transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.btn-press:active {
+  transform: scale(0.96);
+}
+
+/* ============================================================
+   ENTRANCE ANIMATIONS
+   ============================================================ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes expandHeight {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 1000px;
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out both;
+}
+
+.slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-down {
+  animation: slideDown 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-in {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.expand-in {
+  animation: expandHeight 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  overflow: hidden;
+}
+
+/* Staggered animation delays */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.1s; }
+.stagger-3 { animation-delay: 0.15s; }
+.stagger-4 { animation-delay: 0.2s; }
+.stagger-5 { animation-delay: 0.25s; }
+.stagger-6 { animation-delay: 0.3s; }
+
+/* Reduced motion: disable all entrance animations */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .slide-up,
+  .slide-down,
+  .slide-in,
+  .slide-in-left,
+  .slide-in-right,
+  .scale-in,
+  .expand-in,
+  .card-hover,
+  .btn-press,
+  .skeleton,
+  .skeleton-circle,
+  .skeleton-text,
+  .skeleton-heading,
+  .skeleton-avatar,
+  .shimmer::after,
+  .shimmer-gold::after,
+  .gold-shimmer,
+  .heart-burst {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+}
+
+/* ============================================================
+   GRADIENT TEXT EFFECT
+   ============================================================ */
+.gradient-text {
+  background: linear-gradient(135deg, #D4A853, #F5C542, #D4A853);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-text-animated {
+  background: linear-gradient(135deg, #D4A853, #F5C542, #D4A853);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #D4A853, #F5C542);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+   HEART BURST ANIMATION
+   ============================================================ */
 @keyframes heartBurst {
   0% { transform: scale(0); opacity: 1; }
   50% { transform: scale(1.3); opacity: 0.8; }
@@ -280,7 +853,9 @@ a, button, input, select, textarea,
   animation: heartBurst 0.6s ease-out forwards;
 }
 
-/* ============ Pull-to-refresh ============ */
+/* ============================================================
+   PULL-TO-REFRESH
+   ============================================================ */
 @keyframes pullRefresh {
   0% { transform: translateY(0); }
   50% { transform: translateY(8px); }
@@ -291,7 +866,9 @@ a, button, input, select, textarea,
   animation: pullRefresh 1s ease-in-out infinite;
 }
 
-/* ============ Gold Shimmer Effect ============ */
+/* ============================================================
+   GOLD SHIMMER EFFECT
+   ============================================================ */
 @keyframes goldShimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -303,17 +880,199 @@ a, button, input, select, textarea,
   animation: goldShimmer 3s ease-in-out infinite;
 }
 
-/* ============ Gradient text utility ============ */
-.text-gold-gradient {
-  background: linear-gradient(135deg, #D4A853, #F5C542);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ============ Bottom Nav Safe Area ============ */
+/* ============================================================
+   BOTTOM NAV SAFE AREA
+   ============================================================ */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .nav-safe-bottom {
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
+}
+
+/* ============================================================
+   RTL SUPPORT IMPROVEMENTS
+   ============================================================ */
+/* Logical property helpers for RTL */
+[dir="rtl"] .flip-rtl {
+  transform: scaleX(-1);
+}
+
+[dir="ltr"] .flip-rtl {
+  transform: none;
+}
+
+/* Ensure icons don't flip in RTL unless explicitly desired */
+[dir="rtl"] .icon-no-flip {
+  transform: scaleX(-1);
+}
+
+/* RTL-aware border radius utilities */
+.rounded-s-full { border-start-start-radius: 9999px; border-end-start-radius: 9999px; }
+.rounded-e-full { border-start-end-radius: 9999px; border-end-end-radius: 9999px; }
+.rounded-s-lg { border-start-start-radius: var(--radius-lg); border-end-start-radius: var(--radius-lg); }
+.rounded-e-lg { border-start-end-radius: var(--radius-lg); border-end-end-radius: var(--radius-lg); }
+
+/* RTL-safe margin/padding helpers */
+.ms-auto { margin-inline-start: auto; }
+.me-auto { margin-inline-end: auto; }
+.ps-safe { padding-inline-start: env(safe-area-inset-left, 0px); }
+.pe-safe { padding-inline-end: env(safe-area-inset-right, 0px); }
+
+/* ============================================================
+   RESPONSIVE BREAKPOINT UTILITIES
+   Mobile-first helpers for specific phone sizes
+   ============================================================ */
+
+/* Very small phones (iPhone SE, 320-375px) */
+@media (max-width: 374px) {
+  .xs-text-xs { font-size: var(--text-xs); }
+  .xs-px-2 { padding-inline: 0.5rem; }
+  .xs-gap-1 { gap: 0.25rem; }
+  .xs-gap-2 { gap: 0.5rem; }
+  .xs-hidden { display: none; }
+  .xs-full { width: 100%; }
+}
+
+/* Standard phones (375-428px) — default, no overrides needed */
+
+/* Large phones / small tablets (428-768px) */
+@media (min-width: 428px) {
+  .lp-gap-3 { gap: 0.75rem; }
+  .lp-px-4 { padding-inline: 1rem; }
+}
+
+/* ============================================================
+   RESPONSIVE IMAGE / MEDIA
+   ============================================================ */
+.responsive-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+}
+
+.responsive-img-square {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+}
+
+.responsive-img-video {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+}
+
+/* ============================================================
+   MODERN LAYOUT HELPERS
+   ============================================================ */
+.grid-auto-fill {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.grid-auto-fit {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+/* ============================================================
+   INPUT / FORM ENHANCEMENTS
+   ============================================================ */
+/* Remove default appearance on iOS */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Better mobile input zoom prevention (if font < 16px) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  select,
+  textarea {
+    font-size: max(1rem, 16px);
+  }
+}
+
+/* ============================================================
+   DARK MODE TRANSITIONS (smooth switch)
+   ============================================================ */
+.dark-mode-transition,
+.dark-mode-transition *,
+.dark-mode-transition *::before,
+.dark-mode-transition *::after {
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease,
+    border-color 0.3s ease,
+    box-shadow 0.3s ease !important;
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; color: black; }
+}
+
+/* ============================================================
+   ADDITIONAL UTILITY CLASSES
+   ============================================================ */
+
+/* Aspect ratio for common social media content */
+.aspect-post { aspect-ratio: 4 / 5; }
+.aspect-story { aspect-ratio: 9 / 16; }
+.aspect-square { aspect-ratio: 1 / 1; }
+.aspect-landscape { aspect-ratio: 16 / 9; }
+.aspect-portrait { aspect-ratio: 3 / 4; }
+
+/* Line clamp utilities */
+.line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Truncate with ellipsis */
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Mask edges for fading scroll indicators */
+.mask-fade-bottom {
+  mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
+}
+
+.mask-fade-ends {
+  mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Prevent callout on long-press (iOS) */
+.no-callout {
+  -webkit-touch-callout: none;
+}
+
+/* Drag prevention */
+.no-drag {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Hardware-accelerated element */
+.gpu {
+  transform: translateZ(0);
+  will-change: transform;
 }
