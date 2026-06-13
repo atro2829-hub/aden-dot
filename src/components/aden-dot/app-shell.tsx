@@ -369,32 +369,12 @@ function TopBar() {
 
 // ============ Loading Screen ============
 function LoadingScreen() {
-  const lang = useAppStore((s) => s.language);
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <motion.div
-        className="text-center space-y-4"
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <motion.div
-          className="mx-auto w-20 h-20 rounded-2xl flex items-center justify-center bg-primary"
-          animate={{ rotate: [0, 5, -5, 0] }}
-          transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-        >
-          <img src="/icon.png" alt="Aden Dot" className="w-12 h-12 rounded-xl" />
-        </motion.div>
-        <div className="flex items-center justify-center gap-2">
-          <motion.div
-            className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary"
-            animate={{ rotate: 360 }}
-            transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-          />
-          <span className="text-sm text-primary">{t('app.loading', lang)}</span>
-        </div>
-      </motion.div>
+      <div className="flex items-center gap-2">
+        <div className="w-5 h-5 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+        <span className="text-sm text-muted-foreground">...</span>
+      </div>
     </div>
   );
 }
@@ -572,13 +552,13 @@ export default function AdenDotApp() {
   // Show auth pages
   if (!isAuthenticated || showAuth) {
     if (showAuth === 'register') return <RegisterPage />;
-    if (showAuth === 'complete-profile') return <CompleteProfilePage />;
     if (showAuth === 'forgot-password') return <ForgotPasswordPage />;
     return <LoginPage />;
   }
 
-  // Profile incomplete
-  if (isAuthenticated && !user?.username) {
+  // Profile incomplete - only show complete profile if username is truly missing
+  // (not just is_profile_complete flag, as users who signed up with username are already complete)
+  if (isAuthenticated && user && !user.isProfileComplete && !user.username) {
     return <CompleteProfilePage />;
   }
 

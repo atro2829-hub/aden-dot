@@ -45,7 +45,10 @@ export function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
+    const success = await login(email, password);
+    if (success) {
+      setShowAuth(null);
+    }
   };
 
   return (
@@ -75,38 +78,30 @@ export function LoginPage() {
 
       <div className="relative z-10 max-w-sm mx-auto w-full">
         {/* Logo Section */}
-        <motion.div className="text-center mb-10" variants={fadeIn} initial="initial" animate="animate" transition={{ delay: 0.1 }}>
+        <motion.div className="text-center mb-8" variants={fadeIn} initial="initial" animate="animate" transition={{ delay: 0.1 }}>
           <motion.div
-            className="mx-auto w-24 h-24 mb-5 rounded-3xl flex items-center justify-center shadow-2xl bg-primary shadow-primary/30"
-            initial={{ scale: 0, rotate: -180 }}
-            animate={{ scale: 1, rotate: 0 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+            className="mx-auto w-12 h-12 mb-4 rounded-xl flex items-center justify-center bg-primary"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
           >
-            <img src="/icon.png" alt="Aden Dot" className="w-16 h-16 rounded-2xl" />
+            <img src="/icon.png" alt="Aden Dot" className="w-8 h-8 rounded-lg" />
           </motion.div>
           <motion.h1
-            className="text-3xl font-bold text-foreground mb-2"
+            className="text-2xl font-bold text-foreground mb-1"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ delay: 0.2 }}
           >
             {t('app.name', lang)}
           </motion.h1>
           <motion.p
-            className="text-sm font-medium text-primary"
+            className="text-sm text-primary"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.3 }}
           >
             {t('auth.welcomeBack', lang)}
-          </motion.p>
-          <motion.p
-            className="text-xs text-muted-foreground mt-1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-          >
-            {t('auth.loginDesc', lang)}
           </motion.p>
         </motion.div>
 
@@ -565,6 +560,7 @@ export function CompleteProfilePage() {
   const completeProfile = useAuthStore((s) => s.completeProfile);
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
+  const setShowAuth = useAppStore((s) => s.setShowAuth);
 
   const [bio, setBio] = useState('');
   const [gender, setGender] = useState('unspecified');
@@ -579,6 +575,8 @@ export function CompleteProfilePage() {
       gender,
       profileImage: user?.profileImage || '',
     });
+    // Navigate to home page after completing profile
+    setShowAuth(null);
   };
 
   return (
