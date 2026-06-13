@@ -50,9 +50,9 @@ jobs:
       - name: Build static export for Capacitor
         run: NEXT_EXPORT=1 bun run build
 
-      - name: Initialize Capacitor Android
+      - name: Sync Capacitor Android
         run: |
-          npx cap add android
+          # android directory already exists in repo, just sync
           npx cap sync android
 
       - name: Add Android permissions
@@ -208,20 +208,33 @@ jobs:
       - name: Build static export for Capacitor
         run: NEXT_EXPORT=1 bun run build
 
-      - name: Initialize Capacitor Android (Admin)
+      - name: Modify Capacitor config for Admin
         run: |
-          # Update capacitor config for admin
+          # Update capacitor config for admin build
           sed -i "s/com.qtbmdev.adendot'/com.qtbmdev.adendot.admin'/" capacitor.config.ts
           sed -i 's/Aden Dot/Aden Dot Admin/' capacitor.config.ts
+
+      - name: Remove existing android dir and re-init for Admin
+        run: |
+          rm -rf android
           npx cap add android
           npx cap sync android
 
       - name: Update Android package for Admin
         run: |
           cd android
-          sed -i 's/com.qtbmdev.adendot/com.qtbmdev.adendot.admin/g' app/src/main/AndroidManifest.xml
-          sed -i 's/com.qtbmdev.adendot"/com.qtbmdev.adendot.admin"/g' app/build.gradle
-          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Aden Dot Admin</string><string name="title_activity_main">Aden Dot Admin</string></resources>' > app/src/main/res/values/strings.xml
+          # Update package name in all relevant files
+          find . -name "*.xml" -o -name "*.java" -o -name "*.gradle" | xargs sed -i 's/com\.qtbmdev\.adendot/com.qtbmdev.adendot.admin/g' 2>/dev/null || true
+          # Update kotlin files too
+          find . -name "*.kt" | xargs sed -i 's/com\.qtbmdev\.adendot/com.qtbmdev.adendot.admin/g' 2>/dev/null || true
+          # Move Java package directory
+          mkdir -p app/src/main/java/com/qtbmdev/adendot/admin
+          if [ -f app/src/main/java/com/qtbmdev/adendot/MainActivity.java ]; then
+            mv app/src/main/java/com/qtbmdev/adendot/MainActivity.java app/src/main/java/com/qtbmdev/adendot/admin/
+            rm -rf app/src/main/java/com/qtbmdev/adendot/MainActivity.java
+          fi
+          # Update app name
+          echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Aden Dot Admin</string><string name="title_activity_main">Aden Dot Admin</string><string name="package_name">com.qtbmdev.adendot.admin</string></resources>' > app/src/main/res/values/strings.xml
 
       - name: Add Android permissions (Admin)
         run: |
