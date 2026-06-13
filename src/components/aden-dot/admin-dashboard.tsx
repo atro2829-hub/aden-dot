@@ -334,7 +334,7 @@ function DashboardOverview({ lang }: { lang: string }) {
         <StatCard icon={<GiftIcon size={16} color={GREEN} />} label={isRTL ? 'الهدايا المرسلة' : 'Gifts Sent'} value={formatNumber(stats?.totalGifts || 0, lang)} color={GREEN} delay={0.2} />
         <StatCard icon={<StreamIcon size={16} />} label={isRTL ? 'البثوث النشطة' : 'Active Streams'} value={stats?.activeStreams || 0} color={RED} delay={0.25} />
         <StatCard icon={<WithdrawalIcon size={16} color="#F59E0B" />} label={isRTL ? 'إجمالي المسحوبات' : 'Total Payouts'} value={formatNumber(stats?.totalWithdrawals || 0, lang)} color="#F59E0B" delay={0.3} />
-        <StatCard icon={<LogsIcon size={16} color="#8B5CF6" />} label={isRTL ? 'طلبات سحب معلقة' : 'Pending Payouts'} value={stats?.pendingWithdrawals || 0} color="#8B5CF6" delay={0.35} />
+        <StatCard icon={<LogsIcon size={16} color="var(--primary)" />} label={isRTL ? 'طلبات سحب معلقة' : 'Pending Payouts'} value={stats?.pendingWithdrawals || 0} color="var(--primary)" delay={0.35} />
       </div>
 
       {/* Revenue Chart */}
@@ -502,7 +502,7 @@ function UserManagement({ lang }: { lang: string }) {
   const totalPages = Math.ceil(total / 20);
 
   const roleBadge = (role: string) => {
-    const colors: Record<string, string> = { admin: 'var(--primary)', moderator: '#8B5CF6', supporter: '#3B82F6', user: '#6B7280' };
+    const colors: Record<string, string> = { admin: 'var(--primary)', moderator: 'var(--primary)', supporter: '#3B82F6', user: '#6B7280' };
     const c = colors[role] || '#6B7280';
     return <span className="text-[10px] px-1.5 py-0.5 rounded-full" style={{ background: `${c}15`, color: c }}>{role}</span>;
   };
@@ -668,7 +668,7 @@ function UserManagement({ lang }: { lang: string }) {
                   <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }} onClick={() => setActionDialog({ user: selectedUser, action: selectedUser.is_verified ? 'unverify' : 'verify' })}>
                     {selectedUser.is_verified ? (isRTL ? 'إلغاء التوثيق' : 'Unverify') : (isRTL ? 'توثيق' : 'Verify')}
                   </Button>
-                  <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: '#8B5CF6', color: '#8B5CF6' }} onClick={() => setActionDialog({ user: selectedUser, action: 'give_premium' })}>
+                  <Button size="sm" variant="outline" className="h-8 text-[10px]" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }} onClick={() => setActionDialog({ user: selectedUser, action: 'give_premium' })}>
                     {isRTL ? 'إعطاء مميز' : 'Give Premium'}
                   </Button>
                   <Select onValueChange={(role) => { performAction(selectedUser.uid as string, 'change_role', { role }); setSelectedUser(null); }}>
@@ -755,7 +755,7 @@ function ContentModeration({ lang }: { lang: string }) {
   };
 
   const reasonBadge = (reason: string) => {
-    const colors: Record<string, string> = { spam: '#F59E0B', harassment: RED, hate_speech: '#8B5CF6', nudity: '#EC4899', violence: '#EF4444', other: '#6B7280' };
+    const colors: Record<string, string> = { spam: '#F59E0B', harassment: RED, hate_speech: 'var(--primary)', nudity: '#EC4899', violence: '#EF4444', other: '#6B7280' };
     const c = colors[reason] || '#6B7280';
     return <Badge className="text-[9px] h-4" style={{ background: `${c}15`, color: c, borderColor: 'transparent' }}>{reason}</Badge>;
   };
@@ -799,7 +799,7 @@ function ContentModeration({ lang }: { lang: string }) {
                     <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }}>{isRTL ? 'موافقة' : 'Approve'}</Button>
                     <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }}>{isRTL ? 'إزالة' : 'Remove'}</Button>
                     <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: '#F59E0B', color: '#F59E0B' }}>{isRTL ? 'تحذير' : 'Warn'}</Button>
-                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: '#8B5CF6', color: '#8B5CF6' }}>{isRTL ? 'حظر' : 'Ban'}</Button>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: 'var(--primary)', color: 'var(--primary)' }}>{isRTL ? 'حظر' : 'Ban'}</Button>
                   </div>
                 )}
               </motion.div>
@@ -872,7 +872,7 @@ function SubscriptionManagement({ lang }: { lang: string }) {
       .finally(() => setLoading(false));
   }, []);
 
-  const planColors: Record<string, string> = { free: '#6B7280', premium: 'var(--primary)', vip: '#8B5CF6' };
+  const planColors: Record<string, string> = { free: '#6B7280', premium: 'var(--primary)', vip: 'var(--primary)' };
 
   if (loading) {
     return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
@@ -1112,7 +1112,7 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
     }).catch(() => setLoading(false));
   }, []);
 
-  const categoryColors: Record<string, string> = { basic: '#6B7280', premium: 'var(--primary)', luxury: '#8B5CF6', seasonal: GREEN, exclusive: RED };
+  const categoryColors: Record<string, string> = { basic: '#6B7280', premium: 'var(--primary)', luxury: 'var(--primary)', seasonal: GREEN, exclusive: RED };
   const categories = ['basic', 'premium', 'luxury', 'seasonal', 'exclusive'];
 
   const economySettings = [
@@ -1201,10 +1201,10 @@ function GiftEconomyManagement({ lang }: { lang: string }) {
                 <Pie data={[
                   { name: isRTL ? 'أساسية' : 'Basic', value: 40, fill: '#6B7280' },
                   { name: isRTL ? 'مميزة' : 'Premium', value: 35, fill: 'var(--primary)' },
-                  { name: isRTL ? 'فاخرة' : 'Luxury', value: 15, fill: '#8B5CF6' },
+                  { name: isRTL ? 'فاخرة' : 'Luxury', value: 15, fill: 'var(--primary)' },
                   { name: isRTL ? 'حصرية' : 'Exclusive', value: 10, fill: RED },
                 ]} dataKey="value" innerRadius={35} outerRadius={55} paddingAngle={2}>
-                  {[ '#6B7280', 'var(--primary)', '#8B5CF6', RED ].map((c, i) => <Cell key={i} fill={c} />)}
+                  {[ '#6B7280', 'var(--primary)', 'var(--primary)', RED ].map((c, i) => <Cell key={i} fill={c} />)}
                 </Pie>
                 <Tooltip contentStyle={{ background: 'var(--card)', border: `1px solid var(--primary)30`, borderRadius: 8, fontSize: 12 }} />
               </PieChart>

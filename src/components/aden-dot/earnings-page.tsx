@@ -30,7 +30,7 @@ const plans = [
     name: t('earnings.vip', 'ar'),
     price: 24.99,
     features: ['كل مميزات بريميوم', 'أولوية في الاستكشاف', 'دعم أولوية', 'هدايا VIP', 'شارة تاج ذهبي'],
-    color: '#8B5CF6',
+    color: 'var(--primary)',
   },
 ];
 
@@ -93,9 +93,9 @@ export function EarningsPage() {
           {/* Breakdown */}
           <div className="space-y-2">
             {[
-              { label: t('earnings.fromGifts', lang), amount: 8500, icon: <GiftIcon size={18} color="#D4A853" />, color: '#D4A853' },
+              { label: t('earnings.fromGifts', lang), amount: 8500, icon: <GiftIcon size={18} />, color: 'var(--primary)' },
               { label: t('earnings.fromLive', lang), amount: 2800, icon: <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#EF4444" strokeWidth="1.8"><rect x="2" y="5" width="20" height="14" rx="2" /><path d="M8 10l4 3-4 3V10z" fill="#EF4444" /></svg>, color: '#EF4444' },
-              { label: t('earnings.fromSubscriptions', lang), amount: 1200, icon: <PremiumIcon size={18} />, color: '#8B5CF6' },
+              { label: t('earnings.fromSubscriptions', lang), amount: 1200, icon: <PremiumIcon size={18} />, color: 'var(--primary)' },
             ].map((item, idx) => (
               <motion.div
                 key={idx}

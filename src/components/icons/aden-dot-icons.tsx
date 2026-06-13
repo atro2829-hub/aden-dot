@@ -182,7 +182,7 @@ export function CrownIcon({ size = 24, className }: IconProps) {
 
 // ============ ACHIEVEMENT ICONS ============
 
-export function StarIcon({ size = 24, color = GOLD, className }: IconProps) {
+export function StarIcon({ size = 24, color = 'currentColor', className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className={className}>
       <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -190,7 +190,7 @@ export function StarIcon({ size = 24, color = GOLD, className }: IconProps) {
   );
 }
 
-export function TrophyIcon({ size = 24, color = GOLD, className }: IconProps) {
+export function TrophyIcon({ size = 24, color = 'currentColor', className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
       <path d="M6 9H4a2 2 0 01-2-2V6a2 2 0 012-2h2" />
@@ -202,7 +202,7 @@ export function TrophyIcon({ size = 24, color = GOLD, className }: IconProps) {
   );
 }
 
-export function MedalIcon({ size = 24, color = GOLD, className }: IconProps) {
+export function MedalIcon({ size = 24, color = 'currentColor', className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <circle cx="12" cy="14" r="7" stroke={color} strokeWidth="1.8" />
@@ -230,7 +230,7 @@ export function FireIcon({ size = 24, color = '#EF4444', className }: IconProps)
   );
 }
 
-export function LightningIcon({ size = 24, color = GOLD_LIGHT, className }: IconProps) {
+export function LightningIcon({ size = 24, color = 'currentColor', className }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color} className={className}>
       <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />

@@ -58,7 +58,7 @@ function LiveStreamCard({ stream, onClick, lang }: { stream: LiveStream; onClick
       whileTap={{ scale: 0.98 }}
     >
       {/* Thumbnail - dark for video content */}
-      <div className="relative h-40" style={{ background: `linear-gradient(135deg, #1a1a2e, ${colors[Number(stream.id) % colors.length]}30)` }}>
+      <div className="relative h-40 bg-card border border-border" style={{ background: `linear-gradient(135deg, var(--card), ${colors[Number(stream.id) % colors.length]}20)` }}>
         <div className="absolute inset-0 flex items-center justify-center">
           <LiveIcon size={48} color="#EF4444" />
         </div>

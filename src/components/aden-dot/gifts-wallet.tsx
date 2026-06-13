@@ -129,9 +129,9 @@ export function AchievementsPage() {
 
   const achievements = [
     { icon: <StarIcon size={24} />, name: lang === 'ar' ? 'نجمة أولى' : 'First Star', desc: lang === 'ar' ? 'احصل على 100 إعجاب' : 'Get 100 likes', progress: 75, completed: false },
-    { icon: <TrophyIcon size={24} color="#D4A853" />, name: lang === 'ar' ? 'بطل' : 'Champion', desc: lang === 'ar' ? 'فز بـ 10 مسابقات' : 'Win 10 contests', progress: 100, completed: true },
+    { icon: <TrophyIcon size={24} />, name: lang === 'ar' ? 'بطل' : 'Champion', desc: lang === 'ar' ? 'فز بـ 10 مسابقات' : 'Win 10 contests', progress: 100, completed: true },
     { icon: <FireIcon size={24} />, name: lang === 'ar' ? 'متواصل' : 'Streak Master', desc: lang === 'ar' ? 'سجل دخول 7 أيام متتالية' : 'Login 7 days in a row', progress: 57, completed: false },
-    { icon: <ShieldIcon size={24} color="#D4A853" />, name: lang === 'ar' ? 'حامي' : 'Protector', desc: lang === 'ar' ? 'أبلغ عن 5 محتويات' : 'Report 5 contents', progress: 40, completed: false },
+    { icon: <ShieldIcon size={24} />, name: lang === 'ar' ? 'حامي' : 'Protector', desc: lang === 'ar' ? 'أبلغ عن 5 محتويات' : 'Report 5 contents', progress: 40, completed: false },
     { icon: <LightningIcon size={24} />, name: lang === 'ar' ? 'سريع' : 'Speedster', desc: lang === 'ar' ? 'كن أول من يعلق 10 مرات' : 'Be first to comment 10 times', progress: 100, completed: true },
     { icon: <HeartIcon size={24} />, name: lang === 'ar' ? 'محبوب' : 'Beloved', desc: lang === 'ar' ? 'احصل على 1000 متابع' : 'Get 1000 followers', progress: 30, completed: false },
   ];
@@ -153,7 +153,7 @@ export function AchievementsPage() {
 
             {ach.completed ? (
               <div className="flex items-center justify-center gap-1 mt-2">
-                <svg width={12} height={12} viewBox="0 0 24 24" fill="#D4A853"><path d="M20 6L9 17l-5-5" /></svg>
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
                 <span className="text-[10px] font-medium text-primary">{t('achievements.completed', lang)}</span>
               </div>
             ) : (
@@ -214,7 +214,7 @@ export function DailyRewardCard() {
             <p className="text-[9px] text-muted-foreground">{t('achievements.dayN', lang)} {d.day}</p>
             <div className="flex justify-center my-1">
               {d.claimed ? (
-                <svg width={14} height={14} viewBox="0 0 24 24" fill="#D4A853"><path d="M20 6L9 17l-5-5" /></svg>
+                <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor"><path d="M20 6L9 17l-5-5" /></svg>
               ) : (
                 <CoinIcon size={14} />
               )}
