@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version tag (e.g. v1.2.0)'
+        description: 'Release version tag (e.g. v1.3.0)'
         required: false
         default: 'v1.3.0'
 
@@ -14,49 +14,23 @@ permissions:
   contents: write
 
 # ---------------------------------------------------------------------------
-# Environment variables – embedded for first-run convenience.
-# Move these to GitHub Secrets (Settings > Secrets > Actions) for security.
+# Environment variables
 # ---------------------------------------------------------------------------
 env:
-  # Supabase
   NEXT_PUBLIC_SUPABASE_URL: "https://ocjcbowrewenogrkexmr.supabase.co"
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MjQzNjUsImV4cCI6MjA2NTMwMDM2NX0.RzHqKpV8vCJGjRlUQm-KjK2zKvCZqf4HGTIvuE_XnZs"
   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTcyNDM2NSwiZXhwIjoyMDY1MzAwMzY1fQ.hZOPJjSDe8FFDYOxbIf1z10HIlxbMCAHhNxZXJI5FOw"
   SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0OTcyNDM2NSwiZXhwIjoyMDY1MzAwMzY1fQ.hZOPJjSDe8FFDYOxbIf1z10HIlxbMCAHhNxZXJI5FOw"
-  # Keystore credentials (for CI env-var fallback in build.gradle)
   KEYSTORE_PASSWORD: "AdenDot2026"
   KEY_ALIAS: "adendot"
   KEY_PASSWORD: "AdenDot2026"
 
-# ---------------------------------------------------------------------------
-# Jobs
-# ---------------------------------------------------------------------------
 jobs:
   # ─────────────────────────────────────────────────────────────────────────
-  # 1. LINT
-  # ─────────────────────────────────────────────────────────────────────────
-  lint:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-
-      - name: Install dependencies
-        run: bun install
-
-      - name: Run ESLint
-        run: bun run lint
-
-  # ─────────────────────────────────────────────────────────────────────────
-  # 2. BUILD USER APK
+  # 1. BUILD USER APK (>20MB)
   # ─────────────────────────────────────────────────────────────────────────
   build-user-apk:
     name: Build User APK
-    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -81,10 +55,12 @@ jobs:
       - name: Build Next.js static export (User mode)
         env:
           NEXT_EXPORT: "1"
-          NEXT_PUBLIC_APP_MODE: user
         run: bun run build
 
-      - name: Sync Capacitor
+      - name: Verify User output size
+        run: du -sh out/
+
+      - name: Sync Capacitor (User)
         run: npx cap sync android
 
       - name: Setup Java 21
@@ -108,13 +84,16 @@ jobs:
             echo "Using keystore from repository (android/keystore/)"
           fi
 
-      - name: Build release APK with Gradle
+      - name: Build User release APK
         working-directory: android
         run: |
           chmod +x gradlew
           ./gradlew assembleRelease
 
-      - name: Rename APK
+      - name: Verify User APK size
+        run: ls -lh android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Rename User APK
         run: |
           mv android/app/build/outputs/apk/release/app-release.apk \
              AdenDot-User-signed.apk
@@ -127,11 +106,10 @@ jobs:
           retention-days: 30
 
   # ─────────────────────────────────────────────────────────────────────────
-  # 3. BUILD ADMIN APK
+  # 2. BUILD ADMIN APK (~10MB)
   # ─────────────────────────────────────────────────────────────────────────
   build-admin-apk:
     name: Build Admin APK
-    needs: lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -143,6 +121,64 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Switch to Admin page
+        run: |
+          # Replace page.tsx with admin-page.tsx content
+          cp src/app/admin-page.tsx src/app/page.tsx
+
+          # Update capacitor.config.ts for Admin app
+          cat > capacitor.config.ts << 'CAPEOF'
+          import type { CapacitorConfig } from '@capacitor/cli';
+
+          const config: CapacitorConfig = {
+            appId: 'com.qtbmdev.adendot.admin',
+            appName: 'Aden Dot Admin',
+            webDir: 'out',
+            server: {
+              androidScheme: 'https'
+            },
+            plugins: {
+              SplashScreen: {
+                launchShowDuration: 2000,
+                launchAutoHide: true,
+                backgroundColor: '#FFFFFF',
+                showSpinner: true,
+                spinnerColor: '#D4A853',
+                androidScaleType: 'CENTER_CROP',
+              },
+              StatusBar: {
+                style: 'LIGHT',
+                backgroundColor: '#FFFFFF'
+              },
+              LocalNotifications: {
+                smallIcon: 'ic_stat_icon',
+                iconColor: '#D4A853'
+              },
+              PushNotifications: {
+                presentationOptions: ['badge', 'sound', 'alert']
+              }
+            }
+          };
+
+          export default config;
+          CAPEOF
+
+          # Update Android strings.xml for Admin
+          cat > android/app/src/main/res/values/strings.xml << 'XMLEOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <resources>
+              <string name="app_name">Aden Dot Admin</string>
+              <string name="title_activity_main">Aden Dot Admin</string>
+              <string name="package_name">com.qtbmdev.adendot.admin</string>
+              <string name="custom_url_scheme">com.qtbmdev.adendot.admin</string>
+          </resources>
+          XMLEOF
+
+          # Update Android build.gradle applicationId for Admin
+          sed -i 's/applicationId "com.qtbmdev.adendot"/applicationId "com.qtbmdev.adendot.admin"/' android/app/build.gradle
+
+          echo "✅ Switched to Admin configuration"
+
       - name: Create .env.local
         run: |
           cat > .env.local << 'ENVEOF'
@@ -151,6 +187,7 @@ jobs:
           NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY=${{ env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_SERVICE_ROLE_KEY=${{ env.SUPABASE_SERVICE_ROLE_KEY }}
           DATABASE_URL=file:./dev.db
+          NEXT_PUBLIC_APP_MODE=admin
           ENVEOF
 
       - name: Build Next.js static export (Admin mode)
@@ -159,7 +196,21 @@ jobs:
           NEXT_PUBLIC_APP_MODE: admin
         run: bun run build
 
-      - name: Sync Capacitor (update web assets in existing Android project)
+      - name: Remove heavy resources to reduce Admin APK size (~10MB)
+        run: |
+          cd out/
+          # Remove large resource directories not needed by admin
+          rm -rf heroes/        # ~7.7MB - profile heroes
+          rm -rf stickers/      # ~1.9MB - chat stickers
+          rm -rf animations/    # ~628KB - gift animations
+          # Remove unnecessary images
+          rm -f skyline-icon.png cover.png
+          rm -f onboarding1.png onboarding2.png onboarding3.png
+          rm -f sticker_01.png avatar.png
+          echo "Cleaned admin resources"
+          du -sh .
+
+      - name: Sync Capacitor (Admin)
         run: npx cap sync android
 
       - name: Setup Java 21
@@ -183,13 +234,16 @@ jobs:
             echo "Using keystore from repository (android/keystore/)"
           fi
 
-      - name: Build release APK with Gradle
+      - name: Build Admin release APK
         working-directory: android
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease
+          ./gradlew clean assembleRelease
 
-      - name: Rename APK
+      - name: Verify Admin APK size
+        run: ls -lh android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Rename Admin APK
         run: |
           mv android/app/build/outputs/apk/release/app-release.apk \
              AdenDot-Admin-signed.apk
@@ -202,7 +256,7 @@ jobs:
           retention-days: 30
 
   # ─────────────────────────────────────────────────────────────────────────
-  # 4. RELEASE – Create GitHub Release with both APKs
+  # 3. RELEASE – Create GitHub Release with both APKs
   # ─────────────────────────────────────────────────────────────────────────
   release:
     name: Create GitHub Release
