@@ -9,13 +9,13 @@ import {
   HomeIcon, ExploreIcon, CreateIcon, LiveIcon, ChatIcon, ProfileIcon,
   AppLogoIcon, BellIcon, CoinIcon, DiamondCurrencyIcon, VerifiedIcon, SettingsIcon,
 } from '@/components/icons/aden-dot-icons';
-import { LoginPage, RegisterPage, CompleteProfilePage, VerifyEmailPage, ForgotPasswordPage } from './auth-pages';
+import { LoginPage, RegisterPage, CompleteProfilePage, ForgotPasswordPage } from './auth-pages';
 import { HomeFeed } from './home-feed';
 import { ExplorePage } from './explore-page';
 import { ProfilePage } from './profile-page';
 import { ChatPage } from './chat-page';
 import { LiveStreamsPage } from './live-stream';
-import { WalletPage, AchievementsPage, DailyRewardCard } from './gifts-wallet';
+import { WalletPage, AchievementsPage } from './gifts-wallet';
 import { SettingsPage } from './settings-page';
 import { EarningsPage } from './earnings-page';
 import { AdminDashboard } from './admin-dashboard';
@@ -240,7 +240,6 @@ function ProfileSubMenu() {
 // ============ Main App ============
 export default function AdenDotApp() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const isEmailVerified = useAuthStore((s) => s.isEmailVerified);
   const user = useAuthStore((s) => s.user);
   const isLoading = useAuthStore((s) => s.isLoading);
   const showAuth = useAppStore((s) => s.showAuth);
@@ -341,7 +340,6 @@ export default function AdenDotApp() {
   if (!isAuthenticated || showAuth) {
     if (showAuth === 'register') return <RegisterPage />;
     if (showAuth === 'complete-profile') return <CompleteProfilePage />;
-    if (showAuth === 'verify-email') return <VerifyEmailPage />;
     if (showAuth === 'forgot-password') return <ForgotPasswordPage />;
     return <LoginPage />;
   }
@@ -349,11 +347,6 @@ export default function AdenDotApp() {
   // Profile incomplete
   if (isAuthenticated && !user?.username) {
     return <CompleteProfilePage />;
-  }
-
-  // Email not verified
-  if (!isEmailVerified) {
-    return <VerifyEmailPage />;
   }
 
   // Main app
@@ -367,7 +360,6 @@ export default function AdenDotApp() {
         <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
-              <DailyRewardCard />
               <HomeFeed />
             </motion.div>
           )}

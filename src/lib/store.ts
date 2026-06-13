@@ -92,7 +92,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile,
             isAuthenticated: true,
-            isEmailVerified: data.user.email_confirmed_at != null,
+            isEmailVerified: true, // Always true - no email verification required
           });
           return true;
         }
@@ -119,7 +119,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           set({
             user: profile,
             isAuthenticated: true,
-            isEmailVerified: false,
+            isEmailVerified: true, // Always true - no email verification required
           });
           return true;
         }
@@ -153,7 +153,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           joinDate: new Date().toISOString().split('T')[0],
           lastSeen: Date.now(),
         };
-        set({ user: tempUser, isAuthenticated: true, isEmailVerified: false });
+        set({ user: tempUser, isAuthenticated: true, isEmailVerified: true });
         return true;
       }
       set({ error: 'Registration failed' });

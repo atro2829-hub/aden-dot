@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { GiftShopGrid, GiftSendAnimation, useGiftSend } from './animated-gifts';
 
 // ============ Wallet Page ============
 export function WalletPage() {
@@ -83,6 +84,11 @@ export function WalletPage() {
             <span className="text-[10px] text-muted-foreground">{action.label}</span>
           </motion.button>
         ))}
+      </div>
+
+      {/* Animated Gift Shop */}
+      <div>
+        <GiftShopGrid />
       </div>
 
       {/* Transactions */}
