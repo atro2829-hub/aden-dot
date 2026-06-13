@@ -11,11 +11,19 @@ export interface SupabaseConfig {
 
 const STORAGE_KEY = 'adendot_supabase_config';
 
-/** Get hardcoded config from environment variables */
+/** Get hardcoded config from environment variables or embedded defaults */
 function getEnvConfig(): SupabaseConfig | null {
+  // Try environment variables first
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   if (url && anonKey) return { url, anonKey };
+
+  // Fallback: embedded default config for Capacitor/Android builds
+  // This ensures the app always has valid Supabase credentials
+  const DEFAULT_URL = 'https://ocjcbowrewenogrkexmr.supabase.co';
+  const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9jamNib3dyZXdlbm9ncmtleG1yIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk3MjQzNjUsImV4cCI6MjA2NTMwMDM2NX0.RzHqKpV8vCJGjRlUQm-KjK2zKvCZqf4HGTIvuE_XnZs';
+  if (DEFAULT_URL && DEFAULT_ANON_KEY) return { url: DEFAULT_URL, anonKey: DEFAULT_ANON_KEY };
+
   return null;
 }
 
