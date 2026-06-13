@@ -105,7 +105,7 @@ jobs:
             mkdir -p android/app/keystore
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore/adendot-release.keystore
           else
-            echo "Using keystore from repository (android/app/keystore/)"
+            echo "Using keystore from repository (android/keystore/)"
           fi
 
       - name: Build release APK with Gradle
@@ -143,22 +143,6 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      # ── Backup critical Android files before removing android/ ──
-      - name: Backup keystore and Android config
-        run: |
-          mkdir -p /tmp/aden-backup/keystore /tmp/aden-backup/res-xml
-          # Keystore files
-          cp android/app/keystore/adendot-release.keystore /tmp/aden-backup/keystore/ 2>/dev/null || true
-          cp android/app/keystore/keystore.properties       /tmp/aden-backup/keystore/ 2>/dev/null || true
-          cp android/keystore/adendot-release.keystore      /tmp/aden-backup/keystore/adendot-release-root.keystore 2>/dev/null || true
-          cp android/keystore/keystore.properties           /tmp/aden-backup/keystore/keystore-root.properties 2>/dev/null || true
-          # Build config
-          cp android/app/build.gradle                        /tmp/aden-backup/build.gradle 2>/dev/null || true
-          cp android/app/src/main/AndroidManifest.xml        /tmp/aden-backup/AndroidManifest.xml 2>/dev/null || true
-          # Custom XML resources
-          cp -r android/app/src/main/res/xml/*               /tmp/aden-backup/res-xml/ 2>/dev/null || true
-          echo "Backup complete."
-
       - name: Create .env.local
         run: |
           cat > .env.local << 'ENVEOF'
@@ -175,33 +159,7 @@ jobs:
           NEXT_PUBLIC_APP_MODE: admin
         run: bun run build
 
-      # ── Remove the existing android/ and let Capacitor recreate it ──
-      - name: Remove and re-create Android project
-        run: |
-          rm -rf android
-          npx cap add android
-
-      # ── Restore backed-up files into the fresh Android project ──
-      - name: Restore keystore and Android config
-        run: |
-          # Restore keystore into app module
-          mkdir -p android/app/keystore
-          cp /tmp/aden-backup/keystore/adendot-release.keystore android/app/keystore/
-          cp /tmp/aden-backup/keystore/keystore.properties       android/app/keystore/
-          # Restore root-level keystore (referenced by root build.gradle)
-          mkdir -p android/keystore
-          cp /tmp/aden-backup/keystore/adendot-release-root.keystore android/keystore/adendot-release.keystore 2>/dev/null || true
-          cp /tmp/aden-backup/keystore/keystore-root.properties     android/keystore/keystore.properties 2>/dev/null || true
-          # Restore custom build.gradle (includes signing config)
-          cp /tmp/aden-backup/build.gradle android/app/build.gradle
-          # Restore AndroidManifest.xml
-          cp /tmp/aden-backup/AndroidManifest.xml android/app/src/main/AndroidManifest.xml 2>/dev/null || true
-          # Restore custom XML resources
-          mkdir -p android/app/src/main/res/xml
-          cp -r /tmp/aden-backup/res-xml/* android/app/src/main/res/xml/ 2>/dev/null || true
-          echo "Restore complete."
-
-      - name: Sync Capacitor (update web assets in restored project)
+      - name: Sync Capacitor (update web assets in existing Android project)
         run: npx cap sync android
 
       - name: Setup Java 17
@@ -219,9 +177,10 @@ jobs:
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "Decoding keystore from KEYSTORE_BASE64 secret..."
+            mkdir -p android/app/keystore
             echo "$KEYSTORE_BASE64" | base64 -d > android/app/keystore/adendot-release.keystore
           else
-            echo "Using keystore from backup (android/app/keystore/)"
+            echo "Using keystore from repository (android/keystore/)"
           fi
 
       - name: Build release APK with Gradle
