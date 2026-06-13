@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - run: bun install --frozen-lockfile
+      - run: bun install
       - run: bun run lint
 
   # ========== Build User APK ==========
@@ -39,7 +39,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - run: bun install --frozen-lockfile
+      - run: bun install
 
       - name: Create env file
         run: |
@@ -47,10 +47,10 @@ jobs:
           echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env.local
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
 
-      - name: Build static export
-        run: bun run build
+      - name: Build static export for Capacitor
+        run: NEXT_EXPORT=1 bun run build
 
-      - name: Setup Capacitor
+      - name: Initialize Capacitor Android
         run: |
           npx cap add android
           npx cap sync android
@@ -58,7 +58,6 @@ jobs:
       - name: Add Android permissions
         run: |
           cd android
-          # Update AndroidManifest.xml with all permissions
           cat > app/src/main/AndroidManifest.xml << 'MANIFEST'
           <?xml version="1.0" encoding="utf-8"?>
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -125,7 +124,6 @@ jobs:
             -keypass AdenDot2026 \
             -dname "CN=QTBM DEV, OU=Development, O=QTBM DEV, L=Aden, ST=Aden, C=YE"
 
-          # Create keystore properties
           echo "storeFile=keystore/adendot-release.keystore" > app/keystore/keystore.properties
           echo "storePassword=AdenDot2026" >> app/keystore/keystore.properties
           echo "keyAlias=adendot" >> app/keystore/keystore.properties
@@ -134,7 +132,6 @@ jobs:
       - name: Update build.gradle for signing
         run: |
           cd android
-          # Add signing config to build.gradle
           sed -i '/buildTypes {/i\
           signingConfigs {\
               release {\
@@ -145,13 +142,12 @@ jobs:
               }\
           }' app/build.gradle
 
-          # Make release use signing config
           sed -i 's/minifyEnabled false/minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.release/' app/build.gradle
 
       - name: Generate app icons
         run: |
           cd android
-          # Generate icons from the project icon
+          pip3 install Pillow 2>/dev/null || true
           python3 -c "
           from PIL import Image
           import os
@@ -169,6 +165,11 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleRelease --no-daemon
+
+      - name: Print SHA1 and SHA256
+        run: |
+          cd android
+          keytool -list -v -keystore app/keystore/adendot-release.keystore -alias adendot -storepass AdenDot2026 -keypass AdenDot2026 | grep -E "SHA1:|SHA256:"
 
       - name: Upload User APK
         uses: actions/upload-artifact@v4
@@ -195,7 +196,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - run: bun install --frozen-lockfile
+      - run: bun install
 
       - name: Create env file (admin mode)
         run: |
@@ -204,10 +205,10 @@ jobs:
           echo "SUPABASE_SERVICE_ROLE_KEY=${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" >> .env.local
           echo "NEXT_PUBLIC_APP_MODE=admin" >> .env.local
 
-      - name: Build static export
-        run: bun run build
+      - name: Build static export for Capacitor
+        run: NEXT_EXPORT=1 bun run build
 
-      - name: Setup Capacitor (Admin)
+      - name: Initialize Capacitor Android (Admin)
         run: |
           # Update capacitor config for admin
           sed -i "s/com.qtbmdev.adendot'/com.qtbmdev.adendot.admin'/" capacitor.config.ts
@@ -218,13 +219,66 @@ jobs:
       - name: Update Android package for Admin
         run: |
           cd android
-          # Update package name
           sed -i 's/com.qtbmdev.adendot/com.qtbmdev.adendot.admin/g' app/src/main/AndroidManifest.xml
           sed -i 's/com.qtbmdev.adendot"/com.qtbmdev.adendot.admin"/g' app/build.gradle
-          # Update app name
           echo '<?xml version="1.0" encoding="utf-8"?><resources><string name="app_name">Aden Dot Admin</string><string name="title_activity_main">Aden Dot Admin</string></resources>' > app/src/main/res/values/strings.xml
 
-      - name: Generate signing key
+      - name: Add Android permissions (Admin)
+        run: |
+          cd android
+          cat > app/src/main/AndroidManifest.xml << 'MANIFEST'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.CAMERA" />
+              <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+              <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+              <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+              <uses-permission android:name="android.permission.VIBRATE" />
+              <uses-permission android:name="android.permission.RECORD_AUDIO" />
+              <uses-feature android:name="android.hardware.camera" android:required="false" />
+              <uses-feature android:name="android.hardware.fingerprint" android:required="false" />
+              <application
+                  android:allowBackup="true"
+                  android:icon="@mipmap/ic_launcher"
+                  android:label="Aden Dot Admin"
+                  android:roundIcon="@mipmap/ic_launcher_round"
+                  android:supportsRtl="true"
+                  android:theme="@style/AppTheme.NoActionBar"
+                  android:usesCleartextTraffic="true"
+                  android:networkSecurityConfig="@xml/network_security_config">
+                  <activity
+                      android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+                      android:name=".MainActivity"
+                      android:label="Aden Dot Admin"
+                      android:theme="@style/AppTheme.NoActionBarLaunch"
+                      android:launchMode="singleTask"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+                  <provider
+                      android:name="androidx.core.content.FileProvider"
+                      android:authorities="${applicationId}.fileprovider"
+                      android:exported="false"
+                      android:grantUriPermissions="true">
+                      <meta-data
+                          android:name="android.support.FILE_PROVIDER_PATHS"
+                          android:resource="@xml/file_paths" />
+                  </provider>
+              </application>
+          </manifest>
+          MANIFEST
+
+      - name: Generate signing key (Admin)
         run: |
           cd android
           mkdir -p app/keystore
@@ -242,7 +296,7 @@ jobs:
           echo "keyAlias=adendot" >> app/keystore/keystore.properties
           echo "keyPassword=AdenDot2026" >> app/keystore/keystore.properties
 
-      - name: Update build.gradle for signing
+      - name: Update build.gradle for signing (Admin)
         run: |
           cd android
           sed -i '/buildTypes {/i\
@@ -256,9 +310,10 @@ jobs:
           }' app/build.gradle
           sed -i 's/minifyEnabled false/minifyEnabled true\n            shrinkResources true\n            signingConfig signingConfigs.release/' app/build.gradle
 
-      - name: Generate app icons
+      - name: Generate app icons (Admin)
         run: |
           cd android
+          pip3 install Pillow 2>/dev/null || true
           python3 -c "
           from PIL import Image
           import os
@@ -271,7 +326,7 @@ jobs:
               icon.resize((size, size), Image.LANCZOS).save(f'{d}/ic_launcher_round.png')
           "
 
-      - name: Build Release APK
+      - name: Build Release APK (Admin)
         run: |
           cd android
           chmod +x gradlew
@@ -302,8 +357,10 @@ jobs:
 
       - name: Rename APKs
         run: |
-          find ./artifacts -name "app-release.apk" -exec sh -c 'mv "$1" "$(dirname "$1")/$(basename $(dirname $(dirname "$1"))).apk"' _ {} \;
-          ls -la ./artifacts/
+          mkdir -p release
+          cp ./artifacts/AdenDot-User-APK/app-release.apk release/AdenDot-User.apk || true
+          cp ./artifacts/AdenDot-Admin-APK/app-release.apk release/AdenDot-Admin.apk || true
+          ls -la release/
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -314,15 +371,15 @@ jobs:
             # Aden Dot - عدن دوت
 
             ## APK Downloads
-            - 📱 **AdenDot-User-APK** - تطبيق المستخدم
-            - 🛡️ **AdenDot-Admin-APK** - تطبيق الأدمن
+            - 📱 **AdenDot-User.apk** - تطبيق المستخدم
+            - 🛡️ **AdenDot-Admin.apk** - تطبيق الأدمن
 
             ## Signing Info
-            - **SHA1**: B8:EE:E8:A9:FA:61:CB:08:5F:16:BE:E8:04:E4:51:DD:9A:CC:B8:AD
-            - **SHA256**: 67:96:A4:50:4E:14:1F:4B:BC:82:6D:7B:D0:66:AE:D3:C9:A1:AD:E5:00:D6:B1:65:87:C4:30:BC:EB:10:A4:73
-            - **Package**: com.qtbmdev.adendot
+            - **Package (User)**: com.qtbmdev.adendot
+            - **Package (Admin)**: com.qtbmdev.adendot.admin
+            - **Keystore**: adendot-release.keystore (RSA 2048)
 
             ---
             Built by QTBM DEV
           files: |
-            ./artifacts/**/*.apk
+            release/*.apk
