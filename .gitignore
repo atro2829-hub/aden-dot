@@ -1,0 +1,73 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# testing
+coverage/
+
+# next.js
+.next/
+out/
+
+# production
+build/
+dist/
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+bun-debug.log*
+
+# local env files
+.env*.local
+.env
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma
+prisma/*.db
+prisma/*.db-journal
+db/*.db
+db/*.db-journal
+
+# IDE
+.vscode/
+.idea/
+
+# tool results
+tool-results/
+
+# scripts output
+*.log
+
+# zscripts
+.zscripts/
+
+# agent context
+agent-ctx/
+
+# upload temp
+upload/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Sensitive files with tokens
+execute-schema.py
+missing-tables.sql
+execute-supabase-config.py
+supabase-batch*.sql
+tool-results/
+worklog.md
