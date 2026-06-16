@@ -194,11 +194,13 @@ public class MainActivity extends BridgeActivity {
             message.append("\n\n").append(getString(R.string.permission_settings_instruction));
         }
 
+        final boolean finalGoToSettings = shouldGoToSettings;
+
         new AlertDialog.Builder(this)
             .setTitle(R.string.permission_rationale_title)
             .setMessage(message.toString())
-            .setPositiveButton(shouldGoToSettings ? R.string.open_settings : R.string.ok, (dialog, which) -> {
-                if (shouldGoToSettings) {
+            .setPositiveButton(finalGoToSettings ? R.string.open_settings : R.string.ok, (dialog, which) -> {
+                if (finalGoToSettings) {
                     openAppSettings();
                 }
             })
