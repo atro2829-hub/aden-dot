@@ -373,14 +373,14 @@ public class MainActivity extends BridgeActivity {
     // ============ Network & App Lifecycle ============
 
     @Override
-    protected void onResume() {
+    public void onResume() {
         super.onResume();
         // App came to foreground - notify the web layer
         notifyAppForeground();
     }
 
     @Override
-    protected void onPause() {
+    public void onPause() {
         super.onPause();
         // App went to background
         notifyAppBackground();
