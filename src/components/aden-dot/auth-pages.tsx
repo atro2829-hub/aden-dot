@@ -59,6 +59,10 @@ export function LoginPage() {
       animate="animate"
       exit="exit"
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 2rem)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 2rem)',
+      }}
     >
       {/* Background decorative circles */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -80,29 +84,41 @@ export function LoginPage() {
         {/* Logo Section */}
         <motion.div className="text-center mb-8" variants={fadeIn} initial="initial" animate="animate" transition={{ delay: 0.1 }}>
           <motion.div
-            className="mx-auto w-12 h-12 mb-4 rounded-xl flex items-center justify-center bg-primary"
+            className="mx-auto w-14 h-14 mb-4 rounded-2xl flex items-center justify-center bg-primary shadow-lg shadow-primary/25"
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.1 }}
           >
-            <img src="/icon.png" alt="Aden Dot" className="w-8 h-8 rounded-lg" />
+            <img src="/icon.png" alt="Aden Dot" className="w-10 h-10 rounded-xl" />
           </motion.div>
           <motion.h1
-            className="text-2xl font-bold text-foreground mb-1"
+            className="text-2xl font-bold text-foreground mb-1 tracking-tight"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
             {t('app.name', lang)}
           </motion.h1>
-          <motion.p
-            className="text-sm text-primary"
+          <motion.div
+            className="flex items-center justify-center gap-2 mb-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.25 }}
           >
-            {t('auth.welcomeBack', lang)}
-          </motion.p>
+            <img
+              src="/flags/south-yemen.png"
+              alt="South Yemen"
+              className="w-5 h-3.5 rounded-sm shadow-sm border border-border object-cover"
+            />
+            <motion.p
+              className="text-xs text-primary font-medium"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              {t('auth.welcomeBack', lang)}
+            </motion.p>
+          </motion.div>
         </motion.div>
 
         {/* Form */}

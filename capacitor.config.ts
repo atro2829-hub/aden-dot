@@ -8,16 +8,20 @@ const config: CapacitorConfig = {
     androidScheme: 'https'
   },
   plugins: {
+    // Splash screen fully disabled - no big launch splash, app loads directly
     SplashScreen: {
       launchShowDuration: 0,
       launchAutoHide: true,
       backgroundColor: '#FFFFFF',
       showSpinner: false,
       androidScaleType: 'CENTER_CROP',
+      splashFullScreen: false,
+      splashImmersive: false,
     },
     StatusBar: {
       style: 'LIGHT',
-      backgroundColor: '#FFFFFF'
+      backgroundColor: '#FFFFFF',
+      overlaysWebView: true,
     },
     LocalNotifications: {
       smallIcon: 'ic_stat_icon',

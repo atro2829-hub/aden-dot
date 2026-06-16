@@ -323,19 +323,30 @@ function TopBar() {
   const isWideLayout = activeTab === 'admin';
 
   return (
-    <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-xl border-b border-border">
+    <header
+      className="sticky top-0 z-40 bg-background/95 backdrop-blur-xl border-b border-border safe-top"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+    >
       <div className={`mx-auto flex items-center justify-between px-4 py-3 ${isWideLayout ? 'max-w-6xl' : 'max-w-lg'}`}>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {activeTab === 'home' && (
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary"
+              className="w-9 h-9 rounded-xl flex items-center justify-center bg-primary shadow-sm"
             >
               <img src="/icon.png" alt="Aden Dot" className="w-6 h-6 rounded-md" />
             </motion.div>
           )}
-          <h1 className="text-lg font-bold text-foreground">{getTitle()}</h1>
+          <h1 className="text-lg font-bold text-foreground tracking-tight">{getTitle()}</h1>
+          {/* South Yemen flag badge - shown on home tab */}
+          {activeTab === 'home' && (
+            <img
+              src="/flags/south-yemen.png"
+              alt="South Yemen"
+              className="w-6 h-4 rounded-sm shadow-sm border border-border object-cover"
+            />
+          )}
         </div>
         <div className="flex items-center gap-3">
           {user && (
@@ -367,12 +378,16 @@ function TopBar() {
   );
 }
 
-// ============ Loading Screen ============
+// ============ Loading Screen (minimal - no big splash) ============
 function LoadingScreen() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-background"
+      style={{ paddingTop: 'env(safe-area-inset-top, 0px)', paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+    >
       <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
+        <img src="/icon.png" alt="Aden Dot" className="w-12 h-12 rounded-xl opacity-90" />
+        <div className="w-6 h-6 rounded-full border-2 border-primary/30 border-t-primary animate-spin" />
       </div>
     </div>
   );
@@ -385,10 +400,30 @@ function ProfileSubMenu() {
   const lang = useAppStore((s) => s.language);
 
   const menuItems = [
-    { id: 'wallet' as const, emoji: '💰', label: t('nav.wallet', lang), desc: `🪙 ${user?.coinsBalance || 0} | 💎 ${user?.diamondsBalance || 0}` },
-    { id: 'achievements' as const, emoji: '🏆', label: t('nav.achievements', lang), desc: `${t('profile.level', lang)} ${user?.level || 1}` },
-    { id: 'earnings' as const, emoji: '📊', label: t('nav.earnings', lang), desc: lang === 'ar' ? 'أرباحك وإيراداتك' : 'Your revenue & earnings' },
-    { id: 'settings' as const, emoji: '⚙️', label: t('nav.settings', lang), desc: lang === 'ar' ? 'إعدادات التطبيق' : 'App settings' },
+    {
+      id: 'wallet' as const,
+      icon: <CoinIcon size={20} color="var(--primary)" />,
+      label: t('nav.wallet', lang),
+      desc: `${user?.coinsBalance || 0} ${lang === 'ar' ? 'عملة' : 'coins'} · ${user?.diamondsBalance || 0} ${lang === 'ar' ? 'ماس' : 'diamonds'}`,
+    },
+    {
+      id: 'achievements' as const,
+      icon: <TrophyIcon size={20} color="var(--primary)" />,
+      label: t('nav.achievements', lang),
+      desc: `${t('profile.level', lang)} ${user?.level || 1}`,
+    },
+    {
+      id: 'earnings' as const,
+      icon: <LightningIcon size={20} color="var(--primary)" />,
+      label: t('nav.earnings', lang),
+      desc: lang === 'ar' ? 'أرباحك وإيراداتك' : 'Your revenue & earnings',
+    },
+    {
+      id: 'settings' as const,
+      icon: <SettingsIcon size={20} color="var(--primary)" />,
+      label: t('nav.settings', lang),
+      desc: lang === 'ar' ? 'إعدادات التطبيق' : 'App settings',
+    },
   ];
 
   return (
@@ -397,14 +432,14 @@ function ProfileSubMenu() {
         <motion.button
           key={item.id}
           onClick={() => setActiveTab(item.id)}
-          className="w-full p-3.5 rounded-xl flex items-center gap-3 transition-all bg-card border border-border hover:bg-primary/5"
+          className="w-full p-3.5 rounded-xl flex items-center gap-3 transition-all bg-card border border-border hover:bg-primary/5 hover:border-primary/20"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: idx * 0.05 }}
           whileTap={{ scale: 0.98 }}
         >
-          <div className="w-11 h-11 rounded-full flex items-center justify-center text-xl bg-primary/10">
-            {item.emoji}
+          <div className="w-11 h-11 rounded-full flex items-center justify-center bg-primary/10 border border-primary/20">
+            {item.icon}
           </div>
           <div className="flex-1 text-left" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
             <p className="font-medium text-sm text-foreground">{item.label}</p>
@@ -573,11 +608,15 @@ export default function AdenDotApp() {
   // Main app
   return (
     <div
-      className="min-h-screen bg-background"
+      className="min-h-screen bg-background flex flex-col"
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
+      style={{
+        paddingLeft: 'env(safe-area-inset-left, 0px)',
+        paddingRight: 'env(safe-area-inset-right, 0px)',
+      }}
     >
       {activeTab !== 'live' && <TopBar />}
-      <main className={activeTab === 'live' ? '' : `${isWideLayout ? 'max-w-6xl' : 'max-w-lg'} mx-auto px-4 pt-4 pb-24`}>
+      <main className={`flex-1 ${activeTab === 'live' ? '' : `${isWideLayout ? 'max-w-6xl' : 'max-w-lg'} mx-auto px-4 pt-4 pb-24 w-full`}`}>
         <AnimatePresence mode="wait">
           {activeTab === 'home' && (
             <motion.div key="home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
