@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore, useAppStore } from '@/lib/store';
 import { t, regions } from '@/lib/i18n';
-import { AppLogoIcon, ArrowBackIcon, EyeIcon } from '@/components/icons/aden-dot-icons';
+import { AppLogoIcon, ArrowBackIcon, EyeIcon, SouthYemenFlagIcon, RefreshIcon } from '@/components/icons/aden-dot-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -105,11 +105,7 @@ export function LoginPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.25 }}
           >
-            <img
-              src="/flags/south-yemen.png"
-              alt="South Yemen"
-              className="w-5 h-3.5 rounded-sm shadow-sm border border-border object-cover"
-            />
+            <SouthYemenFlagIcon size={20} className="shadow-sm" />
             <motion.p
               className="text-xs text-primary font-medium"
               initial={{ opacity: 0 }}
@@ -180,9 +176,25 @@ export function LoginPage() {
                 exit={{ opacity: 0, y: -5, height: 0 }}
                 className="space-y-2"
               >
-                <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl">
-                  {error}
+                <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl flex items-start gap-2">
+                  <span className="flex-1">{error}</span>
                 </div>
+                {(error.includes('تعذّر') || error.includes('الاتصال') || error.includes('شبكة') || error.includes('إنترنت')) && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full text-primary border-primary/30 hover:bg-primary/10"
+                    disabled={isLoading}
+                    onClick={() => {
+                      // Re-submit the form to trigger a retry
+                      const form = document.querySelector('form');
+                      if (form) form.requestSubmit();
+                    }}
+                  >
+                    <RefreshIcon size={16} color="var(--primary)" className={isLoading ? 'animate-spin' : ''} />
+                    <span className="mr-2">{isLoading ? 'جارٍ إعادة المحاولة...' : 'إعادة المحاولة'}</span>
+                  </Button>
+                )}
                 {error.includes('API') && (
                   <Button
                     type="button"
@@ -516,7 +528,7 @@ export function RegisterPage() {
               <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm p-3 rounded-xl">
                 {localError || error}
               </div>
-              {(localError || error).includes('API') && (
+              {(localError || error || '').includes('API') && (
                 <Button
                   type="button"
                   variant="outline"

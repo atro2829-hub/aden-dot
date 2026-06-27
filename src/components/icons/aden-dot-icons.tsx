@@ -546,3 +546,90 @@ export function FingerPrintIcon({ size = 24, color = 'currentColor', className }
     </svg>
   );
 }
+
+// ============ FLAGS ============
+
+/**
+ * Flag of South Yemen (علم الجنوب) - horizontal tricolor: red / white / black
+ * with a light blue triangle at the hoist (left) side.
+ * Used in: login screen, profile badge, app watermark.
+ */
+export function SouthYemenFlagIcon({ size = 24, className, rounded = true }: IconProps & { rounded?: boolean }) {
+  return (
+    <svg
+      width={size}
+      height={size * 0.667}
+      viewBox="0 0 60 40"
+      className={className}
+      preserveAspectRatio="xMidYMid meet"
+      style={rounded ? { borderRadius: '4px', overflow: 'hidden' } : undefined}
+    >
+      {/* Red stripe (top) */}
+      <rect x="0" y="0" width="60" height="13.33" fill="#CE1126" />
+      {/* White stripe (middle) */}
+      <rect x="0" y="13.33" width="60" height="13.34" fill="#FFFFFF" />
+      {/* Black stripe (bottom) */}
+      <rect x="0" y="26.67" width="60" height="13.33" fill="#000000" />
+      {/* Blue triangle at the hoist (left) */}
+      <polygon points="0,0 24,20 0,40" fill="#3A7BCE" />
+    </svg>
+  );
+}
+
+/**
+ * Flag of the Republic of Yemen - horizontal tricolor: red / white / black.
+ * (Solid red on top, white middle, black bottom — no emblem.)
+ */
+export function YemenFlagIcon({ size = 24, className, rounded = true }: IconProps & { rounded?: boolean }) {
+  return (
+    <svg
+      width={size}
+      height={size * 0.667}
+      viewBox="0 0 60 40"
+      className={className}
+      preserveAspectRatio="xMidYMid meet"
+      style={rounded ? { borderRadius: '4px', overflow: 'hidden' } : undefined}
+    >
+      <rect x="0" y="0" width="60" height="13.33" fill="#CE1126" />
+      <rect x="0" y="13.33" width="60" height="13.34" fill="#FFFFFF" />
+      <rect x="0" y="26.67" width="60" height="13.33" fill="#000000" />
+    </svg>
+  );
+}
+
+// ============ CONNECTION STATUS ICONS ============
+
+export function WifiOffIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M1 1l22 22" />
+      <path d="M16.72 11.06A10.94 10.94 0 0119 12.55" />
+      <path d="M5 12.55a10.94 10.94 0 015.17-2.39" />
+      <path d="M10.71 5.05A16 16 0 0122.58 9" />
+      <path d="M1.42 9a15.91 15.91 0 014.7-2.88" />
+      <path d="M8.53 16.11a6 6 0 016.95 0" />
+      <line x1="12" y1="20" x2="12.01" y2="20" />
+    </svg>
+  );
+}
+
+export function WifiIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M5 12.55a11 11 0 0114.08 0" />
+      <path d="M1.42 9a16 16 0 0121.16 0" />
+      <path d="M8.53 16.11a6 6 0 016.95 0" />
+      <line x1="12" y1="20" x2="12.01" y2="20" />
+    </svg>
+  );
+}
+
+export function RefreshIcon({ size = 24, color = 'currentColor', className }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M23 4v6h-6" />
+      <path d="M1 20v-6h6" />
+      <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+    </svg>
+  );
+}

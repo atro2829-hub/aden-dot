@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version tag (e.g. v1.4.0)'
+        description: 'Release version tag (e.g. v1.5.0)'
         required: false
-        default: 'v1.4.0'
+        default: 'v1.5.0'
 
 permissions:
   contents: write
@@ -27,9 +27,49 @@ env:
 
 jobs:
   # ─────────────────────────────────────────────────────────────────────────
+  # 0. BOOTSTRAP ADMIN ACCOUNT IN SUPABASE
+  # ─────────────────────────────────────────────────────────────────────────
+  bootstrap-admin:
+    name: Bootstrap Admin Account
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Wait for Supabase to be reachable
+        run: |
+          echo "Checking Supabase reachability at ${{ env.NEXT_PUBLIC_SUPABASE_URL }}"
+          for i in {1..15}; do
+            STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 10 \
+              -H "apikey: ${{ env.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
+              "${{ env.NEXT_PUBLIC_SUPABASE_URL }}/auth/v1/health" || echo "000")
+            echo "Attempt $i: HTTP $STATUS"
+            if [ "$STATUS" = "200" ]; then
+              echo "Supabase is reachable"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "WARNING: Could not reach Supabase after 15 attempts. Continuing anyway (admin bootstrap may fail)."
+          exit 0
+
+      - name: Bootstrap admin account
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          node scripts/bootstrap-admin.js || echo "Bootstrap attempt finished (may already exist)"
+
+  # ─────────────────────────────────────────────────────────────────────────
   # 1. BUILD USER APK (>20MB)
   # ─────────────────────────────────────────────────────────────────────────
   build-user-apk:
+    needs: bootstrap-admin
     name: Build User APK
     runs-on: ubuntu-latest
     steps:
@@ -109,6 +149,7 @@ jobs:
   # 2. BUILD ADMIN APK (~10MB)
   # ─────────────────────────────────────────────────────────────────────────
   build-admin-apk:
+    needs: bootstrap-admin
     name: Build Admin APK
     runs-on: ubuntu-latest
     steps:
@@ -135,10 +176,13 @@ jobs:
             appName: 'Aden Dot Admin',
             webDir: 'out',
             server: {
-              androidScheme: 'https'
+              androidScheme: 'https',
+              cleartext: true,
             },
             plugins: {
-              // Splash screen fully disabled - no big launch splash
+              CapacitorHttp: {
+                enabled: true,
+              },
               SplashScreen: {
                 launchShowDuration: 0,
                 launchAutoHide: true,
@@ -306,7 +350,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.event.inputs.version || 'v1.4.0' }}"
+          VERSION="${{ github.event.inputs.version || 'v1.5.0' }}"
           echo "Creating release $VERSION ..."
 
           # Delete existing release if it exists

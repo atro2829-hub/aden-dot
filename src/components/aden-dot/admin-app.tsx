@@ -88,7 +88,8 @@ function AdminSetupScreen({ onConfigured }: { onConfigured: () => void }) {
 }
 
 // ============ Admin Login ============
-function AdminLoginScreen({ onLogin }: { onLogin: (client: ReturnType<typeof createClient>) => void }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function AdminLoginScreen({ onLogin }: { onLogin: (client: any) => void }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -120,7 +121,8 @@ function AdminLoginScreen({ onLogin }: { onLogin: (client: ReturnType<typeof cre
 
       if (data.user) {
         // Check if user is admin
-        const { data: profile } = await client.from('users').select('role').eq('uid', data.user.id).single();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data: profile } = await client.from('users').select('role').eq('uid', data.user.id).single() as any;
         if (profile?.role === 'admin') {
           onLogin(client);
         } else {
@@ -129,7 +131,16 @@ function AdminLoginScreen({ onLogin }: { onLogin: (client: ReturnType<typeof cre
         }
       }
     } catch (err) {
-      setError('حدث خطأ في الاتصال');
+      const msg = err instanceof Error ? err.message : String(err);
+      const isNetwork = /network|failed to fetch|timeout|aborted|err_network|err_name_resolution|err_connection/i.test(msg) ||
+        (err as Error & { isNetworkError?: boolean }).isNetworkError;
+      if (isNetwork) {
+        setError('تعذّر الاتصال بالخادم - تحقق من الإنترنت أو أن الخادم يعمل، ثم أعد المحاولة');
+      } else if (msg.includes('Invalid login credentials')) {
+        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
+      } else {
+        setError(msg || 'حدث خطأ في الاتصال');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -173,7 +184,8 @@ export default function AdminApp() {
   const [supabaseConfigured, setSupabaseConfigured] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
-  const [supabaseClient, setSupabaseClient] = useState<ReturnType<typeof createClient> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [supabaseClient, setSupabaseClient] = useState<any>(null);
 
   useEffect(() => {
     const init = async () => {
@@ -205,7 +217,8 @@ export default function AdminApp() {
       if (client) {
         const { data: { session } } = await client.auth.getSession();
         if (session?.user) {
-          const { data: profile } = await client.from('users').select('role').eq('uid', session.user.id).single();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const { data: profile } = await client.from('users').select('role').eq('uid', session.user.id).single() as any;
           if (profile?.role === 'admin') {
             setSupabaseClient(client);
             setIsLoggedIn(true);

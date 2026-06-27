@@ -96,6 +96,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     } catch (error: unknown) {
       let message = error instanceof Error ? error.message : 'Login failed';
+      const isNetwork =
+        typeof message === 'string' &&
+        (/network|failed to fetch|timeout|aborted|err_network|err_name_resolution|err_connection/i.test(message) ||
+          (error as Error & { isNetworkError?: boolean }).isNetworkError);
+
       // Translate common Supabase errors
       if (message.includes('Invalid API key')) {
         message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
@@ -109,8 +114,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         message = 'كلمة المرور قصيرة جداً - يجب أن تكون 6 أحرف على الأقل';
       } else if (message.includes('Supabase client not configured')) {
         message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
-      } else if (message.includes('network') || message.includes('Failed to fetch')) {
-        message = 'خطأ في الاتصال - تحقق من الإنترنت';
+      } else if (isNetwork) {
+        // More specific network error message
+        const attempt = (error as Error & { attempt?: number }).attempt;
+        const retryInfo = attempt && attempt > 1 ? ` (بعد ${attempt} محاولات)` : '';
+        message = `تعذّر الاتصال بالخادم${retryInfo} - تحقق من الإنترنت أو أن الخادم يعمل، ثم أعد المحاولة`;
       }
       set({ error: message });
       return false;
@@ -127,7 +135,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       if (data.user) {
         // Try to load the profile (trigger should have created it)
         // Retry a few times since the trigger might need a moment
-        let profile = null;
+        let profile: User | null = null;
         for (let attempt = 0; attempt < 3; attempt++) {
           profile = await userService.getUserProfile(data.user.id);
           if (profile) break;
@@ -182,6 +190,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return false;
     } catch (error: unknown) {
       let message = error instanceof Error ? error.message : 'Registration failed';
+      const isNetwork =
+        typeof message === 'string' &&
+        (/network|failed to fetch|timeout|aborted|err_network|err_name_resolution|err_connection/i.test(message) ||
+          (error as Error & { isNetworkError?: boolean }).isNetworkError);
+
       // Translate common Supabase errors
       if (message.includes('Invalid API key')) {
         message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
@@ -193,8 +206,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         message = 'البريد الإلكتروني غير مؤكد';
       } else if (message.includes('Supabase client not configured')) {
         message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
-      } else if (message.includes('network') || message.includes('Failed to fetch')) {
-        message = 'خطأ في الاتصال - تحقق من الإنترنت';
+      } else if (isNetwork) {
+        const attempt = (error as Error & { attempt?: number }).attempt;
+        const retryInfo = attempt && attempt > 1 ? ` (بعد ${attempt} محاولات)` : '';
+        message = `تعذّر الاتصال بالخادم${retryInfo} - تحقق من الإنترنت أو أن الخادم يعمل، ثم أعد المحاولة`;
       }
       set({ error: message });
       return false;

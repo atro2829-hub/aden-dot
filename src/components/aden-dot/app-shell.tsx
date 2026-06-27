@@ -9,7 +9,9 @@ import {
   HomeIcon, ExploreIcon, CreateIcon, LiveIcon, ChatIcon, ProfileIcon,
   AppLogoIcon, BellIcon, CoinIcon, DiamondCurrencyIcon, VerifiedIcon, SettingsIcon,
   ShieldIcon, HeartIcon, StarIcon, TrophyIcon, GiftIcon, LightningIcon,
+  SouthYemenFlagIcon,
 } from '@/components/icons/aden-dot-icons';
+import { ConnectionBanner } from './connection-banner';
 import { LoginPage, RegisterPage, CompleteProfilePage, ForgotPasswordPage } from './auth-pages';
 import { HomeFeed, CreatePostModal } from './home-feed';
 import { ExplorePage } from './explore-page';
@@ -341,11 +343,7 @@ function TopBar() {
           <h1 className="text-lg font-bold text-foreground tracking-tight">{getTitle()}</h1>
           {/* South Yemen flag badge - shown on home tab */}
           {activeTab === 'home' && (
-            <img
-              src="/flags/south-yemen.png"
-              alt="South Yemen"
-              className="w-6 h-4 rounded-sm shadow-sm border border-border object-cover"
-            />
+            <SouthYemenFlagIcon size={22} className="shadow-sm" />
           )}
         </div>
         <div className="flex items-center gap-3">
@@ -471,7 +469,7 @@ export default function AdenDotApp() {
 
   // Set up Android lifecycle bridge so native code can notify the web layer
   useEffect(() => {
-    (window as Record<string, unknown>).__adendotLifecycle = {
+    (window as unknown as Record<string, unknown>).__adendotLifecycle = {
       onForeground: () => {
         // Update user status to online
         const authState = useAuthStore.getState();
@@ -495,7 +493,7 @@ export default function AdenDotApp() {
     };
 
     return () => {
-      delete (window as Record<string, unknown>).__adendotLifecycle;
+      delete (window as unknown as Record<string, unknown>).__adendotLifecycle;
     };
   }, []);
 
@@ -615,6 +613,7 @@ export default function AdenDotApp() {
         paddingRight: 'env(safe-area-inset-right, 0px)',
       }}
     >
+      <ConnectionBanner />
       {activeTab !== 'live' && <TopBar />}
       <main className={`flex-1 ${activeTab === 'live' ? '' : `${isWideLayout ? 'max-w-6xl' : 'max-w-lg'} mx-auto px-4 pt-4 pb-24 w-full`}`}>
         <AnimatePresence mode="wait">

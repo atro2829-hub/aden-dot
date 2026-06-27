@@ -5,10 +5,16 @@ const config: CapacitorConfig = {
   appName: 'Aden Dot',
   webDir: 'out',
   server: {
-    androidScheme: 'https'
+    androidScheme: 'https',
+    // Allow mixed content for legacy API endpoints (only if needed)
+    cleartext: true,
   },
+  // Enable native CapacitorHttp to bypass WebView CORS for ALL fetch calls
+  // This is critical for Supabase auth + REST calls from Capacitor WebView
   plugins: {
-    // Splash screen fully disabled - no big launch splash, app loads directly
+    CapacitorHttp: {
+      enabled: true,
+    },
     SplashScreen: {
       launchShowDuration: 0,
       launchAutoHide: true,
