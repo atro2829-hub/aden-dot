@@ -1,20 +1,6 @@
 -- =============================================
--- Aden Dot - Complete Supabase Database Schema
--- Version: 2.0 - Production Ready
--- =============================================
--- 
--- تعليمات التطبيق:
--- 1. اذهب إلى supabase.com وأنشئ مشروع جديد
--- 2. اذهب إلى SQL Editor
--- 3. انسخ والصق هذا الملف بالكامل
--- 4. اضغط Run
--- 5. اذهب إلى Project Settings → API
--- 6. انسخ Project URL و anon public key
--- 7. أدخلها في شاشة إعداد التطبيق
---
--- مهم: تأكد من تفعيل Email Auth في:
--- Authentication → Providers → Email → Enable
--- وألغِ تفعيل "Confirm email" إذا كنت لا تريد تأكيد البريد
+-- Skyline Social Media App - Complete Database Schema
+-- Supabase Project: ocjcbowrewenogrkexmr
 -- =============================================
 
 -- Enable required extensions
@@ -61,556 +47,631 @@ CREATE TABLE IF NOT EXISTS public.users (
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.posts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  content TEXT NOT NULL DEFAULT '',
-  images TEXT[] DEFAULT '{}',
-  post_type TEXT DEFAULT 'text' CHECK (post_type IN ('text', 'image', 'video', 'repost')),
-  tags TEXT[] DEFAULT '{}',
-  location TEXT DEFAULT '',
+  publisher_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  type TEXT DEFAULT 'TEXT' CHECK (type IN ('TEXT', 'IMAGE', 'VIDEO', 'POLL', 'ARTICLE')),
+  content TEXT DEFAULT '',
+  media_base64 TEXT,
+  media_mime_type TEXT DEFAULT '',
+  description TEXT DEFAULT '',
   likes_count INTEGER DEFAULT 0,
   comments_count INTEGER DEFAULT 0,
+  views_count INTEGER DEFAULT 0,
   shares_count INTEGER DEFAULT 0,
-  favorites_count INTEGER DEFAULT 0,
-  gifts_count INTEGER DEFAULT 0,
+  is_private BOOLEAN DEFAULT FALSE,
   is_pinned BOOLEAN DEFAULT FALSE,
-  is_featured BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
+  comments_disabled BOOLEAN DEFAULT FALSE,
+  favorites_disabled BOOLEAN DEFAULT FALSE,
+  region TEXT DEFAULT '',
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 3. COMMENTS TABLE
+-- 3. POST LIKES TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.post_likes (
+  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  PRIMARY KEY (post_id, user_uid)
+);
+
+-- =============================================
+-- 4. POST FAVORITES TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.post_favorites (
+  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  PRIMARY KEY (post_id, user_uid)
+);
+
+-- =============================================
+-- 5. COMMENTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.comments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  parent_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
-  content TEXT NOT NULL DEFAULT '',
+  publisher_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  content TEXT NOT NULL,
   likes_count INTEGER DEFAULT 0,
+  is_liked_by_publisher BOOLEAN DEFAULT FALSE,
+  parent_comment_id UUID REFERENCES public.comments(id) ON DELETE CASCADE,
   replies_count INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- =============================================
--- 4. POST LIKES TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS public.post_likes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(post_id, uid)
-);
-
--- =============================================
--- 5. POST FAVORITES TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS public.post_favorites (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(post_id, uid)
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
 -- 6. COMMENT LIKES TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.comment_likes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   comment_id UUID NOT NULL REFERENCES public.comments(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(comment_id, uid)
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  PRIMARY KEY (comment_id, user_uid)
 );
 
 -- =============================================
--- 7. FOLLOWERS TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS public.followers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  follower_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  following_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(follower_uid, following_uid)
-);
-
--- =============================================
--- 8. STORIES TABLE
+-- 7. STORIES TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.stories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  media_url TEXT NOT NULL DEFAULT '',
-  media_type TEXT DEFAULT 'image' CHECK (media_type IN ('image', 'video')),
-  caption TEXT DEFAULT '',
+  publisher_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  media_base64 TEXT DEFAULT '',
+  media_mime_type TEXT DEFAULT 'image/jpeg',
   views_count INTEGER DEFAULT 0,
-  expires_at TIMESTAMPTZ DEFAULT NOW() + INTERVAL '24 hours',
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  viewers TEXT[] DEFAULT '{}',
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
--- 9. STORY VIEWS TABLE
+-- 8. FOLLOWERS TABLE
 -- =============================================
-CREATE TABLE IF NOT EXISTS public.story_views (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  story_id UUID NOT NULL REFERENCES public.stories(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+CREATE TABLE IF NOT EXISTS public.followers (
+  follower_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  followed_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(story_id, uid)
+  PRIMARY KEY (follower_uid, followed_uid),
+  CHECK (follower_uid != followed_uid)
 );
 
 -- =============================================
--- 10. CHAT ROOMS TABLE
+-- 9. CHAT ROOMS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.chat_rooms (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name TEXT DEFAULT '',
-  type TEXT DEFAULT 'direct' CHECK (type IN ('direct', 'group')),
-  avatar TEXT DEFAULT '',
+  participant_1 TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  participant_2 TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   last_message TEXT DEFAULT '',
-  last_message_at TIMESTAMPTZ DEFAULT NOW(),
-  members_count INTEGER DEFAULT 2,
+  last_message_time BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
   created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  UNIQUE (participant_1, participant_2)
 );
 
 -- =============================================
--- 11. CHAT ROOM MEMBERS TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS public.chat_room_members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  room_id UUID NOT NULL REFERENCES public.chat_rooms(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  role TEXT DEFAULT 'member' CHECK (role IN ('member', 'admin', 'owner')),
-  last_read_at TIMESTAMPTZ DEFAULT NOW(),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(room_id, uid)
-);
-
--- =============================================
--- 12. CHAT MESSAGES TABLE
+-- 10. CHAT MESSAGES TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.chat_messages (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   room_id UUID NOT NULL REFERENCES public.chat_rooms(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  content TEXT NOT NULL DEFAULT '',
-  message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'gift', 'system', 'voice')),
-  metadata JSONB DEFAULT '{}',
+  sender_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  content TEXT DEFAULT '',
+  media_base64 TEXT,
+  media_mime_type TEXT DEFAULT '',
+  message_type TEXT DEFAULT 'text' CHECK (message_type IN ('text', 'image', 'video', 'voice', 'gift', 'location', 'contact')),
   is_read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
--- 13. NOTIFICATIONS TABLE
+-- 11. NOTIFICATIONS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.notifications (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  from_uid TEXT DEFAULT '',
-  type TEXT NOT NULL DEFAULT 'system' CHECK (type IN ('like', 'comment', 'follow', 'gift', 'mention', 'system', 'achievement', 'level_up', 'live_start', 'revenue')),
-  title TEXT DEFAULT '',
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('like', 'comment', 'follow', 'mention', 'gift', 'live_start', 'level_up', 'achievement', 'system')),
+  from_uid TEXT,
+  post_id UUID,
   content TEXT DEFAULT '',
-  data JSONB DEFAULT '{}',
   is_read BOOLEAN DEFAULT FALSE,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
--- 14. GIFT TYPES TABLE
+-- 12. GIFT TYPES TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.gift_types (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   name TEXT NOT NULL,
-  image_url TEXT NOT NULL DEFAULT '',
-  animation_url TEXT DEFAULT '',
-  category TEXT DEFAULT 'basic' CHECK (category IN ('basic', 'premium', 'luxury', 'special', 'seasonal')),
-  coin_price INTEGER NOT NULL DEFAULT 10,
-  diamond_price INTEGER DEFAULT 0,
-  animation_type TEXT DEFAULT 'none' CHECK (animation_type IN ('none', 'float', 'burst', 'rain', 'firework', 'heart')),
+  name_ar TEXT DEFAULT '',
+  emoji TEXT DEFAULT '',
+  image_url TEXT DEFAULT '',
+  coin_cost INTEGER NOT NULL DEFAULT 10,
+  diamond_value INTEGER DEFAULT 1,
+  category TEXT DEFAULT 'basic' CHECK (category IN ('basic', 'premium', 'luxury', 'seasonal', 'exclusive')),
+  animation_type TEXT DEFAULT 'float' CHECK (animation_type IN ('float', 'burst', 'rain', 'firework', 'heart_rain')),
   is_active BOOLEAN DEFAULT TRUE,
   sort_order INTEGER DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 15. GIFTS (SENT) TABLE
+-- 13. GIFTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.gifts (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   gift_type_id UUID NOT NULL REFERENCES public.gift_types(id) ON DELETE CASCADE,
-  from_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  to_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  sender_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  receiver_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   post_id UUID REFERENCES public.posts(id) ON DELETE SET NULL,
-  room_id UUID REFERENCES public.chat_rooms(id) ON DELETE SET NULL,
+  live_stream_id UUID,
   quantity INTEGER DEFAULT 1,
-  coin_value INTEGER NOT NULL DEFAULT 0,
-  diamond_value INTEGER DEFAULT 0,
   message TEXT DEFAULT '',
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
+);
+
+-- =============================================
+-- 14. LIVE STREAMS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.live_streams (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  host_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  title TEXT DEFAULT '',
+  description TEXT DEFAULT '',
+  thumbnail_base64 TEXT DEFAULT '',
+  category TEXT DEFAULT '',
+  viewer_count INTEGER DEFAULT 0,
+  peak_viewer_count INTEGER DEFAULT 0,
+  like_count INTEGER DEFAULT 0,
+  gifts_coins_total INTEGER DEFAULT 0,
+  status TEXT DEFAULT 'live' CHECK (status IN ('live', 'ended', 'scheduled')),
+  co_host_uid TEXT REFERENCES public.users(uid) ON DELETE SET NULL,
+  is_recording BOOLEAN DEFAULT FALSE,
+  recording_url TEXT DEFAULT '',
+  scheduled_at TIMESTAMPTZ,
+  started_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
+  ended_at BIGINT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 16. LIVE STREAMS TABLE
+-- 15. LIVE STREAM VIEWERS TABLE
 -- =============================================
-CREATE TABLE IF NOT EXISTS public.live_streams (
+CREATE TABLE IF NOT EXISTS public.live_stream_viewers (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  title TEXT DEFAULT '',
-  thumbnail_url TEXT DEFAULT '',
-  status TEXT DEFAULT 'ended' CHECK (status IN ('live', 'ended', 'paused')),
-  viewers_count INTEGER DEFAULT 0,
-  peak_viewers INTEGER DEFAULT 0,
-  likes_count INTEGER DEFAULT 0,
-  gifts_count INTEGER DEFAULT 0,
-  diamonds_earned INTEGER DEFAULT 0,
-  duration_seconds INTEGER DEFAULT 0,
-  started_at TIMESTAMPTZ DEFAULT NOW(),
-  ended_at TIMESTAMPTZ
+  stream_id UUID NOT NULL REFERENCES public.live_streams(id) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  joined_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000,
+  left_at BIGINT,
+  watch_duration_seconds INTEGER DEFAULT 0,
+  UNIQUE (stream_id, user_uid)
 );
 
 -- =============================================
--- 17. LIVE STREAM COMMENTS TABLE
+-- 16. LIVE STREAM COMMENTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.live_stream_comments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   stream_id UUID NOT NULL REFERENCES public.live_streams(id) ON DELETE CASCADE,
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  content TEXT NOT NULL DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
--- 18. WALLETS TABLE
+-- 17. WALLETS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.wallets (
   uid TEXT PRIMARY KEY REFERENCES public.users(uid) ON DELETE CASCADE,
   coins_balance INTEGER DEFAULT 100,
   diamonds_balance INTEGER DEFAULT 0,
-  total_earned_coins INTEGER DEFAULT 0,
-  total_earned_diamonds INTEGER DEFAULT 0,
-  total_spent_coins INTEGER DEFAULT 0,
-  total_spent_diamonds INTEGER DEFAULT 0,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
+  total_coins_earned INTEGER DEFAULT 100,
+  total_diamonds_earned INTEGER DEFAULT 0,
+  total_coins_spent INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 19. TRANSACTIONS TABLE
+-- 18. TRANSACTIONS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  type TEXT NOT NULL CHECK (type IN ('deposit', 'withdraw', 'purchase', 'gift_sent', 'gift_received', 'reward', 'refund', 'earning', 'admin_adjust')),
-  currency TEXT DEFAULT 'coins' CHECK (currency IN ('coins', 'diamonds')),
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('purchase', 'earn', 'spend', 'withdraw', 'gift_send', 'gift_receive', 'bonus', 'refund')),
+  currency TEXT NOT NULL CHECK (currency IN ('coins', 'diamonds')),
   amount INTEGER NOT NULL,
-  balance_after INTEGER NOT NULL DEFAULT 0,
   description TEXT DEFAULT '',
-  reference_id TEXT DEFAULT '',
-  reference_type TEXT DEFAULT '' CHECK (reference_type IN ('', 'gift', 'post', 'live_stream', 'purchase', 'daily_reward', 'achievement', 'admin')),
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  reference_id TEXT,
+  created_at BIGINT DEFAULT EXTRACT(EPOCH FROM NOW()) * 1000
 );
 
 -- =============================================
--- 20. ACHIEVEMENTS TABLE
+-- 19. ACHIEVEMENTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.achievements (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  code TEXT UNIQUE NOT NULL,
   name TEXT NOT NULL,
+  name_ar TEXT DEFAULT '',
   description TEXT DEFAULT '',
-  icon_url TEXT DEFAULT '',
-  category TEXT DEFAULT 'social' CHECK (category IN ('social', 'content', 'engagement', 'revenue', 'streak', 'special')),
-  requirement_type TEXT NOT NULL DEFAULT 'count',
-  requirement_value INTEGER NOT NULL DEFAULT 1,
+  description_ar TEXT DEFAULT '',
+  icon_emoji TEXT DEFAULT '',
+  category TEXT DEFAULT 'general' CHECK (category IN ('general', 'social', 'content', 'live', 'gifts', 'streak')),
+  requirement_value INTEGER DEFAULT 1,
   reward_coins INTEGER DEFAULT 0,
   reward_diamonds INTEGER DEFAULT 0,
-  reward_xp INTEGER DEFAULT 0,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 21. USER ACHIEVEMENTS TABLE
+-- 20. USER ACHIEVEMENTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.user_achievements (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   achievement_id UUID NOT NULL REFERENCES public.achievements(id) ON DELETE CASCADE,
   progress INTEGER DEFAULT 0,
   is_completed BOOLEAN DEFAULT FALSE,
   completed_at TIMESTAMPTZ,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(uid, achievement_id)
+  PRIMARY KEY (user_uid, achievement_id)
 );
 
 -- =============================================
--- 22. DAILY REWARDS TABLE
+-- 21. DAILY REWARDS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.daily_rewards (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  day_number INTEGER NOT NULL DEFAULT 1,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  day_number INTEGER NOT NULL,
   coins_reward INTEGER DEFAULT 10,
   diamonds_reward INTEGER DEFAULT 0,
-  xp_reward INTEGER DEFAULT 5,
   is_claimed BOOLEAN DEFAULT FALSE,
-  claimed_at TIMESTAMPTZ,
-  reward_date DATE DEFAULT CURRENT_DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(uid, reward_date)
+  claimed_at TIMESTAMPTZ
 );
 
 -- =============================================
--- 23. REPORTS TABLE (for admin)
+-- 22. BLOCKED USERS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.blocked_users (
+  blocker_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  blocked_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (blocker_uid, blocked_uid)
+);
+
+-- =============================================
+-- 23. REPORTS TABLE
 -- =============================================
 CREATE TABLE IF NOT EXISTS public.reports (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   reporter_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   reported_uid TEXT REFERENCES public.users(uid) ON DELETE SET NULL,
   reported_post_id UUID REFERENCES public.posts(id) ON DELETE SET NULL,
-  reason TEXT NOT NULL DEFAULT '',
+  reason TEXT NOT NULL CHECK (reason IN ('spam', 'harassment', 'violence', 'nudity', 'hate_speech', 'misinformation', 'other')),
   description TEXT DEFAULT '',
-  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'reviewing', 'resolved', 'dismissed')),
-  resolved_by TEXT REFERENCES public.users(uid) ON DELETE SET NULL,
-  resolution TEXT DEFAULT '',
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'reviewed', 'resolved', 'dismissed')),
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- =============================================
--- 24. APP CONFIG TABLE (for admin settings)
+-- 24. HASHTAGS TABLE
 -- =============================================
-CREATE TABLE IF NOT EXISTS public.app_config (
-  key TEXT PRIMARY KEY,
-  value JSONB NOT NULL DEFAULT '{}',
-  description TEXT DEFAULT '',
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- =============================================
--- 25. USER BLOCKS TABLE
--- =============================================
-CREATE TABLE IF NOT EXISTS public.user_blocks (
+CREATE TABLE IF NOT EXISTS public.hashtags (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  blocker_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  blocked_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(blocker_uid, blocked_uid)
+  tag TEXT UNIQUE NOT NULL,
+  posts_count INTEGER DEFAULT 0,
+  trending_score REAL DEFAULT 0
 );
 
 -- =============================================
--- INDEXES for Performance
+-- 25. COLLECTIONS TABLE
 -- =============================================
-CREATE INDEX IF NOT EXISTS idx_posts_uid ON public.posts(uid);
-CREATE INDEX IF NOT EXISTS idx_posts_created_at ON public.posts(created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_posts_post_type ON public.posts(post_type);
-CREATE INDEX IF NOT EXISTS idx_comments_post_id ON public.comments(post_id);
-CREATE INDEX IF NOT EXISTS idx_comments_uid ON public.comments(uid);
-CREATE INDEX IF NOT EXISTS idx_post_likes_post_id ON public.post_likes(post_id);
-CREATE INDEX IF NOT EXISTS idx_post_likes_uid ON public.post_likes(uid);
-CREATE INDEX IF NOT EXISTS idx_post_favorites_uid ON public.post_favorites(uid);
+CREATE TABLE IF NOT EXISTS public.collections (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  icon_emoji TEXT DEFAULT '',
+  is_private BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- 26. COLLECTION POSTS TABLE (join table)
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.collection_posts (
+  collection_id UUID NOT NULL REFERENCES public.collections(id) ON DELETE CASCADE,
+  post_id UUID NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  added_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (collection_id, post_id)
+);
+
+-- =============================================
+-- 27. POLLS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.polls (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  post_id UUID UNIQUE NOT NULL REFERENCES public.posts(id) ON DELETE CASCADE,
+  question TEXT NOT NULL,
+  is_multi_choice BOOLEAN DEFAULT FALSE,
+  ends_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- =============================================
+-- 28. POLL OPTIONS TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.poll_options (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  poll_id UUID NOT NULL REFERENCES public.polls(id) ON DELETE CASCADE,
+  option_text TEXT NOT NULL,
+  votes_count INTEGER DEFAULT 0,
+  sort_order INTEGER DEFAULT 0
+);
+
+-- =============================================
+-- 29. POLL VOTES TABLE
+-- =============================================
+CREATE TABLE IF NOT EXISTS public.poll_votes (
+  poll_id UUID NOT NULL REFERENCES public.polls(id) ON DELETE CASCADE,
+  option_id UUID NOT NULL REFERENCES public.poll_options(id) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  PRIMARY KEY (option_id, user_uid)
+);
+
+-- =============================================
+-- INDEXES
+-- =============================================
+CREATE INDEX IF NOT EXISTS idx_posts_publisher ON public.posts(publisher_uid);
+CREATE INDEX IF NOT EXISTS idx_posts_created ON public.posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_comments_post ON public.comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_stories_publisher ON public.stories(publisher_uid);
+CREATE INDEX IF NOT EXISTS idx_stories_created ON public.stories(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_followers_followed ON public.followers(followed_uid);
 CREATE INDEX IF NOT EXISTS idx_followers_follower ON public.followers(follower_uid);
-CREATE INDEX IF NOT EXISTS idx_followers_following ON public.followers(following_uid);
-CREATE INDEX IF NOT EXISTS idx_stories_uid ON public.stories(uid);
-CREATE INDEX IF NOT EXISTS idx_stories_expires ON public.stories(expires_at);
+CREATE INDEX IF NOT EXISTS idx_chat_rooms_participants ON public.chat_rooms(participant_1, participant_2);
 CREATE INDEX IF NOT EXISTS idx_chat_messages_room ON public.chat_messages(room_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_chat_room_members_uid ON public.chat_room_members(uid);
-CREATE INDEX IF NOT EXISTS idx_notifications_uid ON public.notifications(uid, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_notifications_is_read ON public.notifications(uid, is_read);
-CREATE INDEX IF NOT EXISTS idx_gifts_to_uid ON public.gifts(to_uid);
-CREATE INDEX IF NOT EXISTS idx_gifts_from_uid ON public.gifts(from_uid);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON public.notifications(user_uid, is_read);
+CREATE INDEX IF NOT EXISTS idx_gifts_receiver ON public.gifts(receiver_uid);
+CREATE INDEX IF NOT EXISTS idx_gifts_sender ON public.gifts(sender_uid);
+CREATE INDEX IF NOT EXISTS idx_live_streams_host ON public.live_streams(host_uid);
 CREATE INDEX IF NOT EXISTS idx_live_streams_status ON public.live_streams(status);
-CREATE INDEX IF NOT EXISTS idx_transactions_uid ON public.transactions(uid, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_user_achievements_uid ON public.user_achievements(uid);
-CREATE INDEX IF NOT EXISTS idx_daily_rewards_uid ON public.daily_rewards(uid);
-CREATE INDEX IF NOT EXISTS idx_reports_status ON public.reports(status);
-CREATE INDEX IF NOT EXISTS idx_users_username ON public.users(username);
-CREATE INDEX IF NOT EXISTS idx_users_role ON public.users(role);
+CREATE INDEX IF NOT EXISTS idx_transactions_user ON public.transactions(user_uid);
+CREATE INDEX IF NOT EXISTS idx_blocked_users_blocker ON public.blocked_users(blocker_uid);
+CREATE INDEX IF NOT EXISTS idx_user_achievements_user ON public.user_achievements(user_uid);
 
 -- =============================================
--- ROW LEVEL SECURITY (RLS) POLICIES
+-- ENABLE ROW LEVEL SECURITY
 -- =============================================
-
--- Enable RLS on all tables
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.posts ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.post_favorites ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comment_likes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.followers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.stories ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.story_views ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.followers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_rooms ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.chat_room_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gift_types ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.gifts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.live_streams ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.live_stream_viewers ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.live_stream_comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.wallets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_achievements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.daily_rewards ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.blocked_users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.app_config ENABLE ROW LEVEL SECURITY;
-ALTER TABLE public.user_blocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hashtags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.collections ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.collection_posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.polls ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.poll_options ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.poll_votes ENABLE ROW LEVEL SECURITY;
 
--- Users: anyone can read, users can update their own profile
-CREATE POLICY "Users are publicly readable" ON public.users FOR SELECT USING (true);
-CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid()::text = uid);
+-- =============================================
+-- RLS POLICIES - Users can read all, update own
+-- =============================================
+
+-- Users: anyone can read, users can update their own row
+CREATE POLICY "Users are readable by everyone" ON public.users FOR SELECT USING (true);
+CREATE POLICY "Users can update own profile" ON public.users FOR UPDATE USING (auth.uid()::text = uid) WITH CHECK (auth.uid()::text = uid);
 CREATE POLICY "Users can insert own profile" ON public.users FOR INSERT WITH CHECK (auth.uid()::text = uid);
 
--- Posts: anyone can read, authenticated users can create/update/delete own
-CREATE POLICY "Posts are publicly readable" ON public.posts FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create posts" ON public.posts FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can update own posts" ON public.posts FOR UPDATE USING (auth.uid()::text = uid);
-CREATE POLICY "Users can delete own posts" ON public.posts FOR DELETE USING (auth.uid()::text = uid OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
+-- Posts: anyone can read, authenticated users can insert/update own
+CREATE POLICY "Posts are readable by everyone" ON public.posts FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can create posts" ON public.posts FOR INSERT WITH CHECK (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can update own posts" ON public.posts FOR UPDATE USING (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can delete own posts" ON public.posts FOR DELETE USING (auth.uid()::text = publisher_uid);
 
--- Comments: anyone can read, authenticated users can create/delete own
-CREATE POLICY "Comments are publicly readable" ON public.comments FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create comments" ON public.comments FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can delete own comments" ON public.comments FOR DELETE USING (auth.uid()::text = uid OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
-
--- Post Likes: anyone can read, authenticated users can like/unlike
-CREATE POLICY "Post likes are publicly readable" ON public.post_likes FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can like posts" ON public.post_likes FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can unlike own likes" ON public.post_likes FOR DELETE USING (auth.uid()::text = uid);
+-- Post Likes: anyone can read, authenticated users can like
+CREATE POLICY "Post likes are readable by everyone" ON public.post_likes FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can like posts" ON public.post_likes FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
+CREATE POLICY "Users can unlike posts" ON public.post_likes FOR DELETE USING (auth.uid()::text = user_uid);
 
 -- Post Favorites: anyone can read, authenticated users can favorite
-CREATE POLICY "Post favorites are publicly readable" ON public.post_favorites FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can favorite posts" ON public.post_favorites FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can unfavorite" ON public.post_favorites FOR DELETE USING (auth.uid()::text = uid);
+CREATE POLICY "Post favorites are readable by everyone" ON public.post_favorites FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can favorite posts" ON public.post_favorites FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
+CREATE POLICY "Users can unfavorite posts" ON public.post_favorites FOR DELETE USING (auth.uid()::text = user_uid);
 
--- Comment Likes: anyone can read, authenticated users can like
-CREATE POLICY "Comment likes are publicly readable" ON public.comment_likes FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can like comments" ON public.comment_likes FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can unlike comments" ON public.comment_likes FOR DELETE USING (auth.uid()::text = uid);
+-- Comments: anyone can read, authenticated users can create
+CREATE POLICY "Comments are readable by everyone" ON public.comments FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can create comments" ON public.comments FOR INSERT WITH CHECK (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can update own comments" ON public.comments FOR UPDATE USING (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can delete own comments" ON public.comments FOR DELETE USING (auth.uid()::text = publisher_uid);
 
--- Followers: anyone can read, authenticated users can follow/unfollow
-CREATE POLICY "Followers are publicly readable" ON public.followers FOR SELECT USING (true);
+-- Comment Likes
+CREATE POLICY "Comment likes are readable by everyone" ON public.comment_likes FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can like comments" ON public.comment_likes FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
+CREATE POLICY "Users can unlike comments" ON public.comment_likes FOR DELETE USING (auth.uid()::text = user_uid);
+
+-- Stories: anyone can read, authenticated users can create own
+CREATE POLICY "Stories are readable by everyone" ON public.stories FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can create stories" ON public.stories FOR INSERT WITH CHECK (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can update own stories" ON public.stories FOR UPDATE USING (auth.uid()::text = publisher_uid);
+CREATE POLICY "Users can delete own stories" ON public.stories FOR DELETE USING (auth.uid()::text = publisher_uid);
+
+-- Followers: anyone can read, users can follow/unfollow
+CREATE POLICY "Followers are readable by everyone" ON public.followers FOR SELECT USING (true);
 CREATE POLICY "Authenticated users can follow" ON public.followers FOR INSERT WITH CHECK (auth.uid()::text = follower_uid);
 CREATE POLICY "Users can unfollow" ON public.followers FOR DELETE USING (auth.uid()::text = follower_uid);
 
--- Stories: anyone can read, authenticated users can create/delete own
-CREATE POLICY "Stories are publicly readable" ON public.stories FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create stories" ON public.stories FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can delete own stories" ON public.stories FOR DELETE USING (auth.uid()::text = uid);
+-- Chat Rooms: participants can read/manage
+CREATE POLICY "Chat rooms visible to participants" ON public.chat_rooms FOR SELECT USING (auth.uid()::text = participant_1 OR auth.uid()::text = participant_2);
+CREATE POLICY "Authenticated users can create chat rooms" ON public.chat_rooms FOR INSERT WITH CHECK (auth.uid()::text = participant_1 OR auth.uid()::text = participant_2);
+CREATE POLICY "Participants can update chat rooms" ON public.chat_rooms FOR UPDATE USING (auth.uid()::text = participant_1 OR auth.uid()::text = participant_2);
 
--- Story Views: anyone can read, authenticated users can create
-CREATE POLICY "Story views are publicly readable" ON public.story_views FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can view stories" ON public.story_views FOR INSERT WITH CHECK (auth.uid()::text = uid);
-
--- Chat Rooms: members can read, authenticated users can create
-CREATE POLICY "Chat rooms readable by members" ON public.chat_rooms FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.chat_room_members WHERE room_id = id AND uid = auth.uid()::text)
-  OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
+-- Chat Messages: room participants can read/send
+CREATE POLICY "Chat messages visible to room participants" ON public.chat_messages FOR SELECT USING (
+  EXISTS (SELECT 1 FROM public.chat_rooms WHERE chat_rooms.id = chat_messages.room_id AND (chat_rooms.participant_1 = auth.uid()::text OR chat_rooms.participant_2 = auth.uid()::text))
 );
-CREATE POLICY "Authenticated users can create chat rooms" ON public.chat_rooms FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-CREATE POLICY "Members can update chat rooms" ON public.chat_rooms FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.chat_room_members WHERE room_id = id AND uid = auth.uid()::text AND role IN ('admin', 'owner'))
+CREATE POLICY "Authenticated users can send messages" ON public.chat_messages FOR INSERT WITH CHECK (auth.uid()::text = sender_uid);
+CREATE POLICY "Users can update messages in their rooms" ON public.chat_messages FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM public.chat_rooms WHERE chat_rooms.id = chat_messages.room_id AND (chat_rooms.participant_1 = auth.uid()::text OR chat_rooms.participant_2 = auth.uid()::text))
 );
 
--- Chat Room Members: members can read, authenticated users can join
-CREATE POLICY "Members can see room members" ON public.chat_room_members FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.chat_room_members crm WHERE crm.room_id = room_id AND crm.uid = auth.uid()::text)
-  OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
-CREATE POLICY "Authenticated users can join rooms" ON public.chat_room_members FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Users can leave rooms" ON public.chat_room_members FOR DELETE USING (auth.uid()::text = uid);
-
--- Chat Messages: members can read, members can create
-CREATE POLICY "Members can read messages" ON public.chat_messages FOR SELECT USING (
-  EXISTS (SELECT 1 FROM public.chat_room_members WHERE room_id = chat_messages.room_id AND uid = auth.uid()::text)
-  OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
-CREATE POLICY "Members can send messages" ON public.chat_messages FOR INSERT WITH CHECK (
-  auth.uid()::text = uid AND
-  EXISTS (SELECT 1 FROM public.chat_room_members WHERE room_id = chat_messages.room_id AND uid = auth.uid()::text)
-);
-CREATE POLICY "Users can delete own messages" ON public.chat_messages FOR DELETE USING (
-  auth.uid()::text = uid OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
-
--- Notifications: users can read their own
-CREATE POLICY "Users can read own notifications" ON public.notifications FOR SELECT USING (uid = auth.uid()::text);
-CREATE POLICY "System can create notifications" ON public.notifications FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE USING (uid = auth.uid()::text);
-CREATE POLICY "Users can delete own notifications" ON public.notifications FOR DELETE USING (uid = auth.uid()::text);
+-- Notifications: users can read own, system can insert
+CREATE POLICY "Users can read own notifications" ON public.notifications FOR SELECT USING (auth.uid()::text = user_uid);
+CREATE POLICY "System can create notifications" ON public.notifications FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE USING (auth.uid()::text = user_uid);
 
 -- Gift Types: anyone can read
-CREATE POLICY "Gift types are publicly readable" ON public.gift_types FOR SELECT USING (true);
-CREATE POLICY "Admins can manage gift types" ON public.gift_types FOR ALL USING (
-  EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
+CREATE POLICY "Gift types are readable by everyone" ON public.gift_types FOR SELECT USING (true);
+CREATE POLICY "Admins can manage gift types" ON public.gift_types FOR INSERT WITH CHECK (true);
+CREATE POLICY "Admins can update gift types" ON public.gift_types FOR UPDATE USING (true);
 
--- Gifts: anyone can read, authenticated users can send
-CREATE POLICY "Gifts are publicly readable" ON public.gifts FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can send gifts" ON public.gifts FOR INSERT WITH CHECK (auth.uid()::text = from_uid);
+-- Gifts: anyone can read, authenticated can send
+CREATE POLICY "Gifts are readable by everyone" ON public.gifts FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can send gifts" ON public.gifts FOR INSERT WITH CHECK (auth.uid()::text = sender_uid);
 
--- Live Streams: anyone can read, authenticated users can create
-CREATE POLICY "Live streams are publicly readable" ON public.live_streams FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can create streams" ON public.live_streams FOR INSERT WITH CHECK (auth.uid()::text = uid);
-CREATE POLICY "Streamers can update own streams" ON public.live_streams FOR UPDATE USING (auth.uid()::text = uid OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
+-- Live Streams: anyone can read, authenticated can create
+CREATE POLICY "Live streams are readable by everyone" ON public.live_streams FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can create streams" ON public.live_streams FOR INSERT WITH CHECK (auth.uid()::text = host_uid);
+CREATE POLICY "Hosts can update own streams" ON public.live_streams FOR UPDATE USING (auth.uid()::text = host_uid);
+CREATE POLICY "Hosts can end own streams" ON public.live_streams FOR DELETE USING (auth.uid()::text = host_uid);
 
--- Live Stream Comments: anyone can read, authenticated users can comment
-CREATE POLICY "Live stream comments are readable" ON public.live_stream_comments FOR SELECT USING (true);
-CREATE POLICY "Authenticated users can comment on streams" ON public.live_stream_comments FOR INSERT WITH CHECK (auth.uid()::text = uid);
+-- Live Stream Viewers
+CREATE POLICY "Stream viewers readable by everyone" ON public.live_stream_viewers FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can join streams" ON public.live_stream_viewers FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
+CREATE POLICY "Users can update own viewer record" ON public.live_stream_viewers FOR UPDATE USING (auth.uid()::text = user_uid);
 
--- Wallets: users can read their own wallet
-CREATE POLICY "Users can read own wallet" ON public.wallets FOR SELECT USING (uid = auth.uid()::text OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
-CREATE POLICY "Users can update own wallet" ON public.wallets FOR UPDATE USING (uid = auth.uid()::text);
-CREATE POLICY "System creates wallets" ON public.wallets FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- Live Stream Comments
+CREATE POLICY "Stream comments readable by everyone" ON public.live_stream_comments FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can comment on streams" ON public.live_stream_comments FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
 
--- Transactions: users can read their own
-CREATE POLICY "Users can read own transactions" ON public.transactions FOR SELECT USING (uid = auth.uid()::text OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
-CREATE POLICY "System creates transactions" ON public.transactions FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- Wallets: users can read own
+CREATE POLICY "Users can read own wallet" ON public.wallets FOR SELECT USING (auth.uid()::text = uid);
+CREATE POLICY "System can update wallets" ON public.wallets FOR UPDATE USING (true);
+CREATE POLICY "System can create wallets" ON public.wallets FOR INSERT WITH CHECK (true);
+
+-- Transactions: users can read own
+CREATE POLICY "Users can read own transactions" ON public.transactions FOR SELECT USING (auth.uid()::text = user_uid);
+CREATE POLICY "System can create transactions" ON public.transactions FOR INSERT WITH CHECK (true);
 
 -- Achievements: anyone can read
-CREATE POLICY "Achievements are publicly readable" ON public.achievements FOR SELECT USING (true);
-CREATE POLICY "Admins can manage achievements" ON public.achievements FOR ALL USING (
-  EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
+CREATE POLICY "Achievements are readable by everyone" ON public.achievements FOR SELECT USING (true);
+CREATE POLICY "System can manage achievements" ON public.achievements FOR INSERT WITH CHECK (true);
 
--- User Achievements: users can read their own
-CREATE POLICY "Users can read own achievements" ON public.user_achievements FOR SELECT USING (uid = auth.uid()::text OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin'));
-CREATE POLICY "System manages user achievements" ON public.user_achievements FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
+-- User Achievements: users can read own
+CREATE POLICY "Users can read own achievements" ON public.user_achievements FOR SELECT USING (auth.uid()::text = user_uid);
+CREATE POLICY "System can update achievements" ON public.user_achievements FOR INSERT WITH CHECK (true);
+CREATE POLICY "System can update achievement progress" ON public.user_achievements FOR UPDATE USING (true);
 
--- Daily Rewards: users can read their own
-CREATE POLICY "Users can read own rewards" ON public.daily_rewards FOR SELECT USING (uid = auth.uid()::text);
-CREATE POLICY "System manages daily rewards" ON public.daily_rewards FOR INSERT WITH CHECK (auth.uid() IS NOT NULL);
-CREATE POLICY "Users can claim rewards" ON public.daily_rewards FOR UPDATE USING (uid = auth.uid()::text);
+-- Daily Rewards: users can read own
+CREATE POLICY "Users can read own daily rewards" ON public.daily_rewards FOR SELECT USING (auth.uid()::text = user_uid);
+CREATE POLICY "System can manage daily rewards" ON public.daily_rewards FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can claim own rewards" ON public.daily_rewards FOR UPDATE USING (auth.uid()::text = user_uid);
 
--- Reports: users can create, admins can read all
+-- Blocked Users: users can read own blocks
+CREATE POLICY "Users can read own blocks" ON public.blocked_users FOR SELECT USING (auth.uid()::text = blocker_uid);
+CREATE POLICY "Users can block others" ON public.blocked_users FOR INSERT WITH CHECK (auth.uid()::text = blocker_uid);
+CREATE POLICY "Users can unblock" ON public.blocked_users FOR DELETE USING (auth.uid()::text = blocker_uid);
+
+-- Reports: users can create reports, admins can read
 CREATE POLICY "Users can create reports" ON public.reports FOR INSERT WITH CHECK (auth.uid()::text = reporter_uid);
-CREATE POLICY "Users can read own reports" ON public.reports FOR SELECT USING (
-  reporter_uid = auth.uid()::text OR EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
-CREATE POLICY "Admins can update reports" ON public.reports FOR UPDATE USING (
-  EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
+CREATE POLICY "Users can read own reports" ON public.reports FOR SELECT USING (auth.uid()::text = reporter_uid);
 
--- App Config: anyone can read, admins can manage
-CREATE POLICY "App config is publicly readable" ON public.app_config FOR SELECT USING (true);
-CREATE POLICY "Admins can manage app config" ON public.app_config FOR ALL USING (
-  EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
-);
+-- Hashtags: anyone can read
+CREATE POLICY "Hashtags are readable by everyone" ON public.hashtags FOR SELECT USING (true);
+CREATE POLICY "System can manage hashtags" ON public.hashtags FOR INSERT WITH CHECK (true);
 
--- User Blocks: users can manage their blocks
-CREATE POLICY "Users can read own blocks" ON public.user_blocks FOR SELECT USING (blocker_uid = auth.uid()::text);
-CREATE POLICY "Users can block others" ON public.user_blocks FOR INSERT WITH CHECK (auth.uid()::text = blocker_uid);
-CREATE POLICY "Users can unblock" ON public.user_blocks FOR DELETE USING (auth.uid()::text = blocker_uid);
+-- Collections: users can read own, anyone can read public
+CREATE POLICY "Collections readable by owner or public" ON public.collections FOR SELECT USING (auth.uid()::text = user_uid OR is_private = false);
+CREATE POLICY "Users can create collections" ON public.collections FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
+CREATE POLICY "Users can update own collections" ON public.collections FOR UPDATE USING (auth.uid()::text = user_uid);
+CREATE POLICY "Users can delete own collections" ON public.collections FOR DELETE USING (auth.uid()::text = user_uid);
+
+-- Collection Posts
+CREATE POLICY "Collection posts readable with collection" ON public.collection_posts FOR SELECT USING (true);
+CREATE POLICY "Users can add to own collections" ON public.collection_posts FOR INSERT WITH CHECK (true);
+CREATE POLICY "Users can remove from own collections" ON public.collection_posts FOR DELETE USING (true);
+
+-- Polls
+CREATE POLICY "Polls readable by everyone" ON public.polls FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can create polls" ON public.polls FOR INSERT WITH CHECK (true);
+
+-- Poll Options
+CREATE POLICY "Poll options readable by everyone" ON public.poll_options FOR SELECT USING (true);
+CREATE POLICY "System can create poll options" ON public.poll_options FOR INSERT WITH CHECK (true);
+
+-- Poll Votes
+CREATE POLICY "Poll votes readable by everyone" ON public.poll_votes FOR SELECT USING (true);
+CREATE POLICY "Authenticated users can vote" ON public.poll_votes FOR INSERT WITH CHECK (auth.uid()::text = user_uid);
 
 -- =============================================
--- FUNCTIONS & TRIGGERS
+-- DATABASE FUNCTIONS
 -- =============================================
 
--- Auto-update updated_at timestamp
+-- Function to increment post views
+CREATE OR REPLACE FUNCTION public.increment_post_views(post_id UUID)
+RETURNS void AS $$
+  UPDATE public.posts SET views_count = views_count + 1 WHERE id = post_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Function to increment stream viewers
+CREATE OR REPLACE FUNCTION public.increment_stream_viewers(stream_id UUID)
+RETURNS void AS $$
+  UPDATE public.live_streams SET viewer_count = viewer_count + 1, peak_viewer_count = GREATEST(peak_viewer_count, viewer_count + 1) WHERE id = stream_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Function to increment stream likes
+CREATE OR REPLACE FUNCTION public.increment_stream_likes(stream_id UUID)
+RETURNS void AS $$
+  UPDATE public.live_streams SET like_count = like_count + 1 WHERE id = stream_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Function to increment stream gifts
+CREATE OR REPLACE FUNCTION public.increment_stream_gifts(stream_id UUID, amount INTEGER)
+RETURNS void AS $$
+  UPDATE public.live_streams SET gifts_coins_total = gifts_coins_total + amount WHERE id = stream_id;
+$$ LANGUAGE sql SECURITY DEFINER;
+
+-- Function to handle new user creation (auto-create wallet)
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (uid, email, username, nickname, is_email_verified)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'username', ''),
+    COALESCE(NEW.raw_user_meta_data->>'nickname', 'User'),
+    NEW.email_confirmed_at IS NOT NULL
+  );
+  INSERT INTO public.wallets (uid, coins_balance, diamonds_balance)
+  VALUES (NEW.id, 100, 0);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger: auto-create user profile and wallet on auth.users insert
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION public.update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -619,136 +680,141 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON public.users FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-CREATE TRIGGER update_posts_updated_at BEFORE UPDATE ON public.posts FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-CREATE TRIGGER update_comments_updated_at BEFORE UPDATE ON public.comments FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-CREATE TRIGGER update_chat_rooms_updated_at BEFORE UPDATE ON public.chat_rooms FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-CREATE TRIGGER update_wallets_updated_at BEFORE UPDATE ON public.wallets FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
-CREATE TRIGGER update_reports_updated_at BEFORE UPDATE ON public.reports FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+-- Triggers for updated_at
+DROP TRIGGER IF EXISTS update_users_updated_at ON public.users;
+CREATE TRIGGER update_users_updated_at
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
 
--- Auto-increment posts_count when a post is created
-CREATE OR REPLACE FUNCTION public.increment_posts_count()
+DROP TRIGGER IF EXISTS update_wallets_updated_at ON public.wallets;
+CREATE TRIGGER update_wallets_updated_at
+  BEFORE UPDATE ON public.wallets
+  FOR EACH ROW EXECUTE FUNCTION public.update_updated_at();
+
+-- Function to update posts_count when post is created/deleted
+CREATE OR REPLACE FUNCTION public.update_user_posts_count()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE public.users SET posts_count = posts_count + 1 WHERE uid = NEW.uid;
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.users SET posts_count = posts_count + 1 WHERE uid = NEW.publisher_uid;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.users SET posts_count = GREATEST(posts_count - 1, 0) WHERE uid = OLD.publisher_uid;
+    RETURN OLD;
+  END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER trigger_increment_posts_count AFTER INSERT ON public.posts FOR EACH ROW EXECUTE FUNCTION public.increment_posts_count();
+DROP TRIGGER IF EXISTS update_posts_count ON public.posts;
+CREATE TRIGGER update_posts_count
+  AFTER INSERT OR DELETE ON public.posts
+  FOR EACH ROW EXECUTE FUNCTION public.update_user_posts_count();
 
--- Auto-decrement posts_count when a post is deleted
-CREATE OR REPLACE FUNCTION public.decrement_posts_count()
+-- Function to update followers/following counts
+CREATE OR REPLACE FUNCTION public.update_follow_counts()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE public.users SET posts_count = GREATEST(posts_count - 1, 0) WHERE uid = NEW.uid;
-  RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_decrement_posts_count AFTER DELETE ON public.posts FOR EACH ROW EXECUTE FUNCTION public.decrement_posts_count();
-
--- Auto-increment likes_count when a post is liked
-CREATE OR REPLACE FUNCTION public.increment_post_likes()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE public.posts SET likes_count = likes_count + 1 WHERE id = NEW.post_id;
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.users SET following_count = following_count + 1 WHERE uid = NEW.follower_uid;
+    UPDATE public.users SET followers_count = followers_count + 1 WHERE uid = NEW.followed_uid;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.users SET following_count = GREATEST(following_count - 1, 0) WHERE uid = OLD.follower_uid;
+    UPDATE public.users SET followers_count = GREATEST(followers_count - 1, 0) WHERE uid = OLD.followed_uid;
+    RETURN OLD;
+  END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER trigger_increment_post_likes AFTER INSERT ON public.post_likes FOR EACH ROW EXECUTE FUNCTION public.increment_post_likes();
+DROP TRIGGER IF EXISTS update_follow_counts ON public.followers;
+CREATE TRIGGER update_follow_counts
+  AFTER INSERT OR DELETE ON public.followers
+  FOR EACH ROW EXECUTE FUNCTION public.update_follow_counts();
 
--- Auto-decrement likes_count when a post is unliked
-CREATE OR REPLACE FUNCTION public.decrement_post_likes()
+-- Function to update likes_count on posts
+CREATE OR REPLACE FUNCTION public.update_post_likes_count()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE public.posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = OLD.post_id;
-  RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_decrement_post_likes AFTER DELETE ON public.post_likes FOR EACH ROW EXECUTE FUNCTION public.decrement_post_likes();
-
--- Auto-increment comments_count
-CREATE OR REPLACE FUNCTION public.increment_comments_count()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE public.posts SET comments_count = comments_count + 1 WHERE id = NEW.post_id;
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts SET likes_count = likes_count + 1 WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = OLD.post_id;
+    RETURN OLD;
+  END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER trigger_increment_comments_count AFTER INSERT ON public.comments FOR EACH ROW EXECUTE FUNCTION public.increment_comments_count();
+DROP TRIGGER IF EXISTS update_post_likes_count ON public.post_likes;
+CREATE TRIGGER update_post_likes_count
+  AFTER INSERT OR DELETE ON public.post_likes
+  FOR EACH ROW EXECUTE FUNCTION public.update_post_likes_count();
 
--- Auto-increment followers_count when someone follows
-CREATE OR REPLACE FUNCTION public.increment_followers()
+-- Function to update comments_count on posts
+CREATE OR REPLACE FUNCTION public.update_post_comments_count()
 RETURNS TRIGGER AS $$
 BEGIN
-  UPDATE public.users SET following_count = following_count + 1 WHERE uid = NEW.follower_uid;
-  UPDATE public.users SET followers_count = followers_count + 1 WHERE uid = NEW.following_uid;
+  IF TG_OP = 'INSERT' THEN
+    UPDATE public.posts SET comments_count = comments_count + 1 WHERE id = NEW.post_id;
+    RETURN NEW;
+  ELSIF TG_OP = 'DELETE' THEN
+    UPDATE public.posts SET comments_count = GREATEST(comments_count - 1, 0) WHERE id = OLD.post_id;
+    RETURN OLD;
+  END IF;
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
-CREATE TRIGGER trigger_increment_followers AFTER INSERT ON public.followers FOR EACH ROW EXECUTE FUNCTION public.increment_followers();
-
--- Auto-decrement followers_count when someone unfollows
-CREATE OR REPLACE FUNCTION public.decrement_followers()
-RETURNS TRIGGER AS $$
-BEGIN
-  UPDATE public.users SET following_count = GREATEST(following_count - 1, 0) WHERE uid = OLD.follower_uid;
-  UPDATE public.users SET followers_count = GREATEST(followers_count - 1, 0) WHERE uid = OLD.following_uid;
-  RETURN OLD;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trigger_decrement_followers AFTER DELETE ON public.followers FOR EACH ROW EXECUTE FUNCTION public.decrement_followers();
+DROP TRIGGER IF EXISTS update_post_comments_count ON public.comments;
+CREATE TRIGGER update_post_comments_count
+  AFTER INSERT OR DELETE ON public.comments
+  FOR EACH ROW EXECUTE FUNCTION public.update_post_comments_count();
 
 -- =============================================
--- SEED DATA - Default Gift Types
+-- SEED DATA: Default Gift Types
 -- =============================================
-INSERT INTO public.gift_types (name, image_url, category, coin_price, diamond_price, animation_type, sort_order) VALUES
-  ('وردة', '🌹', 'basic', 10, 0, 'float', 1),
-  ('قلب', '❤️', 'basic', 20, 0, 'heart', 2),
-  ('نجمة', '⭐', 'basic', 50, 0, 'burst', 3),
-  ('ألماسة', '💎', 'premium', 100, 1, 'float', 4),
-  ('تاج', '👑', 'luxury', 500, 5, 'firework', 5),
-  ('روcket', '🚀', 'premium', 200, 2, 'burst', 6),
-  ('نمر', '🐯', 'luxury', 1000, 10, 'rain', 7),
-  ('قلعة', '🏰', 'special', 2000, 20, 'firework', 8),
-  ('كوكب', '🪐', 'special', 5000, 50, 'rain', 9),
-  ('تنين', '🐉', 'seasonal', 10000, 100, 'firework', 10)
+INSERT INTO public.gift_types (name, name_ar, emoji, coin_cost, diamond_value, category, animation_type, sort_order) VALUES
+  ('Rose', 'وردة', '🌹', 10, 1, 'basic', 'float', 1),
+  ('Heart', 'قلب', '❤️', 20, 2, 'basic', 'float', 2),
+  ('Star', 'نجمة', '⭐', 50, 5, 'basic', 'burst', 3),
+  ('Crown', 'تاج', '👑', 100, 10, 'premium', 'firework', 4),
+  ('Diamond', 'ألماسة', '💎', 200, 20, 'premium', 'firework', 5),
+  ('Rocket', 'صاروخ', '🚀', 500, 50, 'luxury', 'burst', 6),
+  ('Castle', 'قصر', '🏰', 1000, 100, 'luxury', 'firework', 7),
+  ('Dragon', 'تنين', '🐉', 2000, 200, 'exclusive', 'heart_rain', 8),
+  ('Unicorn', 'يونيكورن', '🦄', 5000, 500, 'exclusive', 'heart_rain', 9),
+  ('Galaxy', 'مجرة', '🌌', 10000, 1000, 'exclusive', 'rain', 10)
 ON CONFLICT DO NOTHING;
 
--- Seed Achievements
-INSERT INTO public.achievements (name, description, icon_url, category, requirement_type, requirement_value, reward_coins, reward_xp) VALUES
-  ('العضو الجديد', 'أكمل ملفك الشخصي', '🌟', 'social', 'profile_complete', 1, 50, 10),
-  ('كاتب محترف', 'انشر 10 منشورات', '✍️', 'content', 'posts_count', 10, 100, 25),
-  ('نجم التواصل', 'احصل على 100 متابع', '⭐', 'social', 'followers_count', 100, 200, 50),
-  ('محب للخير', 'أرسل 50 هدية', '🎁', 'engagement', 'gifts_sent', 50, 150, 30),
-  ('مبدع', 'احصل على 500 إعجاب', '💡', 'content', 'likes_received', 500, 300, 75),
-  ('صاحب البث', 'ابث 10 مرات', '📺', 'engagement', 'streams_count', 10, 250, 60),
-  ('مغامر', 'سجل دخولك 30 يوماً متتالياً', '🔥', 'streak', 'login_streak', 30, 500, 100),
-  ('ثري', 'اجمع 10000 عملة ذهبية', '💰', 'revenue', 'total_coins', 10000, 0, 200)
+-- =============================================
+-- SEED DATA: Default Achievements
+-- =============================================
+INSERT INTO public.achievements (code, name, name_ar, description, description_ar, icon_emoji, category, requirement_value, reward_coins, reward_diamonds) VALUES
+  ('first_post', 'First Post', 'أول منشور', 'Create your first post', 'أنشئ أول منشور لك', '📝', 'content', 1, 50, 0),
+  ('ten_posts', 'Content Creator', 'صانع محتوى', 'Create 10 posts', 'أنشئ 10 منشورات', '✍️', 'content', 10, 200, 5),
+  ('hundred_posts', 'Post Master', 'سيد المنشورات', 'Create 100 posts', 'أنشئ 100 منشور', '🏆', 'content', 100, 1000, 50),
+  ('first_follower', 'Getting Noticed', 'جذب الانتباه', 'Get your first follower', 'احصل على أول متابع', '👋', 'social', 1, 25, 0),
+  ('fifty_followers', 'Popular', 'مشهور', 'Get 50 followers', 'احصل على 50 متابع', '🌟', 'social', 50, 500, 20),
+  ('thousand_followers', 'Influencer', 'مؤثر', 'Get 1000 followers', 'احصل على 1000 متابع', '💯', 'social', 1000, 5000, 200),
+  ('first_gift', 'First Gift', 'أول هدية', 'Receive your first gift', 'استلم أول هدية', '🎁', 'gifts', 1, 30, 1),
+  ('hundred_gifts', 'Gift Magnet', 'مغناطيس الهدايا', 'Receive 100 gifts', 'استلم 100 هدية', '🧲', 'gifts', 100, 2000, 100),
+  ('first_stream', 'Going Live', 'بث مباشر', 'Start your first live stream', 'ابدأ أول بث مباشر', '📹', 'live', 1, 100, 5),
+  ('stream_star', 'Stream Star', 'نجم البث', 'Get 100 viewers in a stream', 'احصل على 100 مشاهد في بث', '⭐', 'live', 100, 3000, 150),
+  ('daily_streak_7', 'Weekly Warrior', 'محارب أسبوعي', 'Login 7 days in a row', 'سجل دخولك 7 أيام متتالية', '🔥', 'streak', 7, 300, 10),
+  ('daily_streak_30', 'Monthly Master', 'سيد الشهر', 'Login 30 days in a row', 'سجل دخولك 30 يوماً متتالياً', '💪', 'streak', 30, 2000, 100)
 ON CONFLICT DO NOTHING;
 
--- Seed App Config
-INSERT INTO public.app_config (key, value, description) VALUES
-  ('app_version', '"2.0.0"', 'Current app version'),
-  ('maintenance_mode', 'false', 'Maintenance mode flag'),
-  ('max_post_length', '2000', 'Maximum post content length'),
-  ('daily_coins_reward', '10', 'Daily login coins reward'),
-  ('min_withdrawal_diamonds', '100', 'Minimum diamonds for withdrawal'),
-  ('gift_commission_rate', '0.3', 'Commission rate for gifts (0-1)'),
-  ('welcome_coins', '100', 'Welcome bonus coins for new users')
-ON CONFLICT (key) DO NOTHING;
-
 -- =============================================
--- REALTIME SUBSCRIPTIONS
+-- ENABLE REALTIME
 -- =============================================
--- Enable realtime for chat messages and notifications
 ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_messages;
-ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.chat_rooms;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.live_stream_comments;
 ALTER PUBLICATION supabase_realtime ADD TABLE public.live_streams;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.notifications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.posts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.stories;
+

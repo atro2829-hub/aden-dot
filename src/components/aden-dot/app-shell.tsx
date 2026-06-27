@@ -498,13 +498,12 @@ export default function AdenDotApp() {
   }, []);
 
   // Initialize auth on mount - go directly to login, no splash or setup screen
-  // Uses smart fallback: tries local first (instant), then Supabase in background
+  // Uses Supabase directly — no local fallback.
   useEffect(() => {
     let mounted = true;
 
     const init = async () => {
       try {
-        // initializeAuth will try local first, then Supabase
         await useAuthStore.getState().initializeAuth();
       } catch (error) {
         console.error('[AdenDotApp] Auth initialization error:', error);
@@ -512,11 +511,10 @@ export default function AdenDotApp() {
         if (mounted) setIsInitializing(false);
       }
 
-      // Set up auth state change listener (only if Supabase is reachable)
+      // Set up auth state change listener (only if Supabase is configured)
       try {
-        const { checkSupabaseReachable } = await import('@/lib/smart-service');
-        const reachable = await checkSupabaseReachable();
-        if (reachable) {
+        const config = getActiveSupabaseConfig();
+        if (config) {
           const subscription = authService.onAuthStateChange(async (event, session) => {
             if (!mounted) return;
             const s = session as { user?: { id?: string } } | null;
@@ -560,8 +558,7 @@ export default function AdenDotApp() {
           (window as unknown as Record<string, unknown>).__adendotAuthSub = subscription;
         }
       } catch (e) {
-        // Supabase not reachable - that's OK, we have local fallback
-        console.log('[AdenDotApp] Running in local-only mode (Supabase unreachable)');
+        console.warn('[AdenDotApp] Auth state listener setup failed:', e);
       }
     };
 
@@ -582,9 +579,11 @@ export default function AdenDotApp() {
     return <LoadingScreen />;
   }
 
-  // NOTE: We no longer require Supabase to be configured.
-  // The app works in local-only mode if Supabase is unreachable.
-  // The SupabaseSetupScreen is only shown if the user explicitly wants to configure Supabase.
+  // If Supabase is not configured, show the setup screen
+  const supabaseConfig = getActiveSupabaseConfig();
+  if (!supabaseConfig) {
+    return <SupabaseSetupScreen />;
+  }
 
   // Show auth pages - handle all auth states properly
   if (!isAuthenticated || showAuth) {

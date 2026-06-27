@@ -1,8 +1,7 @@
 /**
- * Skyline Zustand Stores
- * Thin wrappers around the smart service layer that manages local/remote fallback.
- * All data operations delegate to the smart service which auto-falls back to local.
- * Stores provide optimistic updates where appropriate.
+ * Aden Dot Zustand Stores
+ * Direct wrappers around Supabase services — NO local/mock fallback.
+ * All data operations require an active Supabase connection.
  */
 
 import { create } from 'zustand';
@@ -16,20 +15,37 @@ import {
   liveStreamService, walletService, achievementService,
   fileToBase64, base64ToFile, formatTimeAgo, formatCount,
 } from './supabase-service';
-import {
-  smartAuth, smartPosts, smartComments, smartStories, smartFollows,
-  smartUsers, smartNotifications, smartChat, smartWallet, smartGifts,
-  smartLive, smartAchievements, smartDailyRewards,
-  checkSupabaseReachable, getConnectionMode, onConnectionModeChange,
-} from './smart-service';
-import { signInWithGoogle, initGoogleAuth, signOutGoogle } from './google-auth';
-import { initLocalDatabase, localAuth } from './local-database';
+import { getSupabaseBrowser, testSupabaseConnection } from './supabase-browser';
 
 // Re-export utility functions for backward compatibility
 export { fileToBase64, base64ToFile, formatTimeAgo, formatCount };
 
-// Re-export connection mode for UI
-export { getConnectionMode, onConnectionModeChange, checkSupabaseReachable };
+// Re-export connection test for UI
+export { testSupabaseConnection };
+
+/**
+ * Translate a Supabase auth error message into a friendly Arabic message.
+ */
+function friendlyAuthError(err: unknown, fallback: string): string {
+  if (!err) return fallback;
+  const msg = (err as Error)?.message || String(err);
+  if (/fetch|network|name_resolution|failed to fetch/i.test(msg)) {
+    return 'تعذّر الاتصال بالخادم — تحقق من الإنترنت أو من أن قاعدة بيانات Supabase مُهيّأة بشكل صحيح';
+  }
+  if (/invalid login credentials|invalid email or password/i.test(msg)) {
+    return 'بيانات الدخول غير صحيحة — تأكد من البريد وكلمة المرور';
+  }
+  if (/user already registered|already been registered/i.test(msg)) {
+    return 'هذا البريد مُستخدم بالفعل — سجّل الدخول أو استخدم بريداً آخر';
+  }
+  if (/password should be at least/i.test(msg)) {
+    return 'كلمة المرور قصيرة جداً — استخدم 6 أحرف على الأقل';
+  }
+  if (/unable to validate email/i.test(msg)) {
+    return 'صيغة البريد الإلكتروني غير صحيحة';
+  }
+  return msg || fallback;
+}
 
 // ============ Auth Store ============
 
@@ -54,46 +70,44 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  /** Initialize auth state - tries Supabase session, falls back to local */
+  /** Initialize auth state — restores Supabase session if present */
   initializeAuth: async () => {
     set({ isLoading: true });
     try {
-      // Initialize local DB and Google Auth
-      initLocalDatabase();
-      initGoogleAuth().catch(() => {});
-
-      // Try local first (instant - no network)
-      const localUser = localAuth.getCurrentUser();
-      if (localUser) {
-        set({ user: localUser, isAuthenticated: true });
-        // In background, check if Supabase is available and sync
-        checkSupabaseReachable().then(reachable => {
-          if (reachable) {
-            authService.getSession().then(session => {
-              if (session?.user) {
-                userService.getUserProfile(session.user.id).then(profile => {
-                  if (profile) set({ user: profile });
-                });
-              }
-            }).catch(() => {});
-          }
-        });
+      const client = getSupabaseBrowser();
+      if (!client) {
+        // No Supabase config — show setup screen instead of crashing
+        console.warn('[AuthStore] Supabase is not configured — setup required');
+        set({ isLoading: false });
         return;
       }
-
-      // No local user - try Supabase session
-      const reachable = await checkSupabaseReachable();
-      if (reachable) {
-        try {
-          const session = await authService.getSession();
-          if (session?.user) {
-            const profile = await userService.getUserProfile(session.user.id);
-            if (profile) {
-              set({ user: profile, isAuthenticated: true });
-            }
-          }
-        } catch (error) {
-          console.error('[AuthStore] Supabase init error:', error);
+      const session = await authService.getSession();
+      if (session?.user) {
+        const profile = await userService.getUserProfile(session.user.id);
+        if (profile) {
+          set({ user: profile, isAuthenticated: true });
+        } else {
+          // Profile not created yet (trigger may have failed) — try to fetch from auth user
+          const authUser = session.user;
+          const fallbackProfile: User = {
+            uid: authUser.id,
+            email: authUser.email || '',
+            username: (authUser.user_metadata?.username as string) || '',
+            nickname: (authUser.user_metadata?.nickname as string) || '',
+            profileImage: '',
+            bio: '',
+            gender: 'male',
+            followersCount: 0,
+            followingCount: 0,
+            postsCount: 0,
+            isVerified: false,
+            isProfileComplete: false,
+            role: 'user',
+            status: 'online',
+            createdAt: Date.now(),
+            lastSeen: Date.now(),
+          };
+          set({ user: fallbackProfile, isAuthenticated: true });
         }
       }
     } catch (error) {
@@ -103,12 +117,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Refresh user profile */
+  /** Refresh user profile from Supabase */
   refreshProfile: async () => {
     const { user } = get();
     if (!user) return;
     try {
-      const profile = await smartUsers.getById(user.uid);
+      const profile = await userService.getUserProfile(user.uid);
       if (profile) {
         set({ user: profile });
       }
@@ -117,23 +131,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Login with email and password - uses smart fallback */
+  /** Login with email + password via Supabase Auth */
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const { user, error } = await smartAuth.login(email, password);
-      if (error) {
-        set({ error });
-        return false;
+      const data = await authService.signIn(email, password);
+      if (data.user) {
+        const profile = await userService.getUserProfile(data.user.id);
+        if (profile) {
+          set({ user: profile, isAuthenticated: true });
+          return true;
+        }
       }
-      if (user) {
-        set({ user, isAuthenticated: true });
-        return true;
-      }
-      set({ error: 'فشل تسجيل الدخول' });
+      set({ error: 'فشل تسجيل الدخول — تعذّر جلب بيانات المستخدم' });
       return false;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'فشل تسجيل الدخول';
+      const message = friendlyAuthError(error, 'فشل تسجيل الدخول');
       set({ error: message });
       return false;
     } finally {
@@ -141,23 +154,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Register with email, password, and optional username/nickname */
+  /** Register a new account via Supabase Auth */
   register: async (email: string, password: string, username?: string, nickname?: string) => {
     set({ isLoading: true, error: null });
     try {
-      const { user, error } = await smartAuth.register(email, password, username, nickname);
-      if (error) {
-        set({ error });
-        return false;
-      }
-      if (user) {
-        set({ user, isAuthenticated: true });
+      const data = await authService.signUp(email, password, username, nickname);
+      if (data.user) {
+        // Try to fetch the profile (trigger should have created it)
+        let profile = await userService.getUserProfile(data.user.id);
+        if (!profile) {
+          // Provide a temporary profile until trigger completes
+          profile = {
+            uid: data.user.id,
+            email,
+            username: username || '',
+            nickname: nickname || '',
+            profileImage: '',
+            bio: '',
+            gender: 'male',
+            followersCount: 0,
+            followingCount: 0,
+            postsCount: 0,
+            isVerified: false,
+            isProfileComplete: true,
+            role: 'user',
+            status: 'online',
+            createdAt: Date.now(),
+            lastSeen: Date.now(),
+          };
+        }
+        set({ user: profile, isAuthenticated: true });
         return true;
       }
       set({ error: 'فشل إنشاء الحساب' });
       return false;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'فشل التسجيل';
+      const message = friendlyAuthError(error, 'فشل التسجيل');
       set({ error: message });
       return false;
     } finally {
@@ -165,25 +197,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Login with Google - uses Capacitor plugin on native, GIS on web */
+  /** Login with Google via Supabase OAuth (web flow) */
   loginWithGoogle: async () => {
     set({ isLoading: true, error: null });
     try {
-      await initGoogleAuth();
-      const profile = await signInWithGoogle();
-      const { user, error } = await smartAuth.loginWithGoogle(profile);
-      if (error) {
-        set({ error });
+      const client = getSupabaseBrowser();
+      if (!client) {
+        set({ error: 'Supabase غير مُهيّأ — لا يمكن تسجيل الدخول عبر Google' });
         return false;
       }
-      if (user) {
-        set({ user, isAuthenticated: true });
-        return true;
-      }
-      set({ error: 'فشل تسجيل الدخول عبر Google' });
-      return false;
+      const { error: oauthError } = await client.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: typeof window !== 'undefined' ? window.location.href : undefined,
+        },
+      });
+      if (oauthError) throw oauthError;
+      // The browser will redirect to Google — the page reload will pick up the session
+      return true;
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : 'فشل تسجيل الدخول عبر Google';
+      const message = friendlyAuthError(error, 'فشل تسجيل الدخول عبر Google');
       set({ error: message });
       return false;
     } finally {
@@ -191,25 +224,24 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Logout - clears both Supabase session and local */
+  /** Logout — clears Supabase session */
   logout: async () => {
     try {
-      await smartAuth.logout();
-      await signOutGoogle().catch(() => {});
+      await authService.signOut();
     } catch (error) {
       console.error('[AuthStore] logout error:', error);
     }
     set({ user: null, isAuthenticated: false, error: null });
   },
 
-  /** Update user profile data - uses smart fallback */
+  /** Update user profile in Supabase */
   updateUser: async (data: Partial<User>) => {
     const { user } = get();
     if (!user) return;
     // Optimistic update
     set({ user: { ...user, ...data } });
     try {
-      const updated = await smartUsers.update(user.uid, data);
+      const updated = await userService.updateUserProfile(user.uid, data);
       if (updated) {
         set({ user: updated });
       }
@@ -232,7 +264,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     };
     set({ user: { ...user, ...updates } });
     try {
-      const updated = await smartUsers.update(user.uid, updates);
+      const updated = await userService.updateUserProfile(user.uid, updates);
       if (updated) {
         set({ user: updated });
       }

@@ -2,22 +2,23 @@
 
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  saveSupabaseConfig, 
-  validateSupabaseConfig, 
-  type SupabaseConfig 
+import {
+  saveSupabaseConfig,
+  validateSupabaseConfig,
+  type SupabaseConfig
 } from '@/lib/supabase-config';
 import { resetSupabaseBrowser } from '@/lib/supabase-browser';
-import { AppLogoIcon } from '@/components/icons/aden-dot-icons';
+import { AppLogoIcon, SouthYemenFlagIcon } from '@/components/icons/aden-dot-icons';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-interface SupabaseSetupScreenProps {
-  onConfigured: () => void;
-}
-
-export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) {
+/**
+ * Supabase Setup Screen — shown when Supabase is not configured.
+ * Lets the user paste their real Supabase URL + anon key.
+ * After successful validation, reloads the app so the new client takes effect.
+ */
+export function SupabaseSetupScreen() {
   const [url, setUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [isValidating, setIsValidating] = useState(false);
@@ -28,7 +29,7 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
     setError(null);
     setSuccess(false);
 
-    const trimmedUrl = url.trim();
+    const trimmedUrl = url.trim().replace(/\/$/, ''); // strip trailing slash
     const trimmedKey = anonKey.trim();
 
     if (!trimmedUrl || !trimmedKey) {
@@ -38,7 +39,11 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
 
     // Validate URL format
     try {
-      new URL(trimmedUrl);
+      const u = new URL(trimmedUrl);
+      if (!u.hostname.endsWith('supabase.co')) {
+        setError('عنوان URL غير صالح - يجب أن ينتهي بـ supabase.co');
+        return;
+      }
     } catch {
       setError('عنوان URL غير صالح - تأكد من أنه يبدأ بـ https://');
       return;
@@ -54,31 +59,39 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
         saveSupabaseConfig(config);
         resetSupabaseBrowser();
         setSuccess(true);
-        setTimeout(() => onConfigured(), 500);
+        // Reload the page after a short delay so the new client takes effect
+        setTimeout(() => {
+          if (typeof window !== 'undefined') {
+            window.location.reload();
+          }
+        }, 800);
       } else {
-        setError(result.error || 'فشل التحقق من الاتصال');
+        setError(result.error || 'فشل التحقق من الاتصال — تأكد من صحة البيانات');
       }
-    } catch {
-      setError('حدث خطأ أثناء التحقق من الاتصال');
+    } catch (err) {
+      setError('حدث خطأ أثناء التحقق من الاتصال: ' + (err instanceof Error ? err.message : String(err)));
     } finally {
       setIsValidating(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50 to-white flex items-center justify-center p-4" dir="rtl">
+    <div className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-white flex items-center justify-center p-4" dir="rtl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
         {/* Logo */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mb-4">
-            <img src="/icon.png" alt="Aden Dot" className="w-full h-full object-cover" />
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg mb-3 flex items-center justify-center bg-amber-100">
+            <AppLogoIcon className="w-14 h-14" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">Aden Dot</h1>
           <p className="text-gray-500 text-sm mt-1">إعداد قاعدة البيانات</p>
+          <div className="mt-2 w-10 h-7 rounded shadow-sm overflow-hidden">
+            <SouthYemenFlagIcon className="w-full h-full" />
+          </div>
         </div>
 
         {/* Setup Card */}
@@ -86,7 +99,7 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
           <div className="text-center mb-2">
             <h2 className="text-lg font-semibold text-gray-800">الاتصال بـ Supabase</h2>
             <p className="text-sm text-gray-500 mt-1">
-              أدخل بيانات الاتصال الخاصة بمشروع Supabase الخاص بك
+              أدخل بيانات مشروع Supabase الحقيقي الخاص بك لتفعيل جميع المميزات
             </p>
           </div>
 
@@ -135,7 +148,7 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
               animate={{ opacity: 1 }}
               className="bg-red-50 border border-red-200 rounded-lg p-3"
             >
-              <p className="text-sm text-red-600">{error}</p>
+              <p className="text-sm text-red-600 whitespace-pre-line">{error}</p>
             </motion.div>
           )}
 
@@ -146,7 +159,7 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
               animate={{ opacity: 1 }}
               className="bg-green-50 border border-green-200 rounded-lg p-3"
             >
-              <p className="text-sm text-green-600">تم الاتصال بنجاح! جاري التحميل...</p>
+              <p className="text-sm text-green-600">تم الاتصال بنجاح! جاري إعادة تحميل التطبيق...</p>
             </motion.div>
           )}
 
@@ -168,15 +181,27 @@ export function SupabaseSetupScreen({ onConfigured }: SupabaseSetupScreenProps) 
 
           {/* Instructions */}
           <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mt-4">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2">كيف تحصل على هذه البيانات؟</h3>
+            <h3 className="text-sm font-semibold text-blue-800 mb-2">خطوات الإعداد (دقيقتان)</h3>
             <ol className="text-xs text-blue-700 space-y-1 list-decimal list-inside">
-              <li>اذهب إلى supabase.com وسجل الدخول</li>
-              <li>أنشئ مشروع جديد أو اختر مشروعك</li>
+              <li>اذهب إلى <span dir="ltr">supabase.com</span> وسجل الدخول بحسابك</li>
+              <li>أنشئ مشروعاً جديداً (New Project) باسم &quot;Aden Dot&quot;</li>
+              <li>اضبط كلمة مرور قوية لقاعدة البيانات</li>
+              <li>اختر المنطقة الأقرب (Frankfurt أو Singapore)</li>
+              <li>انتظر 2-3 دقائق حتى يكتمل إنشاء المشروع</li>
+              <li>اذهب إلى SQL Editor والصق ملف schema من <code className="bg-white px-1 rounded">download/supabase-schema.sql</code></li>
               <li>اذهب إلى Project Settings ← API</li>
               <li>انسخ Project URL والصقه في الحقل الأول</li>
               <li>انسخ anon public key والصقه في الحقل الثاني</li>
               <li>اضغط &quot;اتصال وتحقق&quot;</li>
             </ol>
+          </div>
+
+          {/* Admin setup hint */}
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-3">
+            <p className="text-xs text-amber-800">
+              <strong>لإنشاء حساب أدمن:</strong> بعد الإعداد، سجّل الدخول بحساب بريد <code className="bg-white px-1 rounded" dir="ltr">admin@adendot.app</code> —
+              سيُمنح تلقائياً صلاحيات الأدمن. أو شغّل سكربت <code className="bg-white px-1 rounded">scripts/bootstrap-admin.js</code> مع service role key.
+            </p>
           </div>
         </div>
       </motion.div>

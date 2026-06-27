@@ -59,26 +59,6 @@ export function LoginPage() {
     }
   };
 
-  // Quick demo login - admin account
-  const handleDemoAdmin = async () => {
-    setEmail('admin@adendot.app');
-    setPassword('Aden@2026');
-    const success = await login('admin@adendot.app', 'Aden@2026');
-    if (success) {
-      setShowAuth(null);
-    }
-  };
-
-  // Quick demo login - regular user
-  const handleDemoUser = async () => {
-    setEmail('ahmad@example.com');
-    setPassword('123456');
-    const success = await login('ahmad@example.com', '123456');
-    if (success) {
-      setShowAuth(null);
-    }
-  };
-
   return (
     <motion.div
       className="min-h-screen flex flex-col justify-center px-6 py-8 relative overflow-hidden bg-background"
@@ -289,31 +269,6 @@ export function LoginPage() {
             </motion.button>
           </div>
 
-          {/* Quick Demo Login Buttons */}
-          <div className="mt-4 p-3 rounded-xl bg-primary/5 border border-primary/20">
-            <p className="text-xs text-muted-foreground text-center mb-2">دخول سريع للتجربة</p>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={handleDemoAdmin}
-                disabled={isLoading}
-                className="h-10 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium transition-colors disabled:opacity-50"
-              >
-                حساب الأدمن
-              </button>
-              <button
-                type="button"
-                onClick={handleDemoUser}
-                disabled={isLoading}
-                className="h-10 rounded-lg bg-muted hover:bg-muted/80 text-foreground text-xs font-medium transition-colors disabled:opacity-50"
-              >
-                مستخدم تجريبي
-              </button>
-            </div>
-            <p className="text-[10px] text-muted-foreground text-center mt-2">
-              يعمل التطبيق محلياً بدون إنترنت - بياناتك محفوظة على جهازك
-            </p>
-          </div>
         </motion.div>
 
         {/* Register Link */}

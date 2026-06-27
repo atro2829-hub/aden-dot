@@ -1,7 +1,10 @@
 /**
  * Supabase Configuration Manager
- * Supports both hardcoded (env) and user-configured credentials
- * Stores custom config in localStorage for persistence
+ * Reads credentials from env vars OR from localStorage (set via the in-app setup screen).
+ *
+ * NOTE: No hardcoded default URL/key — the user MUST configure their own Supabase project
+ * either by setting NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY env vars
+ * (for CI builds) or by entering them in the SupabaseSetupScreen on first launch.
  */
 
 export interface SupabaseConfig {
@@ -11,23 +14,15 @@ export interface SupabaseConfig {
 
 const STORAGE_KEY = 'adendot_supabase_config';
 
-/** Get hardcoded config from environment variables or embedded defaults */
+/** Get config from environment variables (build-time) */
 function getEnvConfig(): SupabaseConfig | null {
-  // Try environment variables first
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
   const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
   if (url && anonKey) return { url, anonKey };
-
-  // Fallback: embedded default config for Capacitor/Android builds
-  // This ensures the app always has valid Supabase credentials
-  const DEFAULT_URL = 'https://zjdkfzemrosdgkgtzhtg.supabase.co';
-  const DEFAULT_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8';
-  if (DEFAULT_URL && DEFAULT_ANON_KEY) return { url: DEFAULT_URL, anonKey: DEFAULT_ANON_KEY };
-
   return null;
 }
 
-/** Get user-configured config from localStorage */
+/** Get user-configured config from localStorage (runtime, in-app setup) */
 function getStoredConfig(): SupabaseConfig | null {
   try {
     if (typeof window === 'undefined') return null;
@@ -79,18 +74,22 @@ export async function validateSupabaseConfig(config: SupabaseConfig): Promise<{ 
         'apikey': config.anonKey,
       },
     });
-    
+
     if (response.ok) {
       return { valid: true };
     }
-    
-    const data = await response.json();
+
+    const data = await response.json().catch(() => ({}));
     if (data.message?.includes('Invalid API key')) {
       return { valid: false, error: 'مفتاح API غير صالح - تأكد من نسخ المفتاح الصحيح من لوحة تحكم Supabase' };
     }
-    
-    return { valid: false, error: data.message || 'فشل الاتصال بقاعدة البيانات' };
+
+    return { valid: false, error: data.message || `فشل الاتصال بقاعدة البيانات (HTTP ${response.status})` };
   } catch (error) {
-    return { valid: false, error: 'لا يمكن الوصول إلى الخادم - تأكد من عنوان URL' };
+    const msg = error instanceof Error ? error.message : String(error);
+    if (/failed to fetch|network|name_resolution|err_name_resolution/i.test(msg)) {
+      return { valid: false, error: 'تعذّر الوصول إلى الخادم - تأكد من عنوان URL ومن أن المشروع يعمل في لوحة تحكم Supabase' };
+    }
+    return { valid: false, error: 'لا يمكن الوصول إلى الخادم - ' + msg };
   }
 }
