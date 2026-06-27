@@ -40,8 +40,6 @@ jobs:
   bootstrap-admin:
     name: Bootstrap Admin Account
     runs-on: ubuntu-latest
-    # Skip entirely if Supabase secrets are not configured
-    if: ${{ secrets.SUPABASE_URL != '' && secrets.SUPABASE_SERVICE_ROLE_KEY != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -51,7 +49,19 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Check Supabase secrets are set
+        id: check_secrets
+        run: |
+          if [ -z "${{ env.NEXT_PUBLIC_SUPABASE_URL }}" ] || [ -z "${{ env.SUPABASE_SERVICE_ROLE_KEY }}" ]; then
+            echo "Supabase secrets are not configured — skipping bootstrap"
+            echo "skip=true" >> $GITHUB_OUTPUT
+          else
+            echo "Supabase secrets are configured — proceeding"
+            echo "skip=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Wait for Supabase to be reachable
+        if: steps.check_secrets.outputs.skip == 'false'
         run: |
           echo "Checking Supabase reachability at ${{ env.NEXT_PUBLIC_SUPABASE_URL }}"
           for i in {1..15}; do
@@ -69,6 +79,7 @@ jobs:
           exit 0
 
       - name: Bootstrap admin account
+        if: steps.check_secrets.outputs.skip == 'false'
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ env.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ env.SUPABASE_SERVICE_ROLE_KEY }}
