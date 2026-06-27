@@ -1,7 +1,7 @@
 /**
  * Skyline Zustand Stores
- * Thin wrappers around Supabase service layer that manage local state.
- * All data operations delegate to the Supabase service.
+ * Thin wrappers around the smart service layer that manages local/remote fallback.
+ * All data operations delegate to the smart service which auto-falls back to local.
  * Stores provide optimistic updates where appropriate.
  */
 
@@ -16,9 +16,20 @@ import {
   liveStreamService, walletService, achievementService,
   fileToBase64, base64ToFile, formatTimeAgo, formatCount,
 } from './supabase-service';
+import {
+  smartAuth, smartPosts, smartComments, smartStories, smartFollows,
+  smartUsers, smartNotifications, smartChat, smartWallet, smartGifts,
+  smartLive, smartAchievements, smartDailyRewards,
+  checkSupabaseReachable, getConnectionMode, onConnectionModeChange,
+} from './smart-service';
+import { signInWithGoogle, initGoogleAuth, signOutGoogle } from './google-auth';
+import { initLocalDatabase, localAuth } from './local-database';
 
 // Re-export utility functions for backward compatibility
 export { fileToBase64, base64ToFile, formatTimeAgo, formatCount };
+
+// Re-export connection mode for UI
+export { getConnectionMode, onConnectionModeChange, checkSupabaseReachable };
 
 // ============ Auth Store ============
 
@@ -29,6 +40,7 @@ interface AuthState {
   error: string | null;
   login: (email: string, password: string) => Promise<boolean>;
   register: (email: string, password: string, username?: string, nickname?: string) => Promise<boolean>;
+  loginWithGoogle: () => Promise<boolean>;
   logout: () => Promise<void>;
   updateUser: (data: Partial<User>) => Promise<void>;
   completeProfile: (data: { username: string; nickname: string; bio: string; gender: string; profileImage: string }) => Promise<void>;
@@ -42,18 +54,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   isLoading: false,
   error: null,
 
-  /** Initialize auth state from Supabase session */
+  /** Initialize auth state - tries Supabase session, falls back to local */
   initializeAuth: async () => {
     set({ isLoading: true });
     try {
-      const session = await authService.getSession();
-      if (session?.user) {
-        const profile = await userService.getUserProfile(session.user.id);
-        if (profile) {
-          set({
-            user: profile,
-            isAuthenticated: true,
-          });
+      // Initialize local DB and Google Auth
+      initLocalDatabase();
+      initGoogleAuth().catch(() => {});
+
+      // Try local first (instant - no network)
+      const localUser = localAuth.getCurrentUser();
+      if (localUser) {
+        set({ user: localUser, isAuthenticated: true });
+        // In background, check if Supabase is available and sync
+        checkSupabaseReachable().then(reachable => {
+          if (reachable) {
+            authService.getSession().then(session => {
+              if (session?.user) {
+                userService.getUserProfile(session.user.id).then(profile => {
+                  if (profile) set({ user: profile });
+                });
+              }
+            }).catch(() => {});
+          }
+        });
+        return;
+      }
+
+      // No local user - try Supabase session
+      const reachable = await checkSupabaseReachable();
+      if (reachable) {
+        try {
+          const session = await authService.getSession();
+          if (session?.user) {
+            const profile = await userService.getUserProfile(session.user.id);
+            if (profile) {
+              set({ user: profile, isAuthenticated: true });
+            }
+          }
+        } catch (error) {
+          console.error('[AuthStore] Supabase init error:', error);
         }
       }
     } catch (error) {
@@ -63,12 +103,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Refresh user profile from Supabase */
+  /** Refresh user profile */
   refreshProfile: async () => {
     const { user } = get();
     if (!user) return;
     try {
-      const profile = await userService.getUserProfile(user.uid);
+      const profile = await smartUsers.getById(user.uid);
       if (profile) {
         set({ user: profile });
       }
@@ -77,49 +117,23 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Login with email and password */
+  /** Login with email and password - uses smart fallback */
   login: async (email: string, password: string) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.signIn(email, password);
-      if (data.user) {
-        const profile = await userService.getUserProfile(data.user.id);
-        if (profile) {
-          set({
-            user: profile,
-            isAuthenticated: true,
-          });
-          return true;
-        }
+      const { user, error } = await smartAuth.login(email, password);
+      if (error) {
+        set({ error });
+        return false;
       }
-      set({ error: 'Login failed: could not load profile' });
+      if (user) {
+        set({ user, isAuthenticated: true });
+        return true;
+      }
+      set({ error: 'فشل تسجيل الدخول' });
       return false;
     } catch (error: unknown) {
-      let message = error instanceof Error ? error.message : 'Login failed';
-      const isNetwork =
-        typeof message === 'string' &&
-        (/network|failed to fetch|timeout|aborted|err_network|err_name_resolution|err_connection/i.test(message) ||
-          (error as Error & { isNetworkError?: boolean }).isNetworkError);
-
-      // Translate common Supabase errors
-      if (message.includes('Invalid API key')) {
-        message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
-      } else if (message.includes('Invalid login credentials')) {
-        message = 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
-      } else if (message.includes('Email not confirmed')) {
-        message = 'البريد الإلكتروني غير مؤكد - تحقق من بريدك';
-      } else if (message.includes('User already registered')) {
-        message = 'هذا البريد مسجل مسبقاً';
-      } else if (message.includes('Password should be')) {
-        message = 'كلمة المرور قصيرة جداً - يجب أن تكون 6 أحرف على الأقل';
-      } else if (message.includes('Supabase client not configured')) {
-        message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
-      } else if (isNetwork) {
-        // More specific network error message
-        const attempt = (error as Error & { attempt?: number }).attempt;
-        const retryInfo = attempt && attempt > 1 ? ` (بعد ${attempt} محاولات)` : '';
-        message = `تعذّر الاتصال بالخادم${retryInfo} - تحقق من الإنترنت أو أن الخادم يعمل، ثم أعد المحاولة`;
-      }
+      const message = error instanceof Error ? error.message : 'فشل تسجيل الدخول';
       set({ error: message });
       return false;
     } finally {
@@ -131,86 +145,19 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   register: async (email: string, password: string, username?: string, nickname?: string) => {
     set({ isLoading: true, error: null });
     try {
-      const data = await authService.signUp(email, password, username, nickname);
-      if (data.user) {
-        // Try to load the profile (trigger should have created it)
-        // Retry a few times since the trigger might need a moment
-        let profile: User | null = null;
-        for (let attempt = 0; attempt < 3; attempt++) {
-          profile = await userService.getUserProfile(data.user.id);
-          if (profile) break;
-          // Wait before retrying
-          await new Promise(r => setTimeout(r, 500));
-        }
-
-        if (profile) {
-          set({
-            user: profile,
-            isAuthenticated: true,
-          });
-          return true;
-        }
-
-        // If profile still not available after retries, create a temporary user
-        // This allows the user to proceed while the profile gets created
-        const isAdmin = email === 'admin@adendot.app';
-        const tempUser: User = {
-          uid: data.user.id,
-          email,
-          username: username || '',
-          nickname: nickname || '',
-          bio: '',
-          gender: 'unspecified',
-          profileImage: '',
-          coverImage: '',
-          status: 'online',
-          role: isAdmin ? 'admin' : 'user',
-          isVerified: isAdmin,
-          isPremium: false,
-          region: '',
-          followersCount: 0,
-          followingCount: 0,
-          postsCount: 0,
-          level: 1,
-          xp: 0,
-          popularity: 0,
-          giftsCount: 0,
-          subscribers: 0,
-          coinsBalance: 100,
-          diamondsBalance: 0,
-          isProfileComplete: false,
-          isEmailVerified: true,
-          joinDate: new Date().toISOString().split('T')[0],
-          lastSeen: Date.now(),
-        };
-        set({ user: tempUser, isAuthenticated: true });
+      const { user, error } = await smartAuth.register(email, password, username, nickname);
+      if (error) {
+        set({ error });
+        return false;
+      }
+      if (user) {
+        set({ user, isAuthenticated: true });
         return true;
       }
-      set({ error: 'فشل إنشاء الحساب - حاول مرة أخرى' });
+      set({ error: 'فشل إنشاء الحساب' });
       return false;
     } catch (error: unknown) {
-      let message = error instanceof Error ? error.message : 'Registration failed';
-      const isNetwork =
-        typeof message === 'string' &&
-        (/network|failed to fetch|timeout|aborted|err_network|err_name_resolution|err_connection/i.test(message) ||
-          (error as Error & { isNetworkError?: boolean }).isNetworkError);
-
-      // Translate common Supabase errors
-      if (message.includes('Invalid API key')) {
-        message = 'مفتاح API غير صالح - يرجى إعداد الاتصال بقاعدة البيانات أولاً';
-      } else if (message.includes('User already registered')) {
-        message = 'هذا البريد مسجل مسبقاً';
-      } else if (message.includes('Password should be')) {
-        message = 'كلمة المرور قصيرة جداً - يجب أن تكون 6 أحرف على الأقل';
-      } else if (message.includes('Email not confirmed')) {
-        message = 'البريد الإلكتروني غير مؤكد';
-      } else if (message.includes('Supabase client not configured')) {
-        message = 'قاعدة البيانات غير مُعدة - يرجى إعداد الاتصال أولاً';
-      } else if (isNetwork) {
-        const attempt = (error as Error & { attempt?: number }).attempt;
-        const retryInfo = attempt && attempt > 1 ? ` (بعد ${attempt} محاولات)` : '';
-        message = `تعذّر الاتصال بالخادم${retryInfo} - تحقق من الإنترنت أو أن الخادم يعمل، ثم أعد المحاولة`;
-      }
+      const message = error instanceof Error ? error.message : 'فشل التسجيل';
       set({ error: message });
       return false;
     } finally {
@@ -218,27 +165,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  /** Logout */
+  /** Login with Google - uses Capacitor plugin on native, GIS on web */
+  loginWithGoogle: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await initGoogleAuth();
+      const profile = await signInWithGoogle();
+      const { user, error } = await smartAuth.loginWithGoogle(profile);
+      if (error) {
+        set({ error });
+        return false;
+      }
+      if (user) {
+        set({ user, isAuthenticated: true });
+        return true;
+      }
+      set({ error: 'فشل تسجيل الدخول عبر Google' });
+      return false;
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'فشل تسجيل الدخول عبر Google';
+      set({ error: message });
+      return false;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  /** Logout - clears both Supabase session and local */
   logout: async () => {
     try {
-      await authService.signOut();
+      await smartAuth.logout();
+      await signOutGoogle().catch(() => {});
     } catch (error) {
       console.error('[AuthStore] logout error:', error);
     }
     set({ user: null, isAuthenticated: false, error: null });
   },
 
-  /** Update user profile data */
+  /** Update user profile data - uses smart fallback */
   updateUser: async (data: Partial<User>) => {
     const { user } = get();
     if (!user) return;
-
     // Optimistic update
     set({ user: { ...user, ...data } });
-
-    // Sync to Supabase
     try {
-      const updated = await userService.updateUserProfile(user.uid, data);
+      const updated = await smartUsers.update(user.uid, data);
       if (updated) {
         set({ user: updated });
       }
@@ -251,7 +222,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   completeProfile: async (data) => {
     const { user } = get();
     if (!user) return;
-
     const updates: Partial<User> = {
       username: data.username,
       nickname: data.nickname,
@@ -260,13 +230,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       profileImage: data.profileImage || user.profileImage,
       isProfileComplete: true,
     };
-
-    // Optimistic update
     set({ user: { ...user, ...updates } });
-
-    // Sync to Supabase
     try {
-      const updated = await userService.updateUserProfile(user.uid, updates);
+      const updated = await smartUsers.update(user.uid, updates);
       if (updated) {
         set({ user: updated });
       }

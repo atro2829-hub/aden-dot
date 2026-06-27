@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Release version tag (e.g. v1.5.0)'
+        description: 'Release version tag (e.g. v1.6.0)'
         required: false
-        default: 'v1.5.0'
+        default: 'v1.6.0'
 
 permissions:
   contents: write
@@ -21,6 +21,8 @@ env:
   NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8"
   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM3NTg1NywiZXhwIjoyMDk2OTUxODU3fQ.gKTa_CbKLCHcgjLA_-OqGwCqHHr3dtDxZ-3Pbx-bWx4"
   SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM3NTg1NywiZXhwIjoyMDk2OTUxODU3fQ.gKTa_CbKLCHcgjLA_-OqGwCqHHr3dtDxZ-3Pbx-bWx4"
+  # Google Sign-In Client ID (user must replace with their own from Google Cloud Console)
+  NEXT_PUBLIC_GOOGLE_CLIENT_ID: "1009829494587-kfj3q8sbqtnl1prq5nq35lmqe7q8m3v4.apps.googleusercontent.com"
   KEYSTORE_PASSWORD: "AdenDot2026"
   KEY_ALIAS: "adendot"
   KEY_PASSWORD: "AdenDot2026"

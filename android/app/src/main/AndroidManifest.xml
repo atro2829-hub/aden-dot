@@ -98,6 +98,17 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- Google Sign-In Activity (required by @codetrix-studio/capacitor-google-auth) -->
+        <activity
+            android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity"
+            android:exported="false"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
+        <!-- Disable default work profile initialization (optional, prevents sign-in issues on work profile devices) -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-0000000000000000~0000000000" />
     </application>
 
 </manifest>

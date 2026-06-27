@@ -498,66 +498,70 @@ export default function AdenDotApp() {
   }, []);
 
   // Initialize auth on mount - go directly to login, no splash or setup screen
+  // Uses smart fallback: tries local first (instant), then Supabase in background
   useEffect(() => {
-    let authSubscription: { data: { subscription: { unsubscribe: () => void } } } | null = null;
     let mounted = true;
 
     const init = async () => {
-      // Check if Supabase is configured
-      const config = getActiveSupabaseConfig();
-      if (!config) {
-        // No config found - show setup screen
+      try {
+        // initializeAuth will try local first, then Supabase
+        await useAuthStore.getState().initializeAuth();
+      } catch (error) {
+        console.error('[AdenDotApp] Auth initialization error:', error);
+      } finally {
         if (mounted) setIsInitializing(false);
-        return;
       }
 
+      // Set up auth state change listener (only if Supabase is reachable)
       try {
-        await useAuthStore.getState().initializeAuth();
+        const { checkSupabaseReachable } = await import('@/lib/smart-service');
+        const reachable = await checkSupabaseReachable();
+        if (reachable) {
+          const subscription = authService.onAuthStateChange(async (event, session) => {
+            if (!mounted) return;
+            const s = session as { user?: { id?: string } } | null;
 
-        authSubscription = authService.onAuthStateChange(async (event, session) => {
-          const s = session as { user?: { id?: string } } | null;
-
-          if (event === 'SIGNED_IN' && s?.user?.id) {
-            const profile = await userService.getUserProfile(s.user.id!);
-            if (profile) {
-              useAuthStore.setState({
-                user: profile,
-                isAuthenticated: true,
-              });
-              // Ensure we navigate away from auth screens
-              useAppStore.setState({ showAuth: null });
-            }
-          } else if (event === 'SIGNED_OUT') {
-            useAuthStore.setState({
-              user: null,
-              isAuthenticated: false,
-              error: null,
-            });
-            usePostsStore.setState({ posts: [], currentPage: 0, hasMore: true });
-            // Navigate to login page
-            useAppStore.setState({ showAuth: 'login', activeTab: 'home' });
-          } else if (event === 'TOKEN_REFRESHED' && s?.user?.id) {
-            const currentState = useAuthStore.getState();
-            if (!currentState.user) {
+            if (event === 'SIGNED_IN' && s?.user?.id) {
               const profile = await userService.getUserProfile(s.user.id!);
               if (profile) {
                 useAuthStore.setState({
                   user: profile,
                   isAuthenticated: true,
                 });
+                useAppStore.setState({ showAuth: null });
+              }
+            } else if (event === 'SIGNED_OUT') {
+              useAuthStore.setState({
+                user: null,
+                isAuthenticated: false,
+                error: null,
+              });
+              usePostsStore.setState({ posts: [], currentPage: 0, hasMore: true });
+              useAppStore.setState({ showAuth: 'login', activeTab: 'home' });
+            } else if (event === 'TOKEN_REFRESHED' && s?.user?.id) {
+              const currentState = useAuthStore.getState();
+              if (!currentState.user) {
+                const profile = await userService.getUserProfile(s.user.id!);
+                if (profile) {
+                  useAuthStore.setState({
+                    user: profile,
+                    isAuthenticated: true,
+                  });
+                }
+              }
+            } else if (event === 'USER_UPDATED' && s?.user?.id) {
+              const profile = await userService.getUserProfile(s.user.id!);
+              if (profile) {
+                useAuthStore.setState({ user: profile });
               }
             }
-          } else if (event === 'USER_UPDATED' && s?.user?.id) {
-            const profile = await userService.getUserProfile(s.user.id!);
-            if (profile) {
-              useAuthStore.setState({ user: profile });
-            }
-          }
-        });
-      } catch (error) {
-        console.error('[AdenDotApp] Auth initialization error:', error);
-      } finally {
-        if (mounted) setIsInitializing(false);
+          });
+          // Store subscription for cleanup
+          (window as unknown as Record<string, unknown>).__adendotAuthSub = subscription;
+        }
+      } catch (e) {
+        // Supabase not reachable - that's OK, we have local fallback
+        console.log('[AdenDotApp] Running in local-only mode (Supabase unreachable)');
       }
     };
 
@@ -565,27 +569,22 @@ export default function AdenDotApp() {
 
     return () => {
       mounted = false;
-      if (authSubscription) {
-        authSubscription.data.subscription.unsubscribe();
+      const sub = (window as unknown as Record<string, unknown>).__adendotAuthSub as
+        { data: { subscription: { unsubscribe: () => void } } } | null;
+      if (sub) {
+        sub.data.subscription.unsubscribe();
       }
     };
   }, []);
 
-  // Quick loading - no splash, just a brief spinner
+  // Quick loading - no splash, just a brief spinner (max 800ms)
   if (isInitializing) {
     return <LoadingScreen />;
   }
 
-  // Show Supabase setup only if no config at all
-  const config = getActiveSupabaseConfig();
-  if (!config) {
-    return <SupabaseSetupScreen onConfigured={() => {
-      resetSupabaseBrowser();
-      setIsInitializing(true);
-      // Re-run init
-      window.location.reload();
-    }} />;
-  }
+  // NOTE: We no longer require Supabase to be configured.
+  // The app works in local-only mode if Supabase is unreachable.
+  // The SupabaseSetupScreen is only shown if the user explicitly wants to configure Supabase.
 
   // Show auth pages - handle all auth states properly
   if (!isAuthenticated || showAuth) {
