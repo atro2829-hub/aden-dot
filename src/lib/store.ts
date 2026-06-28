@@ -1024,7 +1024,7 @@ export const useGiftsStore = create<GiftsState>((set) => ({
     if (!user) return false;
 
     try {
-      const gift = await giftsService.sendGift({
+      const result = await giftsService.sendGift({
         senderUID: user.uid,
         receiverUID: params.receiverUID,
         giftTypeId: params.giftTypeId,
@@ -1033,12 +1033,15 @@ export const useGiftsStore = create<GiftsState>((set) => ({
         liveStreamID: params.liveStreamID,
       });
 
-      if (gift) {
-        set((state) => ({ sentGifts: [gift, ...state.sentGifts] }));
+      if (result.ok) {
+        if (result.gift) {
+          set((state) => ({ sentGifts: [result.gift!, ...state.sentGifts] }));
+        }
         // Refresh wallet balance
         await useAuthStore.getState().refreshProfile();
         return true;
       }
+      set({ error: result.error || 'فشل إرسال الهدية' });
       return false;
     } catch (error) {
       console.error('[GiftsStore] sendGift error:', error);

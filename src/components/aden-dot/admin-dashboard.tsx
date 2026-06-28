@@ -33,7 +33,7 @@ const RED = '#EF4444';
 const GREEN = '#22C55E';
 const AMBER = '#F59E0B';
 
-type AdminSection = 'overview' | 'users' | 'moderation' | 'subscriptions' | 'withdrawals' | 'gifts' | 'livestreams' | 'settings' | 'logs';
+type AdminSection = 'overview' | 'users' | 'moderation' | 'subscriptions' | 'withdrawals' | 'deposits' | 'payments' | 'gifts' | 'livestreams' | 'settings' | 'logs';
 
 // ============ Admin Supabase Client ============
 // Uses service role key for admin operations (bypasses RLS).
@@ -166,7 +166,9 @@ function AdminSidebar({ active, onChange, lang }: { active: AdminSection; onChan
     { id: 'users', icon: <UsersIcon />, labelEn: 'Users', labelAr: 'المستخدمون' },
     { id: 'moderation', icon: <ModerationIcon />, labelEn: 'Moderation', labelAr: 'الإشراف' },
     { id: 'subscriptions', icon: <SubscriptionIcon />, labelEn: 'Subscriptions', labelAr: 'الاشتراكات' },
+    { id: 'deposits', icon: <CoinIcon size={20} />, labelEn: 'Deposits', labelAr: 'الإيداعات' },
     { id: 'withdrawals', icon: <WithdrawalIcon />, labelEn: 'Withdrawals', labelAr: 'السحوبات' },
+    { id: 'payments', icon: <SettingsIcon size={20} />, labelEn: 'Payment Methods', labelAr: 'طرق الدفع' },
     { id: 'gifts', icon: <GiftIcon size={20} />, labelEn: 'Gifts & Economy', labelAr: 'الهدايا والاقتصاد' },
     { id: 'livestreams', icon: <StreamIcon />, labelEn: 'Live Streams', labelAr: 'البث المباشر' },
     { id: 'settings', icon: <SettingsIcon size={20} />, labelEn: 'App Settings', labelAr: 'إعدادات التطبيق' },
@@ -1307,78 +1309,61 @@ function SubscriptionManagement({ lang }: { lang: string }) {
 function WithdrawalManagement({ lang }: { lang: string }) {
   const isRTL = lang === 'ar';
   const { showToast, ToastUI } = useToast();
-  const [data, setData] = useState<{
-    totalPayouts: number; pendingAmount: number; approvedPayouts: number;
-    withdrawals: Database['public']['Tables']['transactions']['Row'][];
-  } | null>(null);
+  const [withdrawals, setWithdrawals] = useState<Database['public']['Tables']['withdrawal_requests']['Row'][]>([]);
   const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed' | 'rejected'>('pending');
   const [actionDialog, setActionDialog] = useState<{ id: string; action: 'approve' | 'reject' } | null>(null);
   const [note, setNote] = useState('');
 
-  useEffect(() => {
-    async function loadData() {
-      const sb = getSupabaseAdmin();
-      if (!sb) { setLoading(false); return; }
-
-      try {
-        const [allWithdrawals, pendingWithdrawals] = await Promise.all([
-          sb.from('transactions').select('*').eq('type', 'withdraw').order('created_at', { ascending: false }).limit(100),
-          sb.from('transactions').select('amount').eq('type', 'withdraw').like('description', '%pending%'),
-        ]);
-
-        const totalPayouts = (allWithdrawals.data || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-        const pendingAmount = (pendingWithdrawals.data || []).reduce((sum, t) => sum + (t.amount || 0), 0);
-        const approvedPayouts = (allWithdrawals.data || []).filter(t => !t.description?.includes('pending')).reduce((sum, t) => sum + (t.amount || 0), 0);
-
-        setData({
-          totalPayouts,
-          pendingAmount,
-          approvedPayouts,
-          withdrawals: allWithdrawals.data || [],
-        });
-      } catch (err) {
-        console.error('[Admin] Failed to load withdrawals:', err);
-      } finally {
-        setLoading(false);
-      }
+  const loadWithdrawals = useCallback(async () => {
+    const sb = getSupabaseAdmin();
+    if (!sb) { setLoading(false); return; }
+    try {
+      let query = sb.from('withdrawal_requests')
+        .select('*, payment_method:payment_methods(*), user:users!withdrawal_requests_user_uid_fkey(uid,username,nickname,email)')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      setWithdrawals((data || []) as unknown as Database['public']['Tables']['withdrawal_requests']['Row'][]);
+    } catch (err) {
+      console.error('[Admin] Failed to load withdrawals:', err);
+    } finally {
+      setLoading(false);
     }
-    loadData();
-  }, []);
+  }, [statusFilter]);
+
+  useEffect(() => { loadWithdrawals(); }, [loadWithdrawals]);
 
   const handleAction = async () => {
     if (!actionDialog) return;
     const sb = getSupabaseAdmin();
     if (!sb) return;
-
     try {
-      if (actionDialog.action === 'approve') {
-        const { error } = await sb.from('transactions').update({ description: `approved${note ? ': ' + note : ''}` }).eq('id', actionDialog.id);
-        if (error) throw error;
-      } else {
-        const { error } = await sb.from('transactions').delete().eq('id', actionDialog.id);
-        if (error) throw error;
+      const { data, error } = await sb.rpc('process_withdrawal_request', {
+        p_request_id: actionDialog.id,
+        p_action: actionDialog.action,
+        p_admin_note: note,
+      });
+      if (error) throw error;
+      const result = data as { ok?: boolean; error?: string };
+      if (!result?.ok) {
+        showToast(isRTL ? 'فشل: ' + (result?.error || '') : 'Failed: ' + (result?.error || ''), 'error');
+        return;
       }
       setActionDialog(null);
       setNote('');
-      // Reload
-      setLoading(true);
-      const [allWithdrawals, pendingWithdrawals] = await Promise.all([
-        sb.from('transactions').select('*').eq('type', 'withdraw').order('created_at', { ascending: false }).limit(100),
-        sb.from('transactions').select('amount').eq('type', 'withdraw').like('description', '%pending%'),
-      ]);
-      setData({
-        totalPayouts: (allWithdrawals.data || []).reduce((sum, t) => sum + (t.amount || 0), 0),
-        pendingAmount: (pendingWithdrawals.data || []).reduce((sum, t) => sum + (t.amount || 0), 0),
-        approvedPayouts: (allWithdrawals.data || []).filter(t => !t.description?.includes('pending')).reduce((sum, t) => sum + (t.amount || 0), 0),
-        withdrawals: allWithdrawals.data || [],
-      });
-      setLoading(false);
-      showToast(actionDialog.action === 'approve' ? (isRTL ? 'تمت الموافقة' : 'Approved') : (isRTL ? 'تم الرفض' : 'Rejected'));
+      await loadWithdrawals();
+      showToast(actionDialog.action === 'approve' ? (isRTL ? 'تمت الموافقة والدفع' : 'Approved & Paid') : (isRTL ? 'تم الرفض' : 'Rejected'));
     } catch (err) {
       console.error('[Admin] Withdrawal action failed:', err);
       showToast(isRTL ? 'فشل الإجراء' : 'Action failed', 'error');
     }
   };
+
+  const totalPending = withdrawals.filter(w => w.status === 'pending').reduce((s, w) => s + (w.amount_coins || 0), 0);
+  const totalCompleted = withdrawals.filter(w => w.status === 'completed').reduce((s, w) => s + (w.amount_coins || 0), 0);
 
   if (loading) {
     return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
@@ -1388,21 +1373,37 @@ function WithdrawalManagement({ lang }: { lang: string }) {
     <div className="space-y-4">
       {ToastUI}
 
-      {/* Stats */}
       <div className="grid grid-cols-2 gap-3">
-        <StatCard icon={<WithdrawalIcon size={16} color="var(--primary)" />} label={isRTL ? 'إجمالي المدفوعات' : 'Total Payouts'} value={formatNumber(data?.totalPayouts || 0, lang)} subValue={isRTL ? 'عملات' : 'coins'} />
-        <StatCard icon={<LightningIcon size={16} />} label={isRTL ? 'معلق' : 'Pending'} value={formatNumber(data?.pendingAmount || 0, lang)} color={AMBER} />
-        <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'تمت الموافقة' : 'Approved'} value={formatNumber(data?.approvedPayouts || 0, lang)} color={GREEN} />
+        <StatCard icon={<WithdrawalIcon size={16} color="var(--primary)" />} label={isRTL ? 'سحوبات معلقة' : 'Pending Withdrawals'} value={formatNumber(totalPending, lang)} color={AMBER} />
+        <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'سحوبات مكتملة' : 'Completed Withdrawals'} value={formatNumber(totalCompleted, lang)} color={GREEN} />
       </div>
 
-      {/* Withdrawal List */}
-      <div>
-        <h3 className="text-sm font-semibold text-foreground mb-2">{isRTL ? 'طلبات السحب' : 'Withdrawal Requests'}</h3>
-        <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
-          {(data?.withdrawals || []).length === 0 && (
-            <p className="text-xs text-muted-foreground text-center py-8">{isRTL ? 'لا توجد طلبات سحب' : 'No withdrawal requests'}</p>
-          )}
-          {(data?.withdrawals || []).map((w, i) => (
+      <div className="flex gap-2">
+        {(['pending', 'completed', 'rejected', 'all'] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => { setStatusFilter(s); setLoading(true); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+              statusFilter === s
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+            }`}
+          >
+            {isRTL
+              ? (s === 'pending' ? 'معلقة' : s === 'completed' ? 'مكتملة' : s === 'rejected' ? 'مرفوضة' : 'الكل')
+              : s === 'pending' ? 'Pending' : s === 'completed' ? 'Completed' : s === 'rejected' ? 'Rejected' : 'All'}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
+        {withdrawals.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-8">{isRTL ? 'لا توجد طلبات سحب' : 'No withdrawal requests'}</p>
+        )}
+        {withdrawals.map((w, i) => {
+          const pm = (w as { payment_method?: { name_ar?: string; name?: string; icon_emoji?: string } }).payment_method;
+          const usr = (w as { user?: { nickname?: string; username?: string; email?: string } }).user;
+          return (
             <motion.div
               key={w.id}
               className="p-3 rounded-lg"
@@ -1412,36 +1413,53 @@ function WithdrawalManagement({ lang }: { lang: string }) {
               transition={{ delay: i * 0.03 }}
             >
               <div className="flex items-center justify-between">
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    {w.currency === 'coins' ? <CoinIcon size={12} /> : <DiamondCurrencyIcon size={12} />}
-                    <span className="text-sm font-semibold text-foreground">{formatNumber(w.amount, lang)}</span>
-                    <span className="text-[10px] text-muted-foreground">{w.currency}</span>
+                    <DiamondCurrencyIcon size={12} />
+                    <span className="text-sm font-semibold text-foreground">-{formatNumber(w.amount_coins, lang)}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {pm?.icon_emoji} {isRTL ? pm?.name_ar : pm?.name}
+                    </span>
                   </div>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{w.user_uid} · {new Date(w.created_at).toLocaleString(isRTL ? 'ar' : 'en')}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                    {usr?.nickname || usr?.username || w.user_uid} · {new Date(w.created_at).toLocaleString(isRTL ? 'ar' : 'en')}
+                  </p>
+                  {w.destination_account && (
+                    <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">
+                      {isRTL ? 'إلى:' : 'To:'} {w.destination_account}
+                    </p>
+                  )}
+                  {w.user_note && <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">"{w.user_note}"</p>}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1" style={{
+                    background: w.status === 'completed' ? `${GREEN}20` : w.status === 'pending' ? `${AMBER}20` : `${RED}20`,
+                    color: w.status === 'completed' ? GREEN : w.status === 'pending' ? AMBER : RED,
+                  }}>
+                    {w.status}
+                  </span>
                 </div>
-                <div className="flex gap-1">
-                  <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }} onClick={() => setActionDialog({ id: w.id, action: 'approve' })}>
-                    {isRTL ? 'موافقة' : 'Approve'}
-                  </Button>
-                  <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => setActionDialog({ id: w.id, action: 'reject' })}>
-                    {isRTL ? 'رفض' : 'Reject'}
-                  </Button>
-                </div>
+                {w.status === 'pending' && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }} onClick={() => setActionDialog({ id: w.id, action: 'approve' })}>
+                      {isRTL ? 'دفع' : 'Pay'}
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => setActionDialog({ id: w.id, action: 'reject' })}>
+                      {isRTL ? 'رفض' : 'Reject'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </motion.div>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Action Dialog */}
       <Dialog open={!!actionDialog} onOpenChange={() => { setActionDialog(null); setNote(''); }}>
         <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: `1px solid var(--primary)20` }}>
           {actionDialog && (
             <>
               <DialogHeader>
                 <DialogTitle className="text-foreground text-sm">
-                  {actionDialog.action === 'approve' ? (isRTL ? 'موافقة على السحب' : 'Approve Withdrawal') : (isRTL ? 'رفض السحب' : 'Reject Withdrawal')}
+                  {actionDialog.action === 'approve' ? (isRTL ? 'تأكيد دفع السحب' : 'Approve & Pay Withdrawal') : (isRTL ? 'رفض السحب' : 'Reject Withdrawal')}
                 </DialogTitle>
               </DialogHeader>
               <Textarea
@@ -1454,7 +1472,7 @@ function WithdrawalManagement({ lang }: { lang: string }) {
               <DialogFooter className="gap-2">
                 <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => { setActionDialog(null); setNote(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
                 <Button size="sm" style={{ background: actionDialog.action === 'approve' ? GREEN : RED, color: '#fff' }} onClick={handleAction}>
-                  {actionDialog.action === 'approve' ? (isRTL ? 'موافقة' : 'Approve') : (isRTL ? 'رفض' : 'Reject')}
+                  {actionDialog.action === 'approve' ? (isRTL ? 'دفع' : 'Pay') : (isRTL ? 'رفض' : 'Reject')}
                 </Button>
               </DialogFooter>
             </>
@@ -2198,6 +2216,354 @@ function AdminLogs({ lang }: { lang: string }) {
   );
 }
 
+// ============ Section 5b: Deposit Management (NEW) ============
+function DepositManagement({ lang }: { lang: string }) {
+  const isRTL = lang === 'ar';
+  const { showToast, ToastUI } = useToast();
+  const [deposits, setDeposits] = useState<Database['public']['Tables']['deposit_requests']['Row'][]>([]);
+  const [loading, setLoading] = useState(true);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'completed' | 'rejected'>('pending');
+  const [actionDialog, setActionDialog] = useState<{ id: string; action: 'approve' | 'reject' } | null>(null);
+  const [note, setNote] = useState('');
+
+  const loadDeposits = useCallback(async () => {
+    const sb = getSupabaseAdmin();
+    if (!sb) { setLoading(false); return; }
+    try {
+      let query = sb.from('deposit_requests')
+        .select('*, payment_method:payment_methods(*), user:users!deposit_requests_user_uid_fkey(uid,username,nickname,email)')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (statusFilter !== 'all') query = query.eq('status', statusFilter);
+      const { data, error } = await query;
+      if (error) throw error;
+      setDeposits((data || []) as unknown as Database['public']['Tables']['deposit_requests']['Row'][]);
+    } catch (err) {
+      console.error('[Admin] Failed to load deposits:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => { loadDeposits(); }, [loadDeposits]);
+
+  const handleAction = async () => {
+    if (!actionDialog) return;
+    const sb = getSupabaseAdmin();
+    if (!sb) return;
+    try {
+      const { data, error } = await sb.rpc('process_deposit_request', {
+        p_request_id: actionDialog.id,
+        p_action: actionDialog.action,
+        p_admin_note: note,
+      });
+      if (error) throw error;
+      const result = data as { ok?: boolean; error?: string };
+      if (!result?.ok) {
+        showToast(isRTL ? 'فشل: ' + (result?.error || '') : 'Failed: ' + (result?.error || ''), 'error');
+        return;
+      }
+      setActionDialog(null);
+      setNote('');
+      await loadDeposits();
+      showToast(actionDialog.action === 'approve' ? (isRTL ? 'تم اعتماد الإيداع' : 'Deposit approved') : (isRTL ? 'تم الرفض' : 'Rejected'));
+    } catch (err) {
+      console.error('[Admin] Deposit action failed:', err);
+      showToast(isRTL ? 'فشل الإجراء' : 'Action failed', 'error');
+    }
+  };
+
+  const totalPending = deposits.filter(d => d.status === 'pending').reduce((s, d) => s + (d.amount_coins || 0), 0);
+  const totalCompleted = deposits.filter(d => d.status === 'completed').reduce((s, d) => s + (d.amount_coins || 0), 0);
+
+  if (loading) {
+    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {ToastUI}
+      <div className="grid grid-cols-2 gap-3">
+        <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'إيداعات معلقة' : 'Pending Deposits'} value={formatNumber(totalPending, lang)} color={AMBER} />
+        <StatCard icon={<CoinIcon size={16} />} label={isRTL ? 'إيداعات مكتملة' : 'Completed Deposits'} value={formatNumber(totalCompleted, lang)} color={GREEN} />
+      </div>
+
+      <div className="flex gap-2">
+        {(['pending', 'completed', 'rejected', 'all'] as const).map((s) => (
+          <button
+            key={s}
+            onClick={() => { setStatusFilter(s); setLoading(true); }}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium ${
+              statusFilter === s
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted text-muted-foreground'
+            }`}
+          >
+            {isRTL
+              ? (s === 'pending' ? 'معلقة' : s === 'completed' ? 'مكتملة' : s === 'rejected' ? 'مرفوضة' : 'الكل')
+              : s === 'pending' ? 'Pending' : s === 'completed' ? 'Completed' : s === 'rejected' ? 'Rejected' : 'All'}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-1.5 max-h-[55vh] overflow-y-auto">
+        {deposits.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-8">{isRTL ? 'لا توجد إيداعات' : 'No deposits'}</p>
+        )}
+        {deposits.map((d, i) => {
+          const pm = (d as { payment_method?: { name_ar?: string; name?: string; icon_emoji?: string } }).payment_method;
+          const usr = (d as { user?: { nickname?: string; username?: string; email?: string } }).user;
+          return (
+            <motion.div
+              key={d.id}
+              className="p-3 rounded-lg"
+              style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.03)' }}
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.03 }}
+            >
+              <div className="flex items-center justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <CoinIcon size={12} />
+                    <span className="text-sm font-semibold text-foreground">+{formatNumber(d.amount_coins, lang)}</span>
+                    <span className="text-[10px] text-muted-foreground">
+                      {pm?.icon_emoji} {isRTL ? pm?.name_ar : pm?.name}
+                    </span>
+                  </div>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 truncate">
+                    {usr?.nickname || usr?.username || d.user_uid} · {new Date(d.created_at).toLocaleString(isRTL ? 'ar' : 'en')}
+                  </p>
+                  {d.user_note && <p className="text-[10px] text-muted-foreground italic mt-0.5 truncate">"{d.user_note}"</p>}
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full inline-block mt-1" style={{
+                    background: d.status === 'completed' ? `${GREEN}20` : d.status === 'pending' ? `${AMBER}20` : `${RED}20`,
+                    color: d.status === 'completed' ? GREEN : d.status === 'pending' ? AMBER : RED,
+                  }}>
+                    {d.status}
+                  </span>
+                </div>
+                {d.status === 'pending' && (
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: GREEN, color: GREEN }} onClick={() => setActionDialog({ id: d.id, action: 'approve' })}>
+                      {isRTL ? 'اعتماد' : 'Approve'}
+                    </Button>
+                    <Button size="sm" variant="outline" className="h-7 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => setActionDialog({ id: d.id, action: 'reject' })}>
+                      {isRTL ? 'رفض' : 'Reject'}
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      <Dialog open={!!actionDialog} onOpenChange={() => { setActionDialog(null); setNote(''); }}>
+        <DialogContent className="max-w-sm" style={{ background: 'var(--card)', border: '1px solid var(--primary)20' }}>
+          {actionDialog && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-foreground text-sm">
+                  {actionDialog.action === 'approve' ? (isRTL ? 'اعتماد الإيداع' : 'Approve Deposit') : (isRTL ? 'رفض الإيداع' : 'Reject Deposit')}
+                </DialogTitle>
+              </DialogHeader>
+              <Textarea
+                placeholder={isRTL ? 'ملاحظات (اختياري)' : 'Notes (optional)'}
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                className="text-xs"
+                style={{ background: 'var(--muted)', borderColor: 'var(--primary)15', color: 'var(--foreground)' }}
+              />
+              <DialogFooter className="gap-2">
+                <Button size="sm" variant="ghost" className="text-muted-foreground" onClick={() => { setActionDialog(null); setNote(''); }}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
+                <Button size="sm" style={{ background: actionDialog.action === 'approve' ? GREEN : RED, color: '#fff' }} onClick={handleAction}>
+                  {actionDialog.action === 'approve' ? (isRTL ? 'اعتماد' : 'Approve') : (isRTL ? 'رفض' : 'Reject')}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+// ============ Section 5c: Payment Methods Management (NEW) ============
+function PaymentMethodsManagement({ lang }: { lang: string }) {
+  const isRTL = lang === 'ar';
+  const { showToast, ToastUI } = useToast();
+  const [methods, setMethods] = useState<Database['public']['Tables']['payment_methods']['Row'][]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [newMethod, setNewMethod] = useState({
+    code: '', name: '', name_ar: '', icon_emoji: '💳', type: 'manual' as const,
+    min_amount: 100, max_amount: 50000, fee_percent: 0, fee_fixed: 0,
+    is_active: true, sort_order: 0, instructions: '', instructions_ar: '',
+  });
+
+  const loadMethods = useCallback(async () => {
+    const sb = getSupabaseAdmin();
+    if (!sb) { setLoading(false); return; }
+    try {
+      const { data, error } = await sb.from('payment_methods').select('*').order('sort_order', { ascending: true });
+      if (error) throw error;
+      setMethods((data || []) as unknown as Database['public']['Tables']['payment_methods']['Row'][]);
+    } catch (err) {
+      console.error('[Admin] Failed to load payment methods:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { loadMethods(); }, [loadMethods]);
+
+  const handleAdd = async () => {
+    const sb = getSupabaseAdmin();
+    if (!sb || !newMethod.code || !newMethod.name) {
+      showToast(isRTL ? 'أدخل الكود والاسم' : 'Code and name required', 'error');
+      return;
+    }
+    try {
+      const { error } = await sb.from('payment_methods').insert({
+        code: newMethod.code,
+        name: newMethod.name,
+        name_ar: newMethod.name_ar || newMethod.name,
+        type: newMethod.type,
+        icon_emoji: newMethod.icon_emoji,
+        min_amount: newMethod.min_amount,
+        max_amount: newMethod.max_amount,
+        fee_percent: newMethod.fee_percent,
+        fee_fixed: newMethod.fee_fixed,
+        is_active: newMethod.is_active,
+        sort_order: newMethod.sort_order,
+        instructions: newMethod.instructions,
+        instructions_ar: newMethod.instructions_ar,
+      });
+      if (error) throw error;
+      setShowAdd(false);
+      setNewMethod({
+        code: '', name: '', name_ar: '', icon_emoji: '💳', type: 'manual',
+        min_amount: 100, max_amount: 50000, fee_percent: 0, fee_fixed: 0,
+        is_active: true, sort_order: 0, instructions: '', instructions_ar: '',
+      });
+      await loadMethods();
+      showToast(isRTL ? 'تمت الإضافة' : 'Added');
+    } catch (err) {
+      console.error('[Admin] Add payment method failed:', err);
+      showToast(isRTL ? 'فشل الإضافة' : 'Failed', 'error');
+    }
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean) => {
+    const sb = getSupabaseAdmin();
+    if (!sb) return;
+    try {
+      const { error } = await sb.from('payment_methods').update({ is_active: !currentActive }).eq('id', id);
+      if (error) throw error;
+      await loadMethods();
+    } catch (err) {
+      console.error('[Admin] Toggle failed:', err);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    const sb = getSupabaseAdmin();
+    if (!sb) return;
+    if (!confirm(isRTL ? 'تأكيد الحذف؟' : 'Confirm delete?')) return;
+    try {
+      const { error } = await sb.from('payment_methods').delete().eq('id', id);
+      if (error) throw error;
+      await loadMethods();
+      showToast(isRTL ? 'تم الحذف' : 'Deleted');
+    } catch (err) {
+      console.error('[Admin] Delete failed:', err);
+      showToast(isRTL ? 'فشل الحذف' : 'Failed', 'error');
+    }
+  };
+
+  if (loading) {
+    return <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <div key={i} className="h-16 rounded-lg animate-pulse" style={{ background: 'var(--card)' }} />)}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {ToastUI}
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-muted-foreground">{isRTL ? 'إدارة طرق الدفع المتاحة للمستخدمين' : 'Manage payment methods available to users'}</p>
+        <Button size="sm" onClick={() => setShowAdd(true)}>
+          <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 5v14M5 12h14" /></svg>
+          {isRTL ? 'إضافة' : 'Add'}
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        {methods.length === 0 && (
+          <p className="text-xs text-muted-foreground text-center py-8">{isRTL ? 'لا توجد طرق دفع' : 'No payment methods'}</p>
+        )}
+        {methods.map((m) => (
+          <div key={m.id} className="p-3 rounded-lg flex items-center gap-3" style={{ background: 'var(--card)', border: '1px solid rgba(255,255,255,0.03)' }}>
+            <span className="text-2xl">{m.icon_emoji}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">
+                {isRTL ? m.name_ar : m.name} <span className="text-[10px] text-muted-foreground">({m.code})</span>
+              </p>
+              <p className="text-[10px] text-muted-foreground">
+                {isRTL ? 'الحدود:' : 'Limits:'} {m.min_amount}-{m.max_amount} · {isRTL ? 'النوع:' : 'Type:'} {m.type}
+              </p>
+              {m.instructions_ar && <p className="text-[10px] text-muted-foreground/70 truncate mt-0.5">{m.instructions_ar}</p>}
+            </div>
+            <div className="flex flex-col gap-1 items-end">
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{
+                background: m.is_active ? `${GREEN}20` : `${RED}20`,
+                color: m.is_active ? GREEN : RED,
+              }}>
+                {m.is_active ? (isRTL ? 'مفعّل' : 'Active') : (isRTL ? 'موقوف' : 'Inactive')}
+              </span>
+              <div className="flex gap-1">
+                <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => handleToggleActive(m.id, m.is_active)}>
+                  {m.is_active ? (isRTL ? 'إيقاف' : 'Disable') : (isRTL ? 'تفعيل' : 'Enable')}
+                </Button>
+                <Button size="sm" variant="outline" className="h-6 text-[10px]" style={{ borderColor: RED, color: RED }} onClick={() => handleDelete(m.id)}>
+                  {isRTL ? 'حذف' : 'Delete'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <Dialog open={showAdd} onOpenChange={setShowAdd}>
+        <DialogContent className="max-w-md" style={{ background: 'var(--card)', border: '1px solid var(--primary)20' }}>
+          <DialogHeader>
+            <DialogTitle className="text-foreground text-sm">{isRTL ? 'إضافة طريقة دفع' : 'Add Payment Method'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <Input placeholder={isRTL ? 'الكود (مثال: paypal)' : 'Code (e.g. paypal)'} value={newMethod.code} onChange={(e) => setNewMethod({ ...newMethod, code: e.target.value })} className="text-xs" />
+              <Input placeholder={isRTL ? 'الإيموجي' : 'Emoji'} value={newMethod.icon_emoji} onChange={(e) => setNewMethod({ ...newMethod, icon_emoji: e.target.value })} className="text-xs" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input placeholder={isRTL ? 'الاسم (إنجليزي)' : 'Name (English)'} value={newMethod.name} onChange={(e) => setNewMethod({ ...newMethod, name: e.target.value })} className="text-xs" />
+              <Input placeholder={isRTL ? 'الاسم (عربي)' : 'Name (Arabic)'} value={newMethod.name_ar} onChange={(e) => setNewMethod({ ...newMethod, name_ar: e.target.value })} className="text-xs" />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <Input type="number" placeholder={isRTL ? 'الحد الأدنى' : 'Min'} value={newMethod.min_amount} onChange={(e) => setNewMethod({ ...newMethod, min_amount: parseInt(e.target.value) || 0 })} className="text-xs" />
+              <Input type="number" placeholder={isRTL ? 'الحد الأقصى' : 'Max'} value={newMethod.max_amount} onChange={(e) => setNewMethod({ ...newMethod, max_amount: parseInt(e.target.value) || 0 })} className="text-xs" />
+              <Input type="number" placeholder={isRTL ? 'الترتيب' : 'Order'} value={newMethod.sort_order} onChange={(e) => setNewMethod({ ...newMethod, sort_order: parseInt(e.target.value) || 0 })} className="text-xs" />
+            </div>
+            <Textarea placeholder={isRTL ? 'التعليمات بالعربية' : 'Instructions (Arabic)'} value={newMethod.instructions_ar} onChange={(e) => setNewMethod({ ...newMethod, instructions_ar: e.target.value })} className="text-xs" />
+            <Textarea placeholder={isRTL ? 'التعليمات بالإنجليزية' : 'Instructions (English)'} value={newMethod.instructions} onChange={(e) => setNewMethod({ ...newMethod, instructions: e.target.value })} className="text-xs" />
+          </div>
+          <DialogFooter className="gap-2">
+            <Button size="sm" variant="ghost" onClick={() => setShowAdd(false)}>{isRTL ? 'إلغاء' : 'Cancel'}</Button>
+            <Button size="sm" onClick={handleAdd}>{isRTL ? 'إضافة' : 'Add'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
 // ============ Main Admin Dashboard ============
 export function AdminDashboard() {
   const lang = useAppStore((s) => s.language);
@@ -2223,7 +2589,9 @@ export function AdminDashboard() {
     users: { en: 'User Management', ar: 'إدارة المستخدمين' },
     moderation: { en: 'Content Moderation', ar: 'الإشراف على المحتوى' },
     subscriptions: { en: 'Subscriptions', ar: 'الاشتراكات' },
+    deposits: { en: 'Deposits', ar: 'الإيداعات' },
     withdrawals: { en: 'Withdrawals', ar: 'السحوبات' },
+    payments: { en: 'Payment Methods', ar: 'طرق الدفع' },
     gifts: { en: 'Gifts & Economy', ar: 'الهدايا والاقتصاد' },
     livestreams: { en: 'Live Streams', ar: 'البث المباشر' },
     settings: { en: 'App Settings', ar: 'إعدادات التطبيق' },
@@ -2236,7 +2604,9 @@ export function AdminDashboard() {
       case 'users': return <UserManagement lang={lang} />;
       case 'moderation': return <ContentModeration lang={lang} />;
       case 'subscriptions': return <SubscriptionManagement lang={lang} />;
+      case 'deposits': return <DepositManagement lang={lang} />;
       case 'withdrawals': return <WithdrawalManagement lang={lang} />;
+      case 'payments': return <PaymentMethodsManagement lang={lang} />;
       case 'gifts': return <GiftEconomyManagement lang={lang} />;
       case 'livestreams': return <LiveStreamManagement lang={lang} />;
       case 'settings': return <AppSettingsSection lang={lang} />;
@@ -2259,7 +2629,9 @@ export function AdminDashboard() {
             {activeSection === 'users' && <UsersIcon size={14} />}
             {activeSection === 'moderation' && <ModerationIcon size={14} />}
             {activeSection === 'subscriptions' && <SubscriptionIcon size={14} />}
+            {activeSection === 'deposits' && <CoinIcon size={14} />}
             {activeSection === 'withdrawals' && <WithdrawalIcon size={14} />}
+            {activeSection === 'payments' && <SettingsIcon size={14} />}
             {activeSection === 'gifts' && <GiftIcon size={14} />}
             {activeSection === 'livestreams' && <StreamIcon size={14} />}
             {activeSection === 'settings' && <SettingsIcon size={14} />}

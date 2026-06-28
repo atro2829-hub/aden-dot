@@ -462,15 +462,21 @@ function LiveStreamViewer({
   const handleGiftBuy = useCallback(
     async (gift: Parameters<typeof sendGift>[0]) => {
       if (!user) return;
-      sendGift(gift, user.nickname || user.username);
-      // Send gift via service which also updates gifts_coins_total
-      await giftsService.sendGift({
+      // Send gift via server-side RPC (atomic balance transfer)
+      const result = await giftsService.sendGift({
         senderUID: user.uid,
         receiverUID: initialStream.hostUID,
         giftTypeId: gift.id,
         liveStreamID: initialStream.id,
       });
-      setShowGiftSheet(false);
+      if (result.ok) {
+        sendGift(gift, user.nickname || user.username);
+        setShowGiftSheet(false);
+        // Refresh stream to show updated gifts total
+        setStream((s) => s ? { ...s, giftsCoinsTotal: s.giftsCoinsTotal + (gift.coinCost * 1) } : s);
+      } else {
+        alert(result.error || 'فشل إرسال الهدية');
+      }
     },
     [user, initialStream.id, initialStream.hostUID, sendGift]
   );

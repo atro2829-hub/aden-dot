@@ -22,7 +22,6 @@ import { WalletPage, AchievementsPage } from './gifts-wallet';
 import { SettingsPage } from './settings-page';
 import { EarningsPage } from './earnings-page';
 import { AdminDashboard } from './admin-dashboard';
-import { SupabaseSetupScreen } from './supabase-setup';
 import { getActiveSupabaseConfig } from '@/lib/supabase-config';
 import { resetSupabaseBrowser } from '@/lib/supabase-browser';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -579,12 +578,7 @@ export default function AdenDotApp() {
     return <LoadingScreen />;
   }
 
-  // If Supabase is not configured, show the setup screen
-  const supabaseConfig = getActiveSupabaseConfig();
-  if (!supabaseConfig) {
-    return <SupabaseSetupScreen />;
-  }
-
+  // Supabase credentials are hardcoded — no setup screen required.
   // Show auth pages - handle all auth states properly
   if (!isAuthenticated || showAuth) {
     if (showAuth === 'register') return <RegisterPage />;

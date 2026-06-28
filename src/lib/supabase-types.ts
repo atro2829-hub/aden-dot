@@ -447,6 +447,152 @@ export interface Database {
           is_active?: boolean;
         };
       };
+      payment_methods: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          name_ar: string;
+          type: 'manual' | 'auto' | 'gateway';
+          instructions: string | null;
+          instructions_ar: string | null;
+          icon_emoji: string;
+          min_amount: number;
+          max_amount: number;
+          fee_percent: number;
+          fee_fixed: number;
+          is_active: boolean;
+          sort_order: number;
+          countries: string[];
+          metadata: Record<string, unknown>;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          name_ar: string;
+          type?: 'manual' | 'auto' | 'gateway';
+          instructions?: string | null;
+          instructions_ar?: string | null;
+          icon_emoji?: string;
+          min_amount?: number;
+          max_amount?: number;
+          fee_percent?: number;
+          fee_fixed?: number;
+          is_active?: boolean;
+          sort_order?: number;
+          countries?: string[];
+          metadata?: Record<string, unknown>;
+        };
+        Update: {
+          code?: string;
+          name?: string;
+          name_ar?: string;
+          type?: 'manual' | 'auto' | 'gateway';
+          instructions?: string | null;
+          instructions_ar?: string | null;
+          icon_emoji?: string;
+          min_amount?: number;
+          max_amount?: number;
+          fee_percent?: number;
+          fee_fixed?: number;
+          is_active?: boolean;
+          sort_order?: number;
+          countries?: string[];
+          metadata?: Record<string, unknown>;
+        };
+      };
+      deposit_requests: {
+        Row: {
+          id: string;
+          user_uid: string;
+          payment_method_id: string;
+          amount_coins: number;
+          amount_paid: number;
+          currency: string;
+          status: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code: string | null;
+          user_note: string | null;
+          admin_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          receipt_base64: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_uid: string;
+          payment_method_id: string;
+          amount_coins: number;
+          amount_paid?: number;
+          currency?: string;
+          status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code?: string | null;
+          user_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          receipt_base64?: string | null;
+        };
+        Update: {
+          status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code?: string | null;
+          user_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          receipt_base64?: string | null;
+        };
+      };
+      withdrawal_requests: {
+        Row: {
+          id: string;
+          user_uid: string;
+          payment_method_id: string;
+          amount_coins: number;
+          amount_payout: number;
+          currency: string;
+          status: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code: string | null;
+          destination_account: string | null;
+          user_note: string | null;
+          admin_note: string | null;
+          reviewed_by: string | null;
+          reviewed_at: string | null;
+          paid_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_uid: string;
+          payment_method_id: string;
+          amount_coins: number;
+          amount_payout?: number;
+          currency?: string;
+          status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code?: string | null;
+          destination_account?: string | null;
+          user_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          paid_at?: string | null;
+        };
+        Update: {
+          status?: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+          reference_code?: string | null;
+          destination_account?: string | null;
+          user_note?: string | null;
+          admin_note?: string | null;
+          reviewed_by?: string | null;
+          reviewed_at?: string | null;
+          paid_at?: string | null;
+        };
+      };
     };
     Views: Record<string, never>;
     Functions: {
@@ -454,6 +600,11 @@ export interface Database {
       increment_stream_viewers: { Args: { stream_id: string }; Returns: undefined };
       increment_stream_likes: { Args: { stream_id: string }; Returns: undefined };
       increment_stream_gifts: { Args: { stream_id: string; amount: number }; Returns: undefined };
+      send_gift: { Args: { p_gift_type_id: string; p_receiver_uid: string; p_quantity?: number; p_message?: string; p_post_id?: string; p_live_stream_id?: string }; Returns: Record<string, unknown> };
+      create_deposit_request: { Args: { p_payment_method_id: string; p_amount_coins: number; p_user_note?: string; p_receipt_base64?: string }; Returns: Record<string, unknown> };
+      create_withdrawal_request: { Args: { p_payment_method_id: string; p_amount_coins: number; p_destination_account: string; p_user_note?: string }; Returns: Record<string, unknown> };
+      process_deposit_request: { Args: { p_request_id: string; p_action: string; p_admin_note?: string }; Returns: Record<string, unknown> };
+      process_withdrawal_request: { Args: { p_request_id: string; p_action: string; p_admin_note?: string }; Returns: Record<string, unknown> };
     };
     Enums: {
       gender: 'male' | 'female' | 'unspecified';

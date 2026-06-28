@@ -8,7 +8,7 @@ on:
       version:
         description: 'Release version tag (e.g. v1.7.0)'
         required: false
-        default: 'v1.7.0'
+        default: 'v1.8.0'
 
 permissions:
   contents: write
@@ -24,8 +24,10 @@ permissions:
 #   KEYSTORE_BASE64              base64-encoded release keystore (optional)
 # ---------------------------------------------------------------------------
 env:
-  NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+  # Hardcoded primary Supabase credentials (the user wants the connection baked into the APK)
+  # Service role key is still pulled from GitHub Secrets (only needed for admin bootstrap)
+  NEXT_PUBLIC_SUPABASE_URL: "https://zjdkfzemrosdgkgtzhtg.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8"
   NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
   SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
@@ -371,7 +373,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.event.inputs.version || 'v1.6.0' }}"
+          VERSION="${{ github.event.inputs.version || 'v1.8.0' }}"
           echo "Creating release $VERSION ..."
 
           # Delete existing release if it exists

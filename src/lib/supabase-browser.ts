@@ -74,12 +74,12 @@ function delay(ms: number): Promise<void> {
  * Get or create the Supabase browser client.
  * Automatically re-creates if configuration changes.
  */
-export function getSupabaseBrowser(): SupabaseClient<Database> | null {
+export function getSupabaseBrowser(): SupabaseClient<Database> {
   const config = getActiveSupabaseConfig();
 
   if (!config) {
-    console.warn('[Supabase] No configuration found. Please set up Supabase credentials.');
-    return null;
+    // Should never happen — credentials are hardcoded in supabase-config.ts
+    throw new Error('[Supabase] Configuration missing');
   }
 
   // Re-create client if config changed
@@ -130,17 +130,17 @@ export function getSupabaseBrowser(): SupabaseClient<Database> | null {
     lastConfigKey = config.anonKey;
   } catch (error) {
     console.error('[Supabase] Failed to create browser client:', error);
-    return null;
+    throw error;
   }
 
   return browserClient;
 }
 
 /**
- * Check if the Supabase browser client is available and configured.
+ * Supabase is always configured (hardcoded credentials).
  */
 export function isSupabaseConfigured(): boolean {
-  return getActiveSupabaseConfig() !== null;
+  return true;
 }
 
 /**
@@ -166,6 +166,7 @@ export async function testSupabaseConnection(): Promise<{
   if (!config) {
     return { ok: false, status: 0, latencyMs: 0, error: 'Supabase not configured' };
   }
+  // config is always set via hardcoded credentials; this branch is unreachable.
 
   const start = Date.now();
   try {

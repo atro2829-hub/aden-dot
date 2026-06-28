@@ -80,11 +80,10 @@ export function formatCount(num: number): string {
   return num.toString();
 }
 
-/** Helper: get the Supabase client or throw */
+/** Helper: get the Supabase client (always available — credentials are hardcoded). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getClient(): SupabaseClient<any> {
   const client = getSupabaseBrowser();
-  if (!client) throw new Error('Supabase client not configured');
   return client as SupabaseClient<any>;
 }
 
@@ -1253,7 +1252,7 @@ export const giftsService = {
     }
   },
 
-  /** Send gift */
+  /** Send gift — uses server-side RPC for atomic balance transfer */
   async sendGift(params: {
     senderUID: string;
     receiverUID: string;
@@ -1261,119 +1260,56 @@ export const giftsService = {
     message?: string;
     postID?: string;
     liveStreamID?: string;
-  }): Promise<Gift | null> {
+    quantity?: number;
+  }): Promise<{ ok: boolean; error?: string; gift?: Gift; newBalance?: number }> {
     try {
       const client = getClient();
 
-      // Check sender's balance
-      const { data: wallet } = await client
-        .from('wallets')
-        .select('coins_balance, total_coins_spent')
-        .eq('uid', params.senderUID)
-        .single();
-
-      const { data: giftType } = await client
-        .from('gift_types')
-        .select('coin_cost, diamond_value')
-        .eq('id', params.giftTypeId)
-        .single();
-
-      if (!wallet || !giftType) throw new Error('Wallet or gift type not found');
-
-      const cost = (giftType as { coin_cost: number }).coin_cost;
-      const diamondValue = (giftType as { diamond_value: number }).diamond_value;
-      const walletData = wallet as { coins_balance: number; total_coins_spent: number };
-
-      if (walletData.coins_balance < cost) throw new Error('Insufficient coins');
-
-      // Deduct from sender
-      await client
-        .from('wallets')
-        .update({
-          coins_balance: walletData.coins_balance - cost,
-          total_coins_spent: walletData.total_coins_spent + cost,
-        })
-        .eq('uid', params.senderUID);
-
-      // Add diamonds to receiver
-      const { data: receiverWallet } = await client
-        .from('wallets')
-        .select('diamonds_balance, total_diamonds_earned')
-        .eq('uid', params.receiverUID)
-        .single();
-
-      if (receiverWallet) {
-        const rw = receiverWallet as { diamonds_balance: number; total_diamonds_earned: number };
-        await client
-          .from('wallets')
-          .update({
-            diamonds_balance: rw.diamonds_balance + diamondValue,
-            total_diamonds_earned: rw.total_diamonds_earned + diamondValue,
-          })
-          .eq('uid', params.receiverUID);
-      }
-
-      // Create gift record
-      const { data, error } = await client
-        .from('gifts')
-        .insert({
-          gift_type_id: params.giftTypeId,
-          sender_uid: params.senderUID,
-          receiver_uid: params.receiverUID,
-          post_id: params.postID || null,
-          live_stream_id: params.liveStreamID || null,
-          quantity: 1,
-          message: params.message || '',
-        })
-        .select('*, gift_type:gift_types(*), sender:users!gifts_sender_uid_fkey(*), receiver:users!gifts_receiver_uid_fkey(*)')
-        .single();
-      if (error) throw error;
-
-      // Create transaction records
-      const giftId = (data as GiftRow).id;
-      await client.from('transactions').insert([
-        {
-          user_uid: params.senderUID,
-          type: 'gift_send',
-          currency: 'coins',
-          amount: cost,
-          description: `Gift sent: ${cost} coins`,
-          reference_id: giftId,
-        },
-        {
-          user_uid: params.receiverUID,
-          type: 'gift_receive',
-          currency: 'diamonds',
-          amount: diamondValue,
-          description: `Gift received: ${diamondValue} diamonds`,
-          reference_id: giftId,
-        },
-      ]);
-
-      // Create notification
-      await notificationService.createNotification({
-        userUID: params.receiverUID,
-        type: 'gift',
-        fromUID: params.senderUID,
-        content: 'Sent you a gift!',
+      // Call server-side RPC (bypasses RLS for atomic wallet transfer)
+      const { data: rpcResult, error: rpcError } = await client.rpc('send_gift', {
+        p_gift_type_id: params.giftTypeId,
+        p_receiver_uid: params.receiverUID,
+        p_quantity: params.quantity ?? 1,
+        p_message: params.message ?? '',
+        p_post_id: params.postID ?? null,
+        p_live_stream_id: params.liveStreamID ?? null,
       });
 
-      // Update live stream gifts total if applicable
-      if (params.liveStreamID) {
-        try {
-          const streamData = (await client.from('live_streams').select('gifts_coins_total').eq('id', params.liveStreamID).single()).data;
-          if (streamData) {
-            await client.from('live_streams').update({
-              gifts_coins_total: (streamData as LiveStreamRow).gifts_coins_total + cost,
-            }).eq('id', params.liveStreamID!);
-          }
-        } catch { /* ignore */ }
+      if (rpcError) {
+        console.error('[GiftsService] send_gift RPC error:', rpcError);
+        return { ok: false, error: rpcError.message };
       }
 
-      return mapGiftFromDB(data as GiftRow & { gift_type: GiftTypeRow; sender: UserRow; receiver: UserRow });
+      const result = rpcResult as { ok?: boolean; error?: string; gift_id?: string; sender_balance?: number };
+      if (!result?.ok) {
+        const errMap: Record<string, string> = {
+          not_authenticated: 'يجب تسجيل الدخول أولاً',
+          cannot_gift_self: 'لا يمكنك إرسال هدية لنفسك',
+          insufficient_balance: 'رصيد العملات غير كافٍ',
+          insufficient_balance_race: 'تعذّر تنفيذ العملية، حاول مرة أخرى',
+          gift_not_found: 'الهدية غير متوفرة',
+          invalid_quantity: 'الكمية غير صحيحة',
+          sender_wallet_missing: 'محفظتك غير مهيأة، تواصل مع الدعم',
+          receiver_wallet_missing: 'محفظة المستلم غير مهيأة',
+        };
+        return { ok: false, error: errMap[result?.error ?? ''] || result?.error || 'فشل الإرسال' };
+      }
+
+      // Fetch the full gift record for UI display
+      const { data: giftRow } = await client
+        .from('gifts')
+        .select('*, gift_type:gift_types(*), sender:users!gifts_sender_uid_fkey(*), receiver:users!gifts_receiver_uid_fkey(*)')
+        .eq('id', result.gift_id!)
+        .single();
+
+      const gift = giftRow
+        ? mapGiftFromDB(giftRow as GiftRow & { gift_type: GiftTypeRow; sender: UserRow; receiver: UserRow })
+        : null;
+
+      return { ok: true, gift: gift ?? undefined, newBalance: result.sender_balance };
     } catch (error) {
       console.error('[GiftsService] sendGift error:', error);
-      return null;
+      return { ok: false, error: 'خطأ غير متوقع أثناء إرسال الهدية' };
     }
   },
 
@@ -1975,3 +1911,503 @@ export const storageService = {
     }
   },
 };
+
+// ============ PAYMENT METHODS SERVICE ============
+
+export interface PaymentMethod {
+  id: string;
+  code: string;
+  name: string;
+  nameAr: string;
+  type: 'manual' | 'auto' | 'gateway';
+  instructions: string | null;
+  instructionsAr: string | null;
+  iconEmoji: string;
+  minAmount: number;
+  maxAmount: number;
+  feePercent: number;
+  feeFixed: number;
+  isActive: boolean;
+  sortOrder: number;
+  countries: string[];
+}
+
+export interface DepositRequest {
+  id: string;
+  userUid: string;
+  paymentMethodId: string;
+  paymentMethod?: PaymentMethod;
+  amountCoins: number;
+  amountPaid: number;
+  currency: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  referenceCode: string | null;
+  userNote: string | null;
+  adminNote: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: { uid: string; username: string; nickname: string; email: string };
+}
+
+export interface WithdrawalRequest {
+  id: string;
+  userUid: string;
+  paymentMethodId: string;
+  paymentMethod?: PaymentMethod;
+  amountCoins: number;
+  amountPayout: number;
+  currency: string;
+  status: 'pending' | 'approved' | 'rejected' | 'completed' | 'cancelled';
+  referenceCode: string | null;
+  destinationAccount: string | null;
+  userNote: string | null;
+  adminNote: string | null;
+  reviewedBy: string | null;
+  reviewedAt: string | null;
+  paidAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  user?: { uid: string; username: string; nickname: string; email: string };
+}
+
+export const paymentService = {
+  /** Get all active payment methods (for users) */
+  async getActiveMethods(): Promise<PaymentMethod[]> {
+    try {
+      const client = getClient();
+      const { data, error } = await client
+        .from('payment_methods')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        code: r.code as string,
+        name: r.name as string,
+        nameAr: r.name_ar as string,
+        type: r.type as 'manual' | 'auto' | 'gateway',
+        instructions: r.instructions as string | null,
+        instructionsAr: r.instructions_ar as string | null,
+        iconEmoji: r.icon_emoji as string,
+        minAmount: r.min_amount as number,
+        maxAmount: r.max_amount as number,
+        feePercent: Number(r.fee_percent ?? 0),
+        feeFixed: r.fee_fixed as number,
+        isActive: r.is_active as boolean,
+        sortOrder: r.sort_order as number,
+        countries: (r.countries as string[]) || [],
+      }));
+    } catch (error) {
+      console.error('[PaymentService] getActiveMethods error:', error);
+      return [];
+    }
+  },
+
+  /** Get ALL payment methods (admin) */
+  async getAllMethods(): Promise<PaymentMethod[]> {
+    try {
+      const client = getClient();
+      const { data, error } = await client
+        .from('payment_methods')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => ({
+        id: r.id as string,
+        code: r.code as string,
+        name: r.name as string,
+        nameAr: r.name_ar as string,
+        type: r.type as 'manual' | 'auto' | 'gateway',
+        instructions: r.instructions as string | null,
+        instructionsAr: r.instructions_ar as string | null,
+        iconEmoji: r.icon_emoji as string,
+        minAmount: r.min_amount as number,
+        maxAmount: r.max_amount as number,
+        feePercent: Number(r.fee_percent ?? 0),
+        feeFixed: r.fee_fixed as number,
+        isActive: r.is_active as boolean,
+        sortOrder: r.sort_order as number,
+        countries: (r.countries as string[]) || [],
+      }));
+    } catch (error) {
+      console.error('[PaymentService] getAllMethods error:', error);
+      return [];
+    }
+  },
+
+  /** Create payment method (admin) */
+  async createMethod(input: Omit<PaymentMethod, 'id'>): Promise<PaymentMethod | null> {
+    try {
+      const client = getClient();
+      const { data, error } = await client.from('payment_methods').insert({
+        code: input.code,
+        name: input.name,
+        name_ar: input.nameAr,
+        type: input.type,
+        instructions: input.instructions,
+        instructions_ar: input.instructionsAr,
+        icon_emoji: input.iconEmoji,
+        min_amount: input.minAmount,
+        max_amount: input.maxAmount,
+        fee_percent: input.feePercent,
+        fee_fixed: input.feeFixed,
+        is_active: input.isActive,
+        sort_order: input.sortOrder,
+        countries: input.countries,
+      }).select('*').single();
+      if (error) throw error;
+      const r = data as Record<string, unknown>;
+      return {
+        id: r.id as string,
+        code: r.code as string,
+        name: r.name as string,
+        nameAr: r.name_ar as string,
+        type: r.type as 'manual' | 'auto' | 'gateway',
+        instructions: r.instructions as string | null,
+        instructionsAr: r.instructions_ar as string | null,
+        iconEmoji: r.icon_emoji as string,
+        minAmount: r.min_amount as number,
+        maxAmount: r.max_amount as number,
+        feePercent: Number(r.fee_percent ?? 0),
+        feeFixed: r.fee_fixed as number,
+        isActive: r.is_active as boolean,
+        sortOrder: r.sort_order as number,
+        countries: (r.countries as string[]) || [],
+      };
+    } catch (error) {
+      console.error('[PaymentService] createMethod error:', error);
+      return null;
+    }
+  },
+
+  /** Update payment method (admin) */
+  async updateMethod(id: string, patch: Partial<PaymentMethod>): Promise<boolean> {
+    try {
+      const client = getClient();
+      const update: Record<string, unknown> = {};
+      if (patch.name !== undefined) update.name = patch.name;
+      if (patch.nameAr !== undefined) update.name_ar = patch.nameAr;
+      if (patch.type !== undefined) update.type = patch.type;
+      if (patch.instructions !== undefined) update.instructions = patch.instructions;
+      if (patch.instructionsAr !== undefined) update.instructions_ar = patch.instructionsAr;
+      if (patch.iconEmoji !== undefined) update.icon_emoji = patch.iconEmoji;
+      if (patch.minAmount !== undefined) update.min_amount = patch.minAmount;
+      if (patch.maxAmount !== undefined) update.max_amount = patch.maxAmount;
+      if (patch.feePercent !== undefined) update.fee_percent = patch.feePercent;
+      if (patch.feeFixed !== undefined) update.fee_fixed = patch.feeFixed;
+      if (patch.isActive !== undefined) update.is_active = patch.isActive;
+      if (patch.sortOrder !== undefined) update.sort_order = patch.sortOrder;
+      if (patch.countries !== undefined) update.countries = patch.countries;
+
+      const { error } = await client.from('payment_methods').update(update).eq('id', id);
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[PaymentService] updateMethod error:', error);
+      return false;
+    }
+  },
+
+  /** Delete payment method (admin) */
+  async deleteMethod(id: string): Promise<boolean> {
+    try {
+      const client = getClient();
+      const { error } = await client.from('payment_methods').delete().eq('id', id);
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('[PaymentService] deleteMethod error:', error);
+      return false;
+    }
+  },
+
+  /** Create deposit request (user) — uses RPC for atomic creation with validation */
+  async createDepositRequest(params: {
+    paymentMethodId: string;
+    amountCoins: number;
+    userNote?: string;
+    receiptBase64?: string;
+  }): Promise<{ ok: boolean; error?: string; requestId?: string; reference?: string }> {
+    try {
+      const client = getClient();
+      const { data, error } = await client.rpc('create_deposit_request', {
+        p_payment_method_id: params.paymentMethodId,
+        p_amount_coins: params.amountCoins,
+        p_user_note: params.userNote ?? '',
+        p_receipt_base64: params.receiptBase64 ?? '',
+      });
+      if (error) return { ok: false, error: error.message };
+      const result = data as { ok?: boolean; error?: string; request_id?: string; reference?: string };
+      if (!result?.ok) {
+        const errMap: Record<string, string> = {
+          not_authenticated: 'يجب تسجيل الدخول',
+          method_not_found: 'طريقة الدفع غير متوفرة',
+          amount_out_of_range: 'المبلغ خارج النطاق المسموح',
+        };
+        return { ok: false, error: errMap[result?.error ?? ''] || result?.error || 'فشل إنشاء طلب الإيداع' };
+      }
+      return { ok: true, requestId: result.request_id, reference: result.reference };
+    } catch (error) {
+      console.error('[PaymentService] createDepositRequest error:', error);
+      return { ok: false, error: 'خطأ غير متوقع' };
+    }
+  },
+
+  /** Create withdrawal request (user) — uses RPC */
+  async createWithdrawalRequest(params: {
+    paymentMethodId: string;
+    amountCoins: number;
+    destinationAccount: string;
+    userNote?: string;
+  }): Promise<{ ok: boolean; error?: string; requestId?: string; reference?: string }> {
+    try {
+      const client = getClient();
+      const { data, error } = await client.rpc('create_withdrawal_request', {
+        p_payment_method_id: params.paymentMethodId,
+        p_amount_coins: params.amountCoins,
+        p_destination_account: params.destinationAccount,
+        p_user_note: params.userNote ?? '',
+      });
+      if (error) return { ok: false, error: error.message };
+      const result = data as { ok?: boolean; error?: string; request_id?: string; reference?: string };
+      if (!result?.ok) {
+        const errMap: Record<string, string> = {
+          not_authenticated: 'يجب تسجيل الدخول',
+          method_not_found: 'طريقة الدفع غير متوفرة',
+          amount_out_of_range: 'المبلغ خارج النطاق المسموح',
+          insufficient_balance: 'رصيد الألماس غير كافٍ',
+          insufficient_balance_race: 'تعذّر تنفيذ العملية، حاول مرة أخرى',
+        };
+        return { ok: false, error: errMap[result?.error ?? ''] || result?.error || 'فشل إنشاء طلب السحب' };
+      }
+      return { ok: true, requestId: result.request_id, reference: result.reference };
+    } catch (error) {
+      console.error('[PaymentService] createWithdrawalRequest error:', error);
+      return { ok: false, error: 'خطأ غير متوقع' };
+    }
+  },
+
+  /** Get user's deposit requests */
+  async getUserDeposits(userUid: string): Promise<DepositRequest[]> {
+    try {
+      const client = getClient();
+      const { data, error } = await client
+        .from('deposit_requests')
+        .select('*, payment_method:payment_methods(*)')
+        .eq('user_uid', userUid)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => mapDepositRequest(r));
+    } catch (error) {
+      console.error('[PaymentService] getUserDeposits error:', error);
+      return [];
+    }
+  },
+
+  /** Get user's withdrawal requests */
+  async getUserWithdrawals(userUid: string): Promise<WithdrawalRequest[]> {
+    try {
+      const client = getClient();
+      const { data, error } = await client
+        .from('withdrawal_requests')
+        .select('*, payment_method:payment_methods(*)')
+        .eq('user_uid', userUid)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => mapWithdrawalRequest(r));
+    } catch (error) {
+      console.error('[PaymentService] getUserWithdrawals error:', error);
+      return [];
+    }
+  },
+
+  /** Get all deposit requests (admin) */
+  async getAllDeposits(status?: string): Promise<DepositRequest[]> {
+    try {
+      const client = getClient();
+      let query = client
+        .from('deposit_requests')
+        .select('*, payment_method:payment_methods(*), user:users!deposit_requests_user_uid_fkey(uid,username,nickname,email)')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (status && status !== 'all') query = query.eq('status', status);
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => mapDepositRequest(r));
+    } catch (error) {
+      console.error('[PaymentService] getAllDeposits error:', error);
+      return [];
+    }
+  },
+
+  /** Get all withdrawal requests (admin) */
+  async getAllWithdrawals(status?: string): Promise<WithdrawalRequest[]> {
+    try {
+      const client = getClient();
+      let query = client
+        .from('withdrawal_requests')
+        .select('*, payment_method:payment_methods(*), user:users!withdrawal_requests_user_uid_fkey(uid,username,nickname,email)')
+        .order('created_at', { ascending: false })
+        .limit(200);
+      if (status && status !== 'all') query = query.eq('status', status);
+      const { data, error } = await query;
+      if (error) throw error;
+      return (data || []).map((r: Record<string, unknown>) => mapWithdrawalRequest(r));
+    } catch (error) {
+      console.error('[PaymentService] getAllWithdrawals error:', error);
+      return [];
+    }
+  },
+
+  /** Admin: approve/reject deposit */
+  async processDeposit(requestId: string, action: 'approve' | 'reject', adminNote?: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const client = getClient();
+      const { data, error } = await client.rpc('process_deposit_request', {
+        p_request_id: requestId,
+        p_action: action,
+        p_admin_note: adminNote ?? '',
+      });
+      if (error) return { ok: false, error: error.message };
+      const result = data as { ok?: boolean; error?: string };
+      if (!result?.ok) {
+        const errMap: Record<string, string> = {
+          unauthorized: 'غير مصرح',
+          not_found: 'الطلب غير موجود',
+          already_processed: 'تمت معالجة الطلب مسبقاً',
+          invalid_action: 'إجراء غير صالح',
+        };
+        return { ok: false, error: errMap[result?.error ?? ''] || result?.error || 'فشلت المعالجة' };
+      }
+      return { ok: true };
+    } catch (error) {
+      console.error('[PaymentService] processDeposit error:', error);
+      return { ok: false, error: 'خطأ غير متوقع' };
+    }
+  },
+
+  /** Admin: approve/reject withdrawal */
+  async processWithdrawal(requestId: string, action: 'approve' | 'reject', adminNote?: string): Promise<{ ok: boolean; error?: string }> {
+    try {
+      const client = getClient();
+      const { data, error } = await client.rpc('process_withdrawal_request', {
+        p_request_id: requestId,
+        p_action: action,
+        p_admin_note: adminNote ?? '',
+      });
+      if (error) return { ok: false, error: error.message };
+      const result = data as { ok?: boolean; error?: string };
+      if (!result?.ok) {
+        const errMap: Record<string, string> = {
+          unauthorized: 'غير مصرح',
+          not_found: 'الطلب غير موجود',
+          already_processed: 'تمت معالجة الطلب مسبقاً',
+          insufficient_balance: 'رصيد المستخدم غير كافٍ',
+          invalid_action: 'إجراء غير صالح',
+        };
+        return { ok: false, error: errMap[result?.error ?? ''] || result?.error || 'فشلت المعالجة' };
+      }
+      return { ok: true };
+    } catch (error) {
+      console.error('[PaymentService] processWithdrawal error:', error);
+      return { ok: false, error: 'خطأ غير متوقع' };
+    }
+  },
+};
+
+// ============ Mappers for new tables ============
+
+function mapDepositRequest(r: Record<string, unknown>): DepositRequest {
+  const pm = r.payment_method as Record<string, unknown> | null;
+  const user = r.user as Record<string, unknown> | null;
+  return {
+    id: r.id as string,
+    userUid: r.user_uid as string,
+    paymentMethodId: r.payment_method_id as string,
+    paymentMethod: pm ? {
+      id: pm.id as string,
+      code: pm.code as string,
+      name: pm.name as string,
+      nameAr: pm.name_ar as string,
+      type: pm.type as 'manual' | 'auto' | 'gateway',
+      instructions: pm.instructions as string | null,
+      instructionsAr: pm.instructions_ar as string | null,
+      iconEmoji: pm.icon_emoji as string,
+      minAmount: pm.min_amount as number,
+      maxAmount: pm.max_amount as number,
+      feePercent: Number(pm.fee_percent ?? 0),
+      feeFixed: pm.fee_fixed as number,
+      isActive: pm.is_active as boolean,
+      sortOrder: pm.sort_order as number,
+      countries: (pm.countries as string[]) || [],
+    } : undefined,
+    amountCoins: r.amount_coins as number,
+    amountPaid: Number(r.amount_paid ?? 0),
+    currency: r.currency as string,
+    status: r.status as DepositRequest['status'],
+    referenceCode: r.reference_code as string | null,
+    userNote: r.user_note as string | null,
+    adminNote: r.admin_note as string | null,
+    reviewedBy: r.reviewed_by as string | null,
+    reviewedAt: r.reviewed_at as string | null,
+    createdAt: r.created_at as string,
+    updatedAt: r.updated_at as string,
+    user: user ? {
+      uid: user.uid as string,
+      username: user.username as string,
+      nickname: user.nickname as string,
+      email: user.email as string,
+    } : undefined,
+  };
+}
+
+function mapWithdrawalRequest(r: Record<string, unknown>): WithdrawalRequest {
+  const pm = r.payment_method as Record<string, unknown> | null;
+  const user = r.user as Record<string, unknown> | null;
+  return {
+    id: r.id as string,
+    userUid: r.user_uid as string,
+    paymentMethodId: r.payment_method_id as string,
+    paymentMethod: pm ? {
+      id: pm.id as string,
+      code: pm.code as string,
+      name: pm.name as string,
+      nameAr: pm.name_ar as string,
+      type: pm.type as 'manual' | 'auto' | 'gateway',
+      instructions: pm.instructions as string | null,
+      instructionsAr: pm.instructions_ar as string | null,
+      iconEmoji: pm.icon_emoji as string,
+      minAmount: pm.min_amount as number,
+      maxAmount: pm.max_amount as number,
+      feePercent: Number(pm.fee_percent ?? 0),
+      feeFixed: pm.fee_fixed as number,
+      isActive: pm.is_active as boolean,
+      sortOrder: pm.sort_order as number,
+      countries: (pm.countries as string[]) || [],
+    } : undefined,
+    amountCoins: r.amount_coins as number,
+    amountPayout: Number(r.amount_payout ?? 0),
+    currency: r.currency as string,
+    status: r.status as WithdrawalRequest['status'],
+    referenceCode: r.reference_code as string | null,
+    destinationAccount: r.destination_account as string | null,
+    userNote: r.user_note as string | null,
+    adminNote: r.admin_note as string | null,
+    reviewedBy: r.reviewed_by as string | null,
+    reviewedAt: r.reviewed_at as string | null,
+    paidAt: r.paid_at as string | null,
+    createdAt: r.created_at as string,
+    updatedAt: r.updated_at as string,
+    user: user ? {
+      uid: user.uid as string,
+      username: user.username as string,
+      nickname: user.nickname as string,
+      email: user.email as string,
+    } : undefined,
+  };
+}
