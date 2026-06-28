@@ -8,7 +8,7 @@ on:
       version:
         description: 'Release version tag (e.g. v1.7.0)'
         required: false
-        default: 'v1.8.0'
+        default: 'v1.9.0'
 
 permissions:
   contents: write
@@ -25,11 +25,11 @@ permissions:
 # ---------------------------------------------------------------------------
 env:
   # Hardcoded primary Supabase credentials (the user wants the connection baked into the APK)
-  # Service role key is still pulled from GitHub Secrets (only needed for admin bootstrap)
-  NEXT_PUBLIC_SUPABASE_URL: "https://zjdkfzemrosdgkgtzhtg.supabase.co"
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8"
-  NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  # Both anon + service role keys are baked in so admin bootstrap works without GitHub Secrets
+  NEXT_PUBLIC_SUPABASE_URL: "https://bkqsetwjfdhuxtbtzatw.supabase.co"
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrcXNldHdqZmRodXh0YnR6YXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODM3MjUsImV4cCI6MjA5ODE1OTcyNX0.FgQOJTmx8Z7AbY06k05OGL1aBhU3yZG9Jyh7pmng0HU"
+  NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrcXNldHdqZmRodXh0YnR6YXR3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjU4MzcyNSwiZXhwIjoyMDk4MTU5NzI1fQ.Xx41_3lthr5h-G2Z26zwLjMfNPw66Sim8MNjoo7Ii4Y"
+  SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrcXNldHdqZmRodXh0YnR6YXR3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MjU4MzcyNSwiZXhwIjoyMDk4MTU5NzI1fQ.Xx41_3lthr5h-G2Z26zwLjMfNPw66Sim8MNjoo7Ii4Y"
   NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
   KEYSTORE_PASSWORD: "AdenDot2026"
   KEY_ALIAS: "adendot"
@@ -373,7 +373,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.event.inputs.version || 'v1.8.0' }}"
+          VERSION="${{ github.event.inputs.version || 'v1.9.0' }}"
           echo "Creating release $VERSION ..."
 
           # Delete existing release if it exists

@@ -11,7 +11,7 @@
  *   NEXT_PUBLIC_SUPABASE_ANON_KEY
  *   SUPABASE_SERVICE_ROLE_KEY
  */
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zjdkfzemrosdgkgtzhtg.supabase.co';
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bkqsetwjfdhuxtbtzatw.supabase.co';
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY;
 
 const ADMIN_EMAIL = 'admin@adendot.app';

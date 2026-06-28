@@ -16,9 +16,9 @@ const STORAGE_KEY = 'adendot_supabase_config';
 
 /** Official Aden Dot Supabase project credentials (hardcoded primary connection). */
 const PRIMARY_CONFIG: SupabaseConfig = {
-  url: 'https://zjdkfzemrosdgkgtzhtg.supabase.co',
+  url: 'https://bkqsetwjfdhuxtbtzatw.supabase.co',
   anonKey:
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNzU4NTcsImV4cCI6MjA5Njk1MTg1N30.ldIKtc8JsfSrZUHniFgAF7DZPcC-6DIMlfue_8xMPn8',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrcXNldHdqZmRodXh0YnR6YXR3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI1ODM3MjUsImV4cCI6MjA5ODE1OTcyNX0.FgQOJTmx8Z7AbY06k05OGL1aBhU3yZG9Jyh7pmng0HU',
 };
 
 /** Get config from environment variables (build-time override if ever needed). */

@@ -16,7 +16,7 @@ import json
 import urllib.request
 import urllib.error
 
-SUPABASE_URL = "https://zjdkfzemrosdgkgtzhtg.supabase.co"
+SUPABASE_URL = "https://bkqsetwjfdhuxtbtzatw.supabase.co"
 SERVICE_ROLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqZGtmemVtcm9zZGdrZ3R6aHRnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4MTM3NTg1NywiZXhwIjoyMDk2OTUxODU3fQ.gKTa_CbKLCHcgjLA_-OqGwCqHHr3dtDxZ-3Pbx-bWx4"
 
 ADMIN_EMAIL = "admin@adendot.app"

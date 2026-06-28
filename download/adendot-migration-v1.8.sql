@@ -3,6 +3,10 @@
 -- NEW: Payment Methods, Deposit & Withdrawal System
 -- =============================================
 
+-- Add missing analytics columns to wallets table (idempotent)
+ALTER TABLE public.wallets ADD COLUMN IF NOT EXISTS total_coins_purchased INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE public.wallets ADD COLUMN IF NOT EXISTS total_diamonds_withdrawn INTEGER NOT NULL DEFAULT 0;
+
 -- Payment methods configured by admin (PayPal, bank transfer, crypto, etc.)
 CREATE TABLE IF NOT EXISTS public.payment_methods (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -28,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.payment_methods (
 -- Deposit requests from users (charge coins balance)
 CREATE TABLE IF NOT EXISTS public.deposit_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_uid UUID NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   payment_method_id UUID NOT NULL REFERENCES public.payment_methods(id) ON DELETE RESTRICT,
   amount_coins INTEGER NOT NULL,
   amount_paid NUMERIC(12,2) NOT NULL DEFAULT 0,
@@ -37,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.deposit_requests (
   reference_code TEXT,
   user_note TEXT,
   admin_note TEXT,
-  reviewed_by UUID REFERENCES public.users(uid) ON DELETE SET NULL,
+  reviewed_by TEXT REFERENCES public.users(uid) ON DELETE SET NULL,
   reviewed_at TIMESTAMPTZ,
   receipt_base64 TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -51,7 +55,7 @@ CREATE INDEX IF NOT EXISTS idx_deposit_requests_created ON public.deposit_reques
 -- Withdrawal requests from users (cash out diamonds/coins)
 CREATE TABLE IF NOT EXISTS public.withdrawal_requests (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  user_uid UUID NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
+  user_uid TEXT NOT NULL REFERENCES public.users(uid) ON DELETE CASCADE,
   payment_method_id UUID NOT NULL REFERENCES public.payment_methods(id) ON DELETE RESTRICT,
   amount_coins INTEGER NOT NULL,
   amount_payout NUMERIC(12,2) NOT NULL DEFAULT 0,
@@ -61,7 +65,7 @@ CREATE TABLE IF NOT EXISTS public.withdrawal_requests (
   destination_account TEXT,
   user_note TEXT,
   admin_note TEXT,
-  reviewed_by UUID REFERENCES public.users(uid) ON DELETE SET NULL,
+  reviewed_by TEXT REFERENCES public.users(uid) ON DELETE SET NULL,
   reviewed_at TIMESTAMPTZ,
   paid_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -118,33 +122,33 @@ CREATE POLICY "Anyone authenticated can read active payment methods" ON public.p
   FOR SELECT TO authenticated USING (true);
 CREATE POLICY "Admins can manage payment methods" ON public.payment_methods
   FOR ALL TO authenticated USING (
-    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
   );
 
 -- RLS for deposit_requests
 ALTER TABLE public.deposit_requests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own deposit requests" ON public.deposit_requests
-  FOR SELECT TO authenticated USING (user_uid = auth.uid());
+  FOR SELECT TO authenticated USING (user_uid = auth.uid()::text);
 CREATE POLICY "Users can create own deposit requests" ON public.deposit_requests
-  FOR INSERT TO authenticated WITH CHECK (user_uid = auth.uid());
+  FOR INSERT TO authenticated WITH CHECK (user_uid = auth.uid()::text);
 CREATE POLICY "Users can update own pending deposit requests" ON public.deposit_requests
-  FOR UPDATE TO authenticated USING (user_uid = auth.uid() AND status = 'pending');
+  FOR UPDATE TO authenticated USING (user_uid = auth.uid()::text AND status = 'pending');
 CREATE POLICY "Admins can manage all deposit requests" ON public.deposit_requests
   FOR ALL TO authenticated USING (
-    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
   );
 
 -- RLS for withdrawal_requests
 ALTER TABLE public.withdrawal_requests ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can read own withdrawal requests" ON public.withdrawal_requests
-  FOR SELECT TO authenticated USING (user_uid = auth.uid());
+  FOR SELECT TO authenticated USING (user_uid = auth.uid()::text);
 CREATE POLICY "Users can create own withdrawal requests" ON public.withdrawal_requests
-  FOR INSERT TO authenticated WITH CHECK (user_uid = auth.uid());
+  FOR INSERT TO authenticated WITH CHECK (user_uid = auth.uid()::text);
 CREATE POLICY "Users can update own pending withdrawal requests" ON public.withdrawal_requests
-  FOR UPDATE TO authenticated USING (user_uid = auth.uid() AND status = 'pending');
+  FOR UPDATE TO authenticated USING (user_uid = auth.uid()::text AND status = 'pending');
 CREATE POLICY "Admins can manage all withdrawal requests" ON public.withdrawal_requests
   FOR ALL TO authenticated USING (
-    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid() AND role = 'admin')
+    EXISTS (SELECT 1 FROM public.users WHERE uid = auth.uid()::text AND role = 'admin')
   );
 
 -- Seed default payment methods
@@ -180,7 +184,7 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.payment_methods;
 
 CREATE OR REPLACE FUNCTION public.send_gift(
   p_gift_type_id UUID,
-  p_receiver_uid UUID,
+  p_receiver_uid TEXT,
   p_quantity INTEGER DEFAULT 1,
   p_message TEXT DEFAULT '',
   p_post_id UUID DEFAULT NULL,
@@ -191,7 +195,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_sender_uid UUID := auth.uid();
+  v_sender_uid TEXT := auth.uid()::text;
   v_gift_type RECORD;
   v_sender_wallet RECORD;
   v_receiver_wallet RECORD;
@@ -264,14 +268,14 @@ BEGIN
   -- Transactions
   INSERT INTO public.transactions (user_uid, type, currency, amount, description, reference_id) VALUES
     (v_sender_uid, 'gift_send', 'coins', v_total_cost,
-     'Gift sent: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id),
+     'Gift sent: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id::text),
     (p_receiver_uid, 'gift_receive', 'diamonds', v_total_diamonds,
-     'Gift received: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id);
+     'Gift received: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id::text);
 
   -- Notification
   INSERT INTO public.notifications (user_uid, type, from_uid, content, reference_id)
   VALUES (p_receiver_uid, 'gift', v_sender_uid,
-    'Received gift: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id);
+    'Received gift: ' || v_gift_type.name_ar || ' x' || p_quantity, v_gift_id::text);
 
   -- Update stream gift totals
   IF p_live_stream_id IS NOT NULL THEN
@@ -307,7 +311,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
   v_request RECORD;
-  v_admin_uid UUID := auth.uid();
+  v_admin_uid TEXT := auth.uid()::text;
   v_admin_role TEXT;
   v_reference_code TEXT;
 BEGIN
@@ -342,7 +346,7 @@ BEGIN
     -- Transaction record
     INSERT INTO public.transactions (user_uid, type, currency, amount, description, reference_id)
     VALUES (v_request.user_uid, 'deposit', 'coins', v_request.amount_coins,
-      'Deposit via ' || v_request.reference_code || ' (#' || p_request_id || ')', p_request_id);
+      'Deposit via ' || COALESCE(v_request.reference_code, '') || ' (#' || p_request_id::text || ')', p_request_id::text);
 
     v_reference_code := 'DEP-' || UPPER(SUBSTRING(p_request_id::text, 1, 8));
     RETURN jsonb_build_object('ok', true, 'status', 'completed', 'reference', v_reference_code);
@@ -378,7 +382,7 @@ SECURITY DEFINER
 AS $$
 DECLARE
   v_request RECORD;
-  v_admin_uid UUID := auth.uid();
+  v_admin_uid TEXT := auth.uid()::text;
   v_admin_role TEXT;
   v_reference_code TEXT;
   v_user_wallet RECORD;
@@ -426,7 +430,7 @@ BEGIN
 
     INSERT INTO public.transactions (user_uid, type, currency, amount, description, reference_id)
     VALUES (v_request.user_uid, 'withdraw', 'diamonds', v_request.amount_coins,
-      'Withdrawal processed (#' || p_request_id || ')', p_request_id);
+      'Withdrawal processed (#' || p_request_id::text || ')', p_request_id::text);
 
     v_reference_code := 'WTH-' || UPPER(SUBSTRING(p_request_id::text, 1, 8));
     RETURN jsonb_build_object('ok', true, 'status', 'completed', 'reference', v_reference_code);
@@ -462,7 +466,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_user_uid UUID := auth.uid();
+  v_user_uid TEXT := auth.uid()::text;
   v_method RECORD;
   v_request_id UUID;
   v_reference TEXT;
@@ -515,7 +519,7 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_user_uid UUID := auth.uid();
+  v_user_uid TEXT := auth.uid()::text;
   v_method RECORD;
   v_wallet RECORD;
   v_request_id UUID;
