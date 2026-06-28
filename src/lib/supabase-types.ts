@@ -46,6 +46,12 @@ export interface Database {
           last_seen: number;
           created_at: string;
           updated_at: string;
+          badge_type?: 'vip' | 'government' | 'press' | 'organization' | 'verified' | 'founder' | null;
+          is_suspended?: boolean;
+          suspended_reason?: string | null;
+          suspended_until?: string | null;
+          profile_views?: number;
+          total_views?: number;
         };
         Insert: {
           uid: string;

@@ -8,7 +8,7 @@ on:
       version:
         description: 'Release version tag (e.g. v1.7.0)'
         required: false
-        default: 'v1.9.0'
+        default: 'v2.0.0'
 
 permissions:
   contents: write
@@ -373,7 +373,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ github.event.inputs.version || 'v1.9.0' }}"
+          VERSION="${{ github.event.inputs.version || 'v2.0.0' }}"
           echo "Creating release $VERSION ..."
 
           # Delete existing release if it exists
